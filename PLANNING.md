@@ -53,10 +53,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
 
 *1 parcela, Margarita/Tomates/Girasol, timer con timestamps, cosecha manual, 💧, persistencia, escena 3D mínima.*
 
-- [ ] **P1-01** Dominio del temporizador — agente: `backend-go` — dep: P0-03
-  - [ ] P1-01a Interfaz `Clock` inyectable
-  - [ ] P1-01b Funciones puras: restante, pausa, reanudación, cancelación, finalización (GDD §6.1)
-  - [ ] P1-01c Tests: pausa/reanuda, cierre y vuelta ±1 s, reloj retrocedido
+- [x] **P1-01** Dominio del temporizador — agente: `backend-go` — dep: P0-03
+  - [x] P1-01a Interfaz `Clock` inyectable
+  - [x] P1-01b Funciones puras: restante, pausa, reanudación, cancelación, finalización (GDD §6.1)
+  - [x] P1-01c Tests: pausa/reanuda, cierre y vuelta ±1 s, reloj retrocedido
   - **Hecho:** tests de tiempo pasan.
 
 - [ ] **P1-02** API de Pomodoro — agente: `backend-go` — dep: P1-01
