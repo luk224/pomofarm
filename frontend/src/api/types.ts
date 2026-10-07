@@ -91,3 +91,12 @@ export interface PlantRequest {
   tag?: string
   duration_min?: number
 }
+
+/** One minute of the Oak's Flow range (GDD §4.3), served by the backend. */
+export interface FlowRow {
+  duration_min: number
+  reward: number
+  life_h: number
+  yield: number
+  rest_min: number
+}

@@ -1,4 +1,4 @@
-import type { GameState, PlantRequest } from './types'
+import type { FlowRow, GameState, PlantRequest } from './types'
 
 /** Error body from the server is {"error": "<code>"}; code is stable, message is for humans. */
 export class ApiError extends Error {
@@ -31,6 +31,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 }
 
 export const api = {
+  flow: () => request<FlowRow[]>('GET', '/api/flow'),
   state: () => request<GameState>('GET', '/api/state'),
   plant: (req: PlantRequest) => request<GameState>('POST', '/api/pomodoros', req),
   pause: () => request<GameState>('POST', '/api/pomodoros/active/pause'),

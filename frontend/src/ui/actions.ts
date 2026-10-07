@@ -20,11 +20,16 @@ export function plantTargetId(): number | null {
 }
 
 export async function plantSelected() {
-  const { selectedSeed, tag, selectSeed } = useUi.getState()
+  const { selectedSeed, tag, selectSeed, flowMinutes } = useUi.getState()
   const plotId = plantTargetId()
   if (!selectedSeed || plotId === null || useGame.getState().state?.pomodoro) return
   prepareAlerts() // inside the user's click: unlock audio and ask for notification permission
-  await useGame.getState().plant({ plot_id: plotId, plant_type: selectedSeed, tag: tag.trim() || undefined })
+  await useGame.getState().plant({
+    plot_id: plotId,
+    plant_type: selectedSeed,
+    tag: tag.trim() || undefined,
+    duration_min: selectedSeed === 'oak' ? flowMinutes : undefined, // only the Oak has Flow mode
+  })
   if (useGame.getState().state?.pomodoro) selectSeed(null)
 }
 

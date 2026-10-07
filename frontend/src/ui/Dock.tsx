@@ -9,6 +9,7 @@ import { SEED_NAMES } from './names'
 import type { PlotState } from '../api/types'
 import { canClear, effectivePlot, needsHarvest } from './selection'
 import { SeedPacket } from './SeedPacket'
+import { FlowSlider } from './FlowSlider'
 import { Tutorial } from './Tutorial'
 
 const TILTS = [-2.2, 1.6, -1.2, 2.2, -1.8]
@@ -79,6 +80,7 @@ function IdleDock() {
         ))}
       </div>
       <div className="plant">
+        {selected === 'oak' && <FlowSlider />}
         <input className="field" list="recent-tags" maxLength={60} value={tag} onChange={(e) => setTag(e.target.value)}
           placeholder="Etiqueta opcional" aria-label="¿En qué vas a trabajar? (opcional)" />
         <datalist id="recent-tags">
