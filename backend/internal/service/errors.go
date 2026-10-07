@@ -17,6 +17,7 @@ var (
 	ErrConflict          = errors.New("version_conflict")
 	ErrAlreadyUnlocked   = errors.New("already_unlocked")
 	ErrHarvestFirst      = errors.New("harvest_first")
+	ErrSiloEmpty         = errors.New("silo_empty")
 	ErrNeedsConfirmation = errors.New("needs_confirmation")
 	ErrInsufficientFocus = errors.New("insufficient_focus")
 )

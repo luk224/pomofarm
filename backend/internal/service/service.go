@@ -107,9 +107,19 @@ func addEvent(ctx context.Context, tx *sql.Tx, pomodoroID int64, kind string, at
 // background jobs (GDD §6.2).
 func (s *Service) settle(ctx context.Context, tx *sql.Tx, now time.Time) error {
 	a, err := loadActive(ctx, tx)
-	if err != nil || a == nil || !a.P.Finished(now) {
+	if err != nil {
 		return err
 	}
+	if a != nil && a.P.Finished(now) {
+		if err := s.completeActive(ctx, tx, a, now); err != nil {
+			return err
+		}
+	}
+	return s.accrue(ctx, tx, now)
+}
+
+// completeActive finishes a Pomodoro whose time is up and turns its plot into a mature plant.
+func (s *Service) completeActive(ctx context.Context, tx *sql.Tx, a *activeRow, now time.Time) error {
 	if err := a.P.Complete(now); err != nil {
 		return err
 	}
@@ -127,7 +137,7 @@ func (s *Service) settle(ctx context.Context, tx *sql.Tx, now time.Time) error {
 	if err := tx.QueryRowContext(ctx, `SELECT COALESCE(life_s, 0) FROM plots WHERE id = ?`, a.PlotID.Int64).Scan(&lifeS); err != nil {
 		return err
 	}
-	_, err = tx.ExecContext(ctx, `UPDATE plots SET state = 'mature', matured_at = ?, wilts_at = ?, collected_to = ?,
+	_, err := tx.ExecContext(ctx, `UPDATE plots SET state = 'mature', matured_at = ?, wilts_at = ?, collected_to = ?,
 		version = version + 1 WHERE id = ?`,
 		fmtTime(matured), fmtTime(matured.Add(time.Duration(lifeS)*time.Second)), fmtTime(matured), a.PlotID.Int64)
 	return err

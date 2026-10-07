@@ -44,7 +44,7 @@ func TestBackupIsRestorableAndPrunes(t *testing.T) {
 	if err := restored.QueryRow(`SELECT coins_milli FROM players WHERE id=1`).Scan(&coins); err != nil || coins != 12345 {
 		t.Fatalf("restored coins = %d, err = %v", coins, err)
 	}
-	if v, _ := SchemaVersion(restored); v != 1 {
+	if v, _ := SchemaVersion(restored); v != 2 {
 		t.Fatalf("restored schema version = %d", v)
 	}
 	if lt, _ := LatestBackupTime(dir); !lt.Equal(start.AddDate(0, 0, 15)) {

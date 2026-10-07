@@ -87,6 +87,18 @@ func New(db *sql.DB, clock game.Clock) *fiber.App {
 		return respondState(c, svc, fiber.StatusOK)
 	})
 
+	app.Post("/api/silo/collect", func(c *fiber.Ctx) error {
+		milli, err := svc.CollectSilo(c.UserContext())
+		if err != nil {
+			return fail(c, err)
+		}
+		st, err := svc.State(c.UserContext())
+		if err != nil {
+			return fail(c, err)
+		}
+		return c.JSON(fiber.Map{"collected_milli": milli, "state": st})
+	})
+
 	app.Post("/api/settings", func(c *fiber.Ctx) error {
 		var req struct {
 			Key   string `json:"key"`
@@ -142,6 +154,7 @@ var statusOf = map[error]int{
 	service.ErrAlreadyUnlocked:   fiber.StatusConflict,
 	service.ErrInsufficientFocus: fiber.StatusConflict,
 	service.ErrHarvestFirst:      fiber.StatusConflict,
+	service.ErrSiloEmpty:         fiber.StatusConflict,
 	service.ErrNeedsConfirmation: fiber.StatusConflict,
 }
 
