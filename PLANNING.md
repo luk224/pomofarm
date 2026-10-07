@@ -41,10 +41,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P0-05c Script de restauración y prueba en instalación limpia
   - **Hecho:** `docker compose up -d --build` sirve la app en local y en `wyse`; backup y restore verificados.
 
-- [ ] **P0-06** Validar el balance con foco real del usuario — agente: `game-designer` — dep: —
-  - [ ] P0-06a Pedir al usuario sus horas de foco reales y rellenar hoja `Rendimiento`
+- [x] **P0-06** Validar el balance con foco real del usuario — agente: `game-designer` — dep: —
+  - [x] P0-06a Pedir al usuario sus horas de foco reales y rellenar hoja `Rendimiento`
   - [x] P0-06b `sim.py` ya está en la raíz del repo (v2)
-  - [ ] P0-06c Ejecutar `python3 sim.py` y comprobar que coincide con el GDD §4.10 y el xlsx
+  - [x] P0-06c Ejecutar `python3 sim.py` y comprobar que coincide con el GDD §4.10 y el xlsx
   - **Hecho:** el usuario confirma los perfiles; `sim.py` reproduce los hitos del GDD.
 
 ---
@@ -199,6 +199,6 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
 ## Pendientes del usuario (GDD §10)
 
 - [ ] Confirmar las 7 decisiones tomadas en el GDD
-- [ ] Ajustar perfiles de foco reales en la hoja `Rendimiento`
+- [x] Ajustar perfiles de foco reales en la hoja `Rendimiento` (2–4 h: perfiles "Tú mín" y "Tú máx")
 - [ ] Elegir el bioma de la segunda estación
 - [ ] Jugar una semana y recalibrar precios antes de darlos por buenos

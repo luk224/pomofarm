@@ -201,13 +201,15 @@ Para la simulación se supone un bono medio de adyacencia de +15%, +10% de Huert
 
 ### 4.10 Ritmo de progresión simulado
 
-Tres perfiles; los fines de semana cuentan como 30% del foco. Resultado de `sim.py` (juega siempre la opción más barata asequible):
+Cinco perfiles (los dos últimos son el rango real de uso del autor, 2–4 h al día; su 3 h equivale a "Normal"); los fines de semana cuentan como 30% del foco. Resultado de `sim.py` (juega siempre la opción más barata asequible):
 
 | Perfil | Foco/día | Sesión máx. | Prestigio disponible |
 | :--- | :--- | :--- | :--- |
 | Ligero | 1,5 h | 25 min | día 163 |
 | Normal | 3 h | 45 min | día 57 |
 | Intenso | 5 h | 60 min | día 36 |
+| **Tú mín** `[Decisión]` | 2 h | 45 min | día 83 |
+| **Tú máx** `[Decisión]` | 4 h | 60 min | día 40 |
 
 Hitos del perfil Normal: 8 parcelas el día 4, Girasol el 9, Manzano el 19, 16 parcelas el 49, Perro Pastor el 54, Roble Mágico el 42. La hoja `Hitos` tiene la tabla completa.
 

@@ -22,7 +22,8 @@ ANIMAL_UNLOCK = {"Abejas": 30, "Perro": 120}                  # coste 💧 (desb
 HIVE_BASE, HIVE_GROWTH, DOG_COST = 4000, 1.5, 30000           # coste 🪙
 M_ADJ, M_HUERTO, M_BEES, M_CAP = 0.15, 0.10, 0.25, 2.0        # multiplicadores medios supuestos
 WEEK = (1, 1, 1, 1, 1, 0.3, 0.3)                              # fracción de foco L..D
-PROFILES = {"Ligero": (90, 25), "Normal": (180, 45), "Intenso": (300, 60)}  # (min foco/día, sesión máx min)
+PROFILES = {"Ligero": (90, 25), "Normal": (180, 45), "Intenso": (300, 60),
+            "Tú mín": (120, 45), "Tú máx": (240, 60)}  # (min foco/día, sesión máx min); los dos últimos = rango real del usuario (2–4 h)
 
 
 def e(d): return E0 * (d / 10) ** BETA
