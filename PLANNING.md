@@ -27,10 +27,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P0-03c Test: aplica migraciones sobre BD vacía y rechaza un segundo Pomodoro activo
   - **Hecho:** `go test ./internal/store/...` pasa.
 
-- [ ] **P0-04** Módulo de configuración de balance — agente: `game-designer` + `backend-go` — dep: P0-02
-  - [ ] P0-04a Extraer del xlsx: cultivos, parcelas, Silo, sinergias, estructuras (script en `tools/`)
-  - [ ] P0-04b `internal/game/config.go` con esos valores como única fuente
-  - [ ] P0-04c Test que compara e(d), costes de parcela y totales (1.167 💧 / 605 💧 / 62.500 🪙) con el GDD
+- [x] **P0-04** Módulo de configuración de balance — agente: `game-designer` + `backend-go` — dep: P0-02
+  - [x] P0-04a Extraer del xlsx: cultivos, parcelas, Silo, sinergias, estructuras (script en `tools/`)
+  - [x] P0-04b `internal/game/config.go` con esos valores como única fuente
+  - [x] P0-04c Test que compara e(d), costes de parcela y totales (1.167 💧 / 605 💧 / 62.500 🪙) con el GDD
   - **Hecho:** el test de coherencia pasa.
 
 - [ ] **P0-05** Docker Compose, backups y despliegue en `wyse` — agente: `devops` — dep: P0-01, P0-02, P0-03

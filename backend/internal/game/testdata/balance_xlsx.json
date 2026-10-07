@@ -1,0 +1,186 @@
+{
+ "crops": [
+  {
+   "duration_min": 10,
+   "e": 2,
+   "life_h": 24,
+   "name": "Margarita",
+   "rate_per_h": 0.833333333333333,
+   "reward": 1,
+   "unlock": 0,
+   "yield_coins": 20
+  },
+  {
+   "duration_min": 25,
+   "e": 4.16276603700937,
+   "life_h": 36,
+   "name": "Tomates",
+   "rate_per_h": 2.89080974792317,
+   "reward": 5,
+   "unlock": 8,
+   "yield_coins": 104.069150925234
+  },
+  {
+   "duration_min": 35,
+   "e": 5.4485937908582,
+   "life_h": 54,
+   "name": "Girasol",
+   "rate_per_h": 3.53149597555624,
+   "reward": 8,
+   "unlock": 35,
+   "yield_coins": 190.700782680037
+  },
+  {
+   "duration_min": 45,
+   "e": 6.66192910476876,
+   "life_h": 72,
+   "name": "Manzano",
+   "rate_per_h": 4.16370569048048,
+   "reward": 15,
+   "unlock": 100,
+   "yield_coins": 299.786809714594
+  },
+  {
+   "duration_min": 60,
+   "e": 8.38592542525895,
+   "life_h": 108,
+   "name": "Roble Mágico",
+   "rate_per_h": 4.6588474584772,
+   "reward": 25,
+   "unlock": 250,
+   "yield_coins": 503.155525515537
+  }
+ ],
+ "flow": [
+  {
+   "duration_min": 60,
+   "e": 8.38592542525895,
+   "life_h": 108,
+   "name": "Roble Flow",
+   "rate_per_h": 4.6588474584772,
+   "reward": 25,
+   "unlock": "—",
+   "yield_coins": 503.155525515537
+  },
+  {
+   "duration_min": 75,
+   "e": 10.024875929374,
+   "life_h": 135,
+   "name": "Roble Flow",
+   "rate_per_h": 5.56937551631891,
+   "reward": 35,
+   "unlock": "—",
+   "yield_coins": 751.865694703053
+  },
+  {
+   "duration_min": 90,
+   "e": 11.5990922695906,
+   "life_h": 162,
+   "name": "Roble Flow",
+   "rate_per_h": 6.44394014977254,
+   "reward": 46,
+   "unlock": "—",
+   "yield_coins": 1043.91830426315
+  },
+  {
+   "duration_min": 105,
+   "e": 13.1214380672118,
+   "life_h": 189,
+   "name": "Roble Flow",
+   "rate_per_h": 7.28968781511767,
+   "reward": 58,
+   "unlock": "—",
+   "yield_coins": 1377.75099705724
+  },
+  {
+   "duration_min": 120,
+   "e": 14.6007442054369,
+   "life_h": 216,
+   "name": "Roble Flow",
+   "rate_per_h": 8.11152455857608,
+   "reward": 71,
+   "unlock": "—",
+   "yield_coins": 1752.08930465243
+  }
+ ],
+ "params": {
+  "BETA": 0.8,
+  "D0": 10,
+  "DOG_COST": 30000,
+  "DOG_SILO_H": 12,
+  "E0": 2,
+  "FLOW_EXP": 1.5,
+  "FLOW_L_BASE": 108,
+  "FLOW_REF_D": 60,
+  "FLOW_R_BASE": 25,
+  "FOCO_REF": 180,
+  "HIVE_BASE": 4000,
+  "HIVE_GROWTH": 1.5,
+  "MAX_PLOTS": 16,
+  "M_ADJ": 0.15,
+  "M_BEES": 0.25,
+  "M_CAP": 2,
+  "M_HUERTO": 0.1,
+  "PLOT_BASE": 3,
+  "PLOT_GROWTH": 1.4,
+  "PRESTIGE_BONUS": 0.1,
+  "UNLOCK_BEES": 30,
+  "UNLOCK_DOG": 120
+ },
+ "plot_costs": {
+  "2": 3,
+  "3": 5,
+  "4": 6,
+  "5": 9,
+  "6": 12,
+  "7": 17,
+  "8": 23,
+  "9": 32,
+  "10": 45,
+  "11": 62,
+  "12": 87,
+  "13": 122,
+  "14": 171,
+  "15": 239,
+  "16": 334
+ },
+ "silo": [
+  {
+   "capacity_h": 12,
+   "cost": 0,
+   "level": 0
+  },
+  {
+   "capacity_h": 24,
+   "cost": 25,
+   "level": 1
+  },
+  {
+   "capacity_h": 36,
+   "cost": 70,
+   "level": 2
+  },
+  {
+   "capacity_h": 48,
+   "cost": 160,
+   "level": 3
+  },
+  {
+   "capacity_h": 72,
+   "cost": 350,
+   "level": 4
+  }
+ ],
+ "structures": {
+  "Camino de piedra (casilla)": 15,
+  "Colmena 1": 4000,
+  "Colmena 2": 6000,
+  "Colmena 3": 9000,
+  "Colmena 4": 13500,
+  "Farolillo": 80,
+  "Perro Pastor": 30000,
+  "Sombrero de paja del perro": 600,
+  "Total automatización": 62500,
+  "Valla (tramo)": 25
+ }
+}
