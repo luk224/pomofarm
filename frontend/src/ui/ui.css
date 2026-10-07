@@ -43,6 +43,17 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- settings ---------- */
+.topbar { display: flex; gap: 8px; align-items: flex-start; }
+.settings { position: relative; }
+.chip--button { border: 0; cursor: pointer; padding: 6px 10px; color: var(--ink); height: 38px; box-sizing: border-box; }
+.chip--button:hover { background: #fff; }
+.panelbox { position: absolute; top: 46px; left: 0; width: 260px; display: grid; gap: 10px; padding: 14px; border-radius: 18px;
+  background: var(--panel); backdrop-filter: blur(8px); box-shadow: 0 6px 24px #3b2a1f26; z-index: 25; }
+.check { display: flex; align-items: center; gap: 10px; min-height: 36px; cursor: pointer; font-weight: 500; }
+.check input { width: 20px; height: 20px; accent-color: var(--leaf); }
+.panelbox .hint { margin: 0; }
+
 /* ---------- dock ---------- */
 .dockwrap {
   position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%);

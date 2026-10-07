@@ -1,3 +1,4 @@
+import { prepareAlerts } from '../alerts/announce'
 import { useGame } from '../store/game'
 import { useUi } from '../store/ui'
 import { SEED_NAMES } from './names'
@@ -13,6 +14,7 @@ export async function plantSelected() {
   const { selectedSeed, tag, selectSeed } = useUi.getState()
   const plotId = firstFreePlotId()
   if (!selectedSeed || plotId === null || useGame.getState().state?.pomodoro) return
+  prepareAlerts() // inside the user's click: unlock audio and ask for notification permission
   await useGame.getState().plant({ plot_id: plotId, plant_type: selectedSeed, tag: tag.trim() || undefined })
   if (useGame.getState().state?.pomodoro) selectSeed(null)
 }

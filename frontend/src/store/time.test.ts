@@ -52,6 +52,7 @@ describe('tabTitle', () => {
     expect(tabTitle({ ...base, status: 'paused' }, 125_000)).toBe('⏸ 2:05 · PomoFarm')
   })
   it('is plain when idle', () => expect(tabTitle(null, 0)).toBe('PomoFarm'))
+  it('says when a plant is ready, as a visual alert for muted players', () => expect(tabTitle(null, 0, true)).toBe('✔ Lista para cosechar · PomoFarm'))
 })
 
 describe('growthFraction', () => {

@@ -88,8 +88,8 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P1-06d (añadida) Retirar planta cosechada, para poder replantar con una sola parcela; etiquetas recientes y ajustes en el estado
   - **Hecho:** flujo completo plantar → esperar → cosechar → 💧 jugable.
 
-- [ ] **P1-07** Notificación y sonido de fin — agente: `frontend-3d` — dep: P1-06
-  - [ ] P1-07a Permiso de Notification en el primer Pomodoro; alerta sonora suave
+- [x] **P1-07** Notificación y sonido de fin — agente: `frontend-3d` — dep: P1-06
+  - [x] P1-07a Permiso de Notification en el primer Pomodoro; alerta sonora suave
   - **Hecho:** al acabar con la pestaña en segundo plano llega aviso.
 
 - [ ] **P1-08** Verificación de Fase 1 — agente: `qa-tester` — dep: P1-01..P1-07

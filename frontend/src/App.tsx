@@ -3,6 +3,7 @@ import { Farm } from './scene/Farm'
 import { Gallery } from './scene/Gallery'
 import { IsoCamera } from './scene/IsoCamera'
 import { palette } from './scene/palette'
+import { useCompletionAlerts } from './alerts/hooks'
 import { useGameSync } from './store/hooks'
 import { Dock } from './ui/Dock'
 import { Toasts } from './ui/Toasts'
@@ -13,6 +14,7 @@ import { useShortcuts } from './ui/useShortcuts'
 export default function App() {
   useGameSync()
   useShortcuts()
+  useCompletionAlerts()
   const gallery = import.meta.env.DEV && new URLSearchParams(location.search).get('lab') === 'plants'
   return (
     <>
