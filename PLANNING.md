@@ -33,10 +33,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P0-04c Test que compara e(d), costes de parcela y totales (1.167 💧 / 605 💧 / 62.500 🪙) con el GDD
   - **Hecho:** el test de coherencia pasa.
 
-- [~] **P0-05** Docker Compose, backups y despliegue en `wyse` — agente: `devops` — dep: P0-01, P0-02, P0-03
+- [x] **P0-05** Docker Compose, backups y despliegue en `wyse` — agente: `devops` — dep: P0-01, P0-02, P0-03
   - [x] P0-05a Dockerfile multi-stage backend y frontend; `docker-compose.yml` (Nginx + app) con volúmenes `/data`, `/backups`; imagen para la arquitectura de `wyse`
   - [x] P0-05d Script `deploy/deploy.sh` (build → copiar/pull → `docker compose up -d` en `wyse`), con confirmación previa
-  - [ ] P0-05e Primer despliegue "hola mundo" en `wyse` accesible desde la tailnet (`/api/health`)
+  - [x] P0-05e Primer despliegue "hola mundo" en `wyse` accesible desde la tailnet (`/api/health`)
   - [x] P0-05b Backup diario con `VACUUM INTO`, retención de 14
   - [x] P0-05c Script de restauración y prueba en instalación limpia
   - **Hecho:** `docker compose up -d --build` sirve la app en local y en `wyse`; backup y restore verificados.
