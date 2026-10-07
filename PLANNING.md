@@ -70,9 +70,9 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P1-03b Desbloqueo de semillas con 💧 (Tomates 8, Girasol 35): `POST /unlocks`
   - **Hecho:** BD nueva → estado jugable por API.
 
-- [ ] **P1-04** Cliente de estado y temporizador — agente: `frontend-3d` — dep: P1-02
-  - [ ] P1-04a Cliente API tipado + store Zustand
-  - [ ] P1-04b Hook de tiempo restante (servidor manda, `setInterval` solo refresca) y título de pestaña
+- [x] **P1-04** Cliente de estado y temporizador — agente: `frontend-3d` — dep: P1-02
+  - [x] P1-04a Cliente API tipado + store Zustand
+  - [x] P1-04b Hook de tiempo restante (servidor manda, `setInterval` solo refresca) y título de pestaña
   - **Hecho:** recargar la página a mitad de Pomodoro mantiene el tiempo exacto.
 
 - [ ] **P1-05** Escena isométrica mínima — agente: `frontend-3d` — dep: P0-02

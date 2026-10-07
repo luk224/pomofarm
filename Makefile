@@ -8,7 +8,7 @@ dev-frontend:
 
 test:
 	cd backend && go vet ./... && go test ./...
-	cd frontend && npm run lint
+	cd frontend && npm run lint && npm test
 
 build:
 	cd backend && go build -o bin/pomofarm ./cmd/pomofarm
