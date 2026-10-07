@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../store/game'
 import { useRemainingMs } from '../store/hooks'
 import { formatClock } from '../store/time'
+import { formatLife, lifeLeftMs } from '../store/life'
 import { useUi } from '../store/ui'
 import { clearableId, firstFreePlotId, harvestableId, harvestPlot, plantSelected, togglePause } from './actions'
 import { SEED_NAMES } from './names'
@@ -92,9 +93,10 @@ function IdleDock() {
 
 function ReadyDock() {
   const id = harvestableId()
+  const withered = useGame((s) => s.state?.plots.find((p) => p.id === id)?.state === 'withered')
   return (
     <div className="dock dock--ready">
-      <p className="dock__msg">Tu planta está lista.</p>
+      <p className="dock__msg">{withered ? 'Tu planta se marchitó, pero aún puedes cosechar.' : 'Tu planta está lista.'}</p>
       <button type="button" className="btn btn--sun btn--big" data-testid="harvest" onClick={() => id !== null && void harvestPlot(id)}>
         Cosechar
       </button>
@@ -104,14 +106,30 @@ function ReadyDock() {
 
 function ClearDock() {
   const id = clearableId()
+  const plot = useGame((s) => s.state?.plots.find((p) => p.id === id))
+  const serverTime = useGame((s) => s.state?.server_time)
+  const fetchedAt = useGame((s) => s.fetchedAt)
   const clearPlot = useGame((s) => s.clearPlot)
   const confirm = useConfirm(() => id !== null && void clearPlot(id, true))
+  const withered = plot?.state === 'withered'
+  // Life left as of the last sync (the state refreshes every 30 s).
+  const left = plot && serverTime ? lifeLeftMs(plot, serverTime, fetchedAt, fetchedAt) : null
   return (
     <div className="dock dock--clear">
-      <p className="dock__msg">Cosechada y produciendo 🪙. Retírala para sembrar de nuevo.</p>
-      <button type="button" className={`btn ${confirm.armed ? 'btn--danger' : 'btn--primary'}`} data-testid="clear" onClick={confirm.press}>
-        {confirm.armed ? '¿Seguro? Deja de producir' : 'Retirar planta'}
-      </button>
+      <p className="dock__msg">
+        {withered
+          ? 'Se marchitó. Retírala para sembrar de nuevo.'
+          : `Cosechada y produciendo 🪙${left !== null ? ` · se marchita en ${formatLife(left)}` : ''}.`}
+      </p>
+      {withered ? (
+        <button type="button" className="btn btn--primary" data-testid="clear" onClick={() => id !== null && void clearPlot(id, false)}>
+          Retirar planta
+        </button>
+      ) : (
+        <button type="button" className={`btn ${confirm.armed ? 'btn--danger' : 'btn--primary'}`} data-testid="clear" onClick={confirm.press}>
+          {confirm.armed ? '¿Seguro? Deja de producir' : 'Retirar planta'}
+        </button>
+      )}
     </div>
   )
 }

@@ -60,9 +60,9 @@ func (s *Service) Plant(ctx context.Context, req PlantRequest) error {
 			}
 		}
 		var state string
-		var version int64
-		err := tx.QueryRowContext(ctx, `SELECT state, version FROM plots WHERE id = ? AND player_id = ?`, req.PlotID, PlayerID).
-			Scan(&state, &version)
+		var version, harvested int64
+		err := tx.QueryRowContext(ctx, `SELECT state, harvested, version FROM plots WHERE id = ? AND player_id = ?`, req.PlotID, PlayerID).
+			Scan(&state, &harvested, &version)
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrNotFound
 		}
@@ -71,6 +71,9 @@ func (s *Service) Plant(ctx context.Context, req PlantRequest) error {
 		}
 		if state != "empty" && state != "withered" {
 			return ErrPlotBusy
+		}
+		if state == "withered" && harvested == 0 {
+			return ErrHarvestFirst // never plant over a plant whose 💧 reward is still waiting
 		}
 		var tagID any
 		if tag != "" {
@@ -159,9 +162,9 @@ func (s *Service) Harvest(ctx context.Context, plotID int64) (reward int, err er
 			return err
 		}
 		var state, plant string
-		var harvested, version int64
-		err := tx.QueryRowContext(ctx, `SELECT state, COALESCE(plant_type,''), harvested, version FROM plots WHERE id = ? AND player_id = ?`,
-			plotID, PlayerID).Scan(&state, &plant, &harvested, &version)
+		var harvested, version, growS int64
+		err := tx.QueryRowContext(ctx, `SELECT state, COALESCE(plant_type,''), harvested, version, COALESCE(grow_s, 0) FROM plots WHERE id = ? AND player_id = ?`,
+			plotID, PlayerID).Scan(&state, &plant, &harvested, &version, &growS)
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrNotFound
 		}
@@ -171,18 +174,17 @@ func (s *Service) Harvest(ctx context.Context, plotID int64) (reward int, err er
 		if harvested == 1 {
 			return ErrAlreadyHarvested
 		}
-		if state != "mature" {
+		if state != "mature" && state != "withered" { // a withered plant can still be harvested
 			return ErrNotMature
 		}
-		var pid, plannedS int64
-		if err := tx.QueryRowContext(ctx, `SELECT id, planned_s FROM pomodoros WHERE plot_id = ? AND status = 'completed'
-			ORDER BY id DESC LIMIT 1`, plotID).Scan(&pid, &plannedS); err != nil {
-			return err
+		// The reward follows from what was planted, which the plot itself remembers (type and duration).
+		crop, ok := game.CropByKey(plant)
+		if !ok {
+			return ErrInvalid
 		}
-		crop, _ := game.CropByKey(plant)
 		reward = crop.Reward
-		if plant == "oak" && int(plannedS/60) != crop.DurationMin {
-			reward = game.FlowReward(int(plannedS / 60))
+		if plant == "oak" && int(growS/60) != crop.DurationMin && growS > 0 {
+			reward = game.FlowReward(int(growS / 60))
 		}
 		upd, err := tx.ExecContext(ctx, `UPDATE plots SET harvested = 1, version = version + 1 WHERE id = ? AND version = ?`, plotID, version)
 		if err != nil {
@@ -191,7 +193,7 @@ func (s *Service) Harvest(ctx context.Context, plotID int64) (reward int, err er
 		if n, _ := upd.RowsAffected(); n != 1 {
 			return ErrConflict
 		}
-		if _, err := tx.ExecContext(ctx, `UPDATE pomodoros SET reward_focus = ? WHERE id = ?`, reward, pid); err != nil {
+		if _, err := tx.ExecContext(ctx, `UPDATE pomodoros SET reward_focus = ? WHERE id = (SELECT id FROM pomodoros WHERE plot_id = ? AND status = 'completed' ORDER BY id DESC LIMIT 1)`, reward, plotID); err != nil {
 			return err
 		}
 		_, err = tx.ExecContext(ctx, `UPDATE players SET focus_points = focus_points + ?, lifetime_focus = lifetime_focus + ?,

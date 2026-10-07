@@ -71,7 +71,7 @@ export function PlantView({ kind, growth, mature, withered = false, ready = fals
         {kind === 'apple' && <Tree {...props} oak={false} />}
         {kind === 'oak' && <Tree {...props} oak />}
       </group>
-      {ready && !withered && (
+      {ready && (
         <group ref={sparkle} position={[0, PLANT_HEIGHT[kind] + 0.25, 0]}>
           <mesh>
             <octahedronGeometry args={[0.13, 0]} />

@@ -111,8 +111,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P2-01e UI mínima: saldo de 🪙, barra del Silo y botón Recoger (el resto de la granja 3D llega en P2-07)
   - **Hecho:** todos los casos del GDD §6.2 pasan.
 
-- [ ] **P2-02** Vida útil y marchitamiento — agente: `backend-go` — dep: P2-01
-  - [ ] P2-02a Estados growing → mature → withered; retirar marchita gratis, arrancar viva con confirmación
+- [x] **P2-02** Vida útil y marchitamiento — agente: `backend-go` — dep: P2-01
+  - [x] P2-02a Estados growing → mature → withered; retirar marchita gratis, arrancar viva con confirmación
+  - [x] P2-02b (añadida) La marchita conserva su 💧 (se cosecha igual); protegida de sembrar/retirar antes de cosecharla; el dock muestra cuánta vida le queda
+  - [ ] P2-02c (anotada para P2-07) Con varias parcelas el dock único no basta: cosechar/retirar debe poder hacerse sobre cada planta (clic en la parcela), no solo en el dock
   - **Hecho:** tests de transición de estado.
 
 - [ ] **P2-03** Parcelas y Silo — agente: `backend-go` — dep: P2-01

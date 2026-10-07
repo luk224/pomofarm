@@ -39,13 +39,14 @@ export async function harvestPlot(plotId: number) {
   }
 }
 
+/** A plant waiting for its 💧: mature, or withered while the player was away (the reward is never lost). */
 export function harvestableId(): number | null {
-  const plot = useGame.getState().state?.plots.find((p) => p.state === 'mature' && !p.harvested)
+  const plot = useGame.getState().state?.plots.find((p) => (p.state === 'mature' || p.state === 'withered') && !p.harvested)
   return plot ? plot.id : null
 }
 
 export function clearableId(): number | null {
-  const plot = useGame.getState().state?.plots.find((p) => (p.state === 'mature' && p.harvested) || p.state === 'withered')
+  const plot = useGame.getState().state?.plots.find((p) => (p.state === 'mature' && p.harvested) || (p.state === 'withered' && p.harvested))
   return plot ? plot.id : null
 }
 

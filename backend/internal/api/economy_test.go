@@ -221,3 +221,109 @@ func TestGDDExampleWithTheTwoSiloCaps(t *testing.T) {
 		})
 	}
 }
+
+// ---- P2-02: life span and withering ----
+
+func plot1(t *testing.T, e *env) service.PlotState {
+	t.Helper()
+	return e.state().Plots[0]
+}
+
+// A daisy matures 10 min after planting and lives 24 h: it wilts exactly 24 h 10 min after planting.
+func TestPlantWiltsExactlyWhenItsLifeEnds(t *testing.T) {
+	e := newFreshEnv(t)
+	e.expect(201, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "daisy"})
+	e.clock.Advance(10 * time.Minute)
+	e.state()
+	e.clock.Advance(24*time.Hour - time.Second)
+	if st := plot1(t, e).State; st != "mature" {
+		t.Fatalf("1 s before the end of its life: %s", st)
+	}
+	e.clock.Advance(time.Second)
+	if st := plot1(t, e).State; st != "withered" {
+		t.Fatalf("at the end of its life: %s", st)
+	}
+}
+
+func TestWitheredPlantStopsProducingAndTheSiloKeepsWhatItMade(t *testing.T) {
+	e := newFreshEnv(t)
+	plantAndMature(t, e)
+	e.clock.Advance(48 * time.Hour)
+	st := e.state()
+	if st.Plots[0].State != "withered" || st.Silo.RateMilliPerHour != 0 {
+		t.Fatalf("plot %s, rate %d", st.Plots[0].State, st.Silo.RateMilliPerHour)
+	}
+	near(t, "Silo holds its 12 h capacity (the plant made 20, the Silo holds 10)", st.Silo.ContentMilli, 10000, 2)
+	e.expect(200, "POST", "/api/silo/collect", nil)
+	e.clock.Advance(100 * time.Hour)
+	if silo, _ := milli(t, e); silo != 0 {
+		t.Fatalf("a withered plant kept producing: %d", silo)
+	}
+}
+
+func TestWitheredPlantKeepsItsRewardUntilHarvested(t *testing.T) {
+	e := newFreshEnv(t)
+	e.expect(201, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "daisy"})
+	e.clock.Advance(30 * time.Hour) // finished, never harvested, and wilted while the player was away
+	st := e.state()
+	if st.Plots[0].State != "withered" || st.Plots[0].Harvested {
+		t.Fatalf("plot = %+v", st.Plots[0])
+	}
+	var out struct {
+		Reward int `json:"reward_focus"`
+	}
+	json.Unmarshal(e.expect(200, "POST", "/api/plots/1/harvest", nil), &out)
+	if out.Reward != 1 || e.state().Player.FocusPoints != 1 {
+		t.Fatalf("reward %d, focus %d: a withered plant must still pay its 💧", out.Reward, e.state().Player.FocusPoints)
+	}
+	if code := errCode(e.expect(409, "POST", "/api/plots/1/harvest", nil)); code != "already_harvested" {
+		t.Fatalf("second harvest: %s", code)
+	}
+}
+
+func TestClearingAWitheredPlantIsFreeAndNeedsNoConfirmation(t *testing.T) {
+	e := newFreshEnv(t)
+	plantAndMature(t, e)
+	e.clock.Advance(48 * time.Hour)
+	e.expect(200, "POST", "/api/plots/1/clear", nil) // no {"confirm": true}
+	if st := plot1(t, e); st.State != "empty" || st.PlantType != nil {
+		t.Fatalf("after clear: %+v", st)
+	}
+}
+
+func TestWitheredRewardIsProtectedFromClearAndReplant(t *testing.T) {
+	e := newFreshEnv(t)
+	e.expect(201, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "daisy"})
+	e.clock.Advance(30 * time.Hour)
+	if code := errCode(e.expect(409, "POST", "/api/plots/1/clear", nil)); code != "harvest_first" {
+		t.Fatalf("clear before harvest: %s", code)
+	}
+	if code := errCode(e.expect(409, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "daisy"})); code != "harvest_first" {
+		t.Fatalf("plant over an unharvested withered plant: %s", code)
+	}
+	e.expect(200, "POST", "/api/plots/1/harvest", nil)
+	e.expect(201, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "daisy"}) // now replanting is fine
+}
+
+func TestAMatureLivePlantStillNeedsConfirmationToClear(t *testing.T) {
+	e := newFreshEnv(t)
+	plantAndMature(t, e)
+	e.clock.Advance(2 * time.Hour)
+	if code := errCode(e.expect(409, "POST", "/api/plots/1/clear", nil)); code != "needs_confirmation" {
+		t.Fatalf("code = %s", code)
+	}
+}
+
+// The reward comes from what the plot remembers (type, duration), not from a history row that could be missing.
+func TestHarvestDoesNotDependOnPomodoroHistory(t *testing.T) {
+	e := newFreshEnv(t)
+	e.expect(201, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "daisy"})
+	e.clock.Advance(10 * time.Minute)
+	e.state() // the plant matures when a request settles the Pomodoro
+	dbExec(t, e, `DELETE FROM pomodoro_events`)
+	dbExec(t, e, `DELETE FROM pomodoros`)
+	e.expect(200, "POST", "/api/plots/1/harvest", nil)
+	if got := e.state().Player.FocusPoints; got != 1 {
+		t.Fatalf("focus = %d, want 1", got)
+	}
+}

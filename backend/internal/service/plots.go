@@ -11,7 +11,7 @@ import (
 //   - empty or still growing: nothing to clear (growing plants are cancelled instead).
 //   - mature: only after harvesting (the 💧 reward is never lost), and with confirm=true,
 //     because it stops producing (GDD §3.1).
-//   - withered: free, no confirmation.
+//   - withered: free, no confirmation (also only after harvesting, so the 💧 reward is never lost).
 func (s *Service) ClearPlot(ctx context.Context, plotID int64, confirm bool) error {
 	return s.withTx(ctx, func(tx *sql.Tx, now time.Time) error {
 		if err := s.settle(ctx, tx, now); err != nil {
@@ -39,6 +39,11 @@ func (s *Service) ClearPlot(ctx context.Context, plotID int64, confirm bool) err
 			if !confirm {
 				return ErrNeedsConfirmation
 			}
+		case "withered":
+			if harvested == 0 {
+				return ErrHarvestFirst // its 💧 reward is still waiting
+			}
+			// free and without confirmation: it has nothing left to lose (GDD §3.1)
 		}
 		upd, err := tx.ExecContext(ctx, `UPDATE plots SET state = 'empty', plant_type = NULL, planted_at = NULL, grow_s = NULL,
 			matured_at = NULL, harvested = 0, life_s = NULL, wilts_at = NULL, collected_to = NULL, version = version + 1

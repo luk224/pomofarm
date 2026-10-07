@@ -34,7 +34,7 @@ function Pad() {
 function PlotView({ plot, growth }: { plot: PlotState; growth: number }) {
   const kind = isPlantKind(plot.plant_type) ? plot.plant_type : null
   const mature = plot.state === 'mature' || plot.state === 'withered'
-  const ready = plot.state === 'mature' && !plot.harvested
+  const ready = (plot.state === 'mature' || plot.state === 'withered') && !plot.harvested
   return (
     <group position={[plot.x, 0, plot.y]}
       onClick={ready ? (e) => { e.stopPropagation(); void harvestPlot(plot.id) } : undefined}

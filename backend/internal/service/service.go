@@ -115,7 +115,41 @@ func (s *Service) settle(ctx context.Context, tx *sql.Tx, now time.Time) error {
 			return err
 		}
 	}
-	return s.accrue(ctx, tx, now)
+	if err := s.accrue(ctx, tx, now); err != nil {
+		return err
+	}
+	return wither(ctx, tx, now) // after accrue: a plant's last production is counted before it wilts
+}
+
+// wither turns every mature plant whose life is over into a withered one. It keeps its sparkle (the 💧 reward is
+// never lost) and stays in the plot until it is cleared (GDD §3.4).
+func wither(ctx context.Context, tx *sql.Tx, now time.Time) error {
+	rows, err := tx.QueryContext(ctx, `SELECT id, wilts_at FROM plots WHERE player_id = ? AND state = 'mature' AND wilts_at IS NOT NULL`, PlayerID)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	var dead []int64
+	for rows.Next() {
+		var id int64
+		var wilts string
+		if err := rows.Scan(&id, &wilts); err != nil {
+			return err
+		}
+		if !parseTime(wilts).After(now) {
+			dead = append(dead, id)
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	rows.Close()
+	for _, id := range dead {
+		if _, err := tx.ExecContext(ctx, `UPDATE plots SET state = 'withered', version = version + 1 WHERE id = ?`, id); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // completeActive finishes a Pomodoro whose time is up and turns its plot into a mature plant.
