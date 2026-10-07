@@ -1,4 +1,5 @@
 import { useGame } from '../store/game'
+import { harvestPlot } from '../ui/actions'
 import { useRemainingMs } from '../store/hooks'
 import { growthFraction } from '../store/time'
 import type { PlotState } from '../api/types'
@@ -33,13 +34,17 @@ function Pad() {
 function PlotView({ plot, growth }: { plot: PlotState; growth: number }) {
   const kind = isPlantKind(plot.plant_type) ? plot.plant_type : null
   const mature = plot.state === 'mature' || plot.state === 'withered'
+  const ready = plot.state === 'mature' && !plot.harvested
   return (
-    <group position={[plot.x, 0, plot.y]}>
+    <group position={[plot.x, 0, plot.y]}
+      onClick={ready ? (e) => { e.stopPropagation(); void harvestPlot(plot.id) } : undefined}
+      onPointerOver={ready ? () => { document.body.style.cursor = 'pointer' } : undefined}
+      onPointerOut={ready ? () => { document.body.style.cursor = '' } : undefined}>
       <Pad />
       {kind && plot.state !== 'empty' && (
         <group position={[0, 0.08, 0]}>
           <PlantView kind={kind} growth={mature ? 1 : growth} mature={mature} withered={plot.state === 'withered'}
-            ready={plot.state === 'mature' && !plot.harvested} />
+            ready={ready} />
         </group>
       )}
     </group>

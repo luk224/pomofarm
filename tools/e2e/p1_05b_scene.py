@@ -57,7 +57,7 @@ with sync_playwright() as p:
     info = page.evaluate("({calls: window.__three.gl.info.render.calls, tris: window.__three.gl.info.render.triangles})")
     print("render real:", info)
     page.screenshot(path=f"{OUT}/farm_growing.png")
-    page.click("text=Pausar"); page.wait_for_selector("[data-testid=timer][data-status=paused]"); page.wait_for_timeout(600)
+    page.get_by_role("button", name="Pausar", exact=True).click(); page.wait_for_selector("[data-testid=timer][data-status=paused]"); page.wait_for_timeout(600)
     check("en pausa el anillo muestra ⏸", "⏸" in page.inner_text("[data-testid=timer-ring]"))
     call("POST", "/api/pomodoros/active/cancel"); ctx.close()
     check("granja sin errores de consola", not errs, "; ".join(errs))

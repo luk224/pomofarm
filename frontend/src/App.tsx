@@ -4,12 +4,15 @@ import { Gallery } from './scene/Gallery'
 import { IsoCamera } from './scene/IsoCamera'
 import { palette } from './scene/palette'
 import { useGameSync } from './store/hooks'
-import { DevPanel } from './ui/DevPanel'
-import { Hud } from './ui/Hud'
+import { Dock } from './ui/Dock'
+import { Toasts } from './ui/Toasts'
+import { TopBar } from './ui/TopBar'
 import { TimerRing } from './ui/TimerRing'
+import { useShortcuts } from './ui/useShortcuts'
 
 export default function App() {
   useGameSync()
+  useShortcuts()
   const gallery = import.meta.env.DEV && new URLSearchParams(location.search).get('lab') === 'plants'
   return (
     <>
@@ -37,9 +40,10 @@ export default function App() {
         />
         {gallery ? <Gallery /> : <Farm />}
       </Canvas>
-      <Hud />
+      <TopBar />
       {!gallery && <TimerRing />}
-      {import.meta.env.DEV && !gallery && <DevPanel />}
+      {!gallery && <Dock />}
+      <Toasts />
     </>
   )
 }

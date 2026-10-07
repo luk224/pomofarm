@@ -57,7 +57,7 @@ with sync_playwright() as p:
     page.screenshot(path=f"{OUT}/running.png")
 
     # pausa desde la UI
-    page.click("text=Pausar"); page.wait_for_selector('[data-testid=timer][data-status=paused]')
+    page.get_by_role("button", name="Pausar", exact=True).click(); page.wait_for_selector('[data-testid=timer][data-status=paused]')
     p1 = secs(page.inner_text('[data-testid=timer]')); time.sleep(3.5)
     p2 = secs(page.inner_text('[data-testid=timer]'))
     check("en pausa el tiempo está congelado", p1 == p2, f"{p1} == {p2}")
@@ -68,9 +68,10 @@ with sync_playwright() as p:
     page.screenshot(path=f"{OUT}/paused.png")
 
     # reanudar y cancelar
-    page.click("text=Reanudar"); page.wait_for_selector('[data-testid=timer][data-status=running]')
-    page.click("text=Cancelar"); page.wait_for_selector('[data-testid=timer][data-status=idle]')
-    check("cancelar deja la UI sin Pomodoro", "sin Pomodoro" in page.inner_text('[data-testid=timer]'))
+    page.get_by_role("button", name="Reanudar", exact=True).click(); page.wait_for_selector('[data-testid=timer][data-status=running]')
+    page.get_by_role("button", name="Cancelar", exact=True).click()
+    page.get_by_role("button", name="¿Cancelar? Se pierde la planta").click(); page.wait_for_selector(".packet")
+    check("cancelar deja la UI sin Pomodoro", page.locator('[data-testid=timer]').count() == 0)
     check("título vuelve a PomoFarm", page.title() == "PomoFarm", page.title())
 
     # segunda pestaña/dispositivo: ve el Pomodoro existente

@@ -38,6 +38,7 @@ type PomodoroState struct {
 	RemainingMs int64   `json:"remaining_ms"`
 	StartedAt   string  `json:"started_at"`
 	PausedAt    *string `json:"paused_at"`
+	Tag         *string `json:"tag"`
 }
 
 // SeedState lets the client list seeds and their prices without knowing the balance.
@@ -53,11 +54,13 @@ type SeedState struct {
 // State is everything the client needs to draw the game. The client displays it
 // and never computes economy or time itself.
 type State struct {
-	ServerTime string         `json:"server_time"`
-	Player     PlayerState    `json:"player"`
-	Plots      []PlotState    `json:"plots"`
-	Seeds      []SeedState    `json:"seeds"`
-	Pomodoro   *PomodoroState `json:"pomodoro"`
+	ServerTime string            `json:"server_time"`
+	Player     PlayerState       `json:"player"`
+	Plots      []PlotState       `json:"plots"`
+	Seeds      []SeedState       `json:"seeds"`
+	Pomodoro   *PomodoroState    `json:"pomodoro"`
+	RecentTags []string          `json:"recent_tags"`
+	Settings   map[string]string `json:"settings"`
 }
 
 func (s *Service) State(ctx context.Context) (State, error) {
@@ -114,6 +117,39 @@ func (s *Service) State(ctx context.Context) (State, error) {
 		for _, c := range game.Crops {
 			st.Seeds = append(st.Seeds, SeedState{c.Key, c.DurationMin, c.Unlock, c.Reward, c.LifeH, unlocked[c.Key]})
 		}
+		st.RecentTags = []string{}
+		trows, err := tx.QueryContext(ctx, `SELECT t.name FROM tags t JOIN pomodoros p ON p.tag_id = t.id
+			WHERE t.player_id = ? GROUP BY t.id ORDER BY MAX(p.id) DESC LIMIT 8`, PlayerID)
+		if err != nil {
+			return err
+		}
+		defer trows.Close()
+		for trows.Next() {
+			var n string
+			if err := trows.Scan(&n); err != nil {
+				return err
+			}
+			st.RecentTags = append(st.RecentTags, n)
+		}
+		if err := trows.Err(); err != nil {
+			return err
+		}
+		st.Settings = map[string]string{}
+		srows, err := tx.QueryContext(ctx, `SELECT key, value FROM settings WHERE player_id = ?`, PlayerID)
+		if err != nil {
+			return err
+		}
+		defer srows.Close()
+		for srows.Next() {
+			var k, v string
+			if err := srows.Scan(&k, &v); err != nil {
+				return err
+			}
+			st.Settings[k] = v
+		}
+		if err := srows.Err(); err != nil {
+			return err
+		}
 		a, err := loadActive(ctx, tx)
 		if err != nil || a == nil {
 			return err
@@ -123,6 +159,11 @@ func (s *Service) State(ctx context.Context) (State, error) {
 		if a.PlotID.Valid {
 			ps.PlotID = &a.PlotID.Int64
 		}
+		var tag sql.NullString
+		if err := tx.QueryRowContext(ctx, `SELECT t.name FROM pomodoros p LEFT JOIN tags t ON t.id = p.tag_id WHERE p.id = ?`, a.ID).Scan(&tag); err != nil {
+			return err
+		}
+		ps.Tag = strPtr(tag)
 		if a.P.PausedAt != nil {
 			t := fmtTime(*a.P.PausedAt)
 			ps.PausedAt = &t

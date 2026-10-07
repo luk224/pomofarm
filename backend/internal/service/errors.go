@@ -16,5 +16,7 @@ var (
 	ErrWrongState        = errors.New("wrong_state") // e.g. pausing a paused Pomodoro
 	ErrConflict          = errors.New("version_conflict")
 	ErrAlreadyUnlocked   = errors.New("already_unlocked")
+	ErrHarvestFirst      = errors.New("harvest_first")
+	ErrNeedsConfirmation = errors.New("needs_confirmation")
 	ErrInsufficientFocus = errors.New("insufficient_focus")
 )

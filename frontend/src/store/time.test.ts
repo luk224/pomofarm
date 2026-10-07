@@ -4,7 +4,7 @@ import { formatClock, growthFraction, remainingMs, tabTitle } from './time'
 
 const base: PomodoroState = {
   id: 1, plot_id: 1, plant_type: 'daisy', status: 'running', planned_s: 600,
-  remaining_ms: 600_000, started_at: 't', paused_at: null,
+  remaining_ms: 600_000, started_at: 't', paused_at: null, tag: null,
 }
 
 describe('remainingMs', () => {

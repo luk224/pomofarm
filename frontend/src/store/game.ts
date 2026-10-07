@@ -8,12 +8,15 @@ interface GameStore {
   fetchedAt: number
   error: string | null
   refresh: () => Promise<void>
+  clearError: () => void
   plant: (req: PlantRequest) => Promise<void>
   pause: () => Promise<void>
   resume: () => Promise<void>
   cancel: () => Promise<void>
   harvest: (plotId: number) => Promise<number>
   unlockSeed: (key: string) => Promise<void>
+  clearPlot: (plotId: number, confirm: boolean) => Promise<void>
+  setSetting: (key: string, value: string) => Promise<void>
 }
 
 export const useGame = create<GameStore>((set) => {
@@ -40,6 +43,7 @@ export const useGame = create<GameStore>((set) => {
     state: null,
     fetchedAt: 0,
     error: null,
+    clearError: () => set({ error: null }),
     refresh: async () => {
       try {
         apply(await api.state())
@@ -52,6 +56,8 @@ export const useGame = create<GameStore>((set) => {
     resume: () => act(() => api.resume()),
     cancel: () => act(() => api.cancel()),
     unlockSeed: (key) => act(() => api.unlockSeed(key)),
+    clearPlot: (plotId, confirm) => act(() => api.clearPlot(plotId, confirm)),
+    setSetting: (key, value) => act(() => api.setSetting(key, value)),
     harvest: async (plotId) => {
       try {
         const r = await api.harvest(plotId)

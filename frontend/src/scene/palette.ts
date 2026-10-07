@@ -21,6 +21,6 @@ export const palette = {
   withered: '#a89a78',
   ring: '#ffffff',
   ringTrack: '#00000033',
-  ringRunning: '#ff7a59',
+  ringRunning: '#2f7d32',
   ringPaused: '#8a8f99',
 } as const

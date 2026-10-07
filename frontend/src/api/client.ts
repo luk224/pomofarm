@@ -35,5 +35,8 @@ export const api = {
   cancel: () => request<GameState>('POST', '/api/pomodoros/active/cancel'),
   harvest: (plotId: number) =>
     request<{ reward_focus: number; state: GameState }>('POST', `/api/plots/${plotId}/harvest`),
+  clearPlot: (plotId: number, confirm: boolean) =>
+    request<GameState>('POST', `/api/plots/${plotId}/clear`, { confirm }),
+  setSetting: (key: string, value: string) => request<GameState>('POST', '/api/settings', { key, value }),
   unlockSeed: (key: string) => request<GameState>('POST', '/api/unlocks', { kind: 'seed', key }),
 }

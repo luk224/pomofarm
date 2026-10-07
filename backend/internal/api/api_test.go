@@ -407,3 +407,84 @@ func TestHarvestThenBuyTomatoes(t *testing.T) {
 		t.Fatalf("focus after buying = %d", got)
 	}
 }
+
+func TestRecentTagsOrderedByLatestUse(t *testing.T) {
+	e := newFreshEnv(t)
+	for _, tag := range []string{"emails", "tesis", "emails", "gym"} {
+		e.expect(201, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "daisy", Tag: tag})
+		if tag == "emails" || tag == "tesis" {
+			if got := *e.state().Pomodoro.Tag; got != tag {
+				t.Fatalf("active tag = %q, want %q", got, tag)
+			}
+		}
+		e.expect(200, "POST", "/api/pomodoros/active/cancel", nil)
+	}
+	got := e.state().RecentTags
+	want := []string{"gym", "emails", "tesis"}
+	if len(got) != 3 || got[0] != want[0] || got[1] != want[1] || got[2] != want[2] {
+		t.Fatalf("recent tags = %v, want %v", got, want)
+	}
+	e.expect(201, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "daisy"})
+	if e.state().Pomodoro.Tag != nil {
+		t.Fatal("untagged Pomodoro reports a tag")
+	}
+}
+
+func TestSettingsAllowlist(t *testing.T) {
+	e := newFreshEnv(t)
+	e.expect(200, "POST", "/api/settings", map[string]string{"key": "tutorial_done", "value": "1"})
+	if e.state().Settings["tutorial_done"] != "1" {
+		t.Fatalf("settings = %v", e.state().Settings)
+	}
+	e.expect(200, "POST", "/api/settings", map[string]string{"key": "tutorial_done", "value": "0"}) // upsert
+	if e.state().Settings["tutorial_done"] != "0" {
+		t.Fatal("setting not updated")
+	}
+	e.expect(400, "POST", "/api/settings", map[string]string{"key": "players_drop", "value": "x"})
+	e.expect(400, "POST", "/api/settings", map[string]string{"key": "hints_seen", "value": string(make([]byte, 300))})
+}
+
+func TestClearPlotRules(t *testing.T) {
+	e := newFreshEnv(t)
+	code := func(want int, path string, body any) string { return errCode(e.expect(want, "POST", path, body)) }
+
+	if c := code(409, "/api/plots/1/clear", nil); c != "wrong_state" {
+		t.Fatalf("clearing an empty plot: %s", c)
+	}
+	e.expect(201, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "daisy"})
+	if c := code(409, "/api/plots/1/clear", map[string]bool{"confirm": true}); c != "plot_busy" {
+		t.Fatalf("clearing a growing plant: %s", c)
+	}
+	e.clock.Advance(10 * time.Minute)
+	if c := code(409, "/api/plots/1/clear", map[string]bool{"confirm": true}); c != "harvest_first" {
+		t.Fatalf("clearing before harvest must protect the reward: %s", c)
+	}
+	e.expect(200, "POST", "/api/plots/1/harvest", nil)
+	if c := code(409, "/api/plots/1/clear", nil); c != "needs_confirmation" {
+		t.Fatalf("clearing without confirmation: %s", c)
+	}
+	if e.state().Plots[0].State != "mature" {
+		t.Fatal("plot cleared without confirmation")
+	}
+	e.expect(200, "POST", "/api/plots/1/clear", map[string]bool{"confirm": true})
+	st := e.state()
+	if st.Plots[0].State != "empty" || st.Plots[0].PlantType != nil || st.Player.FocusPoints != 1 {
+		t.Fatalf("after clear: %+v focus=%d", st.Plots[0], st.Player.FocusPoints)
+	}
+	e.expect(201, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "daisy"}) // replantable
+	e.expect(404, "POST", "/api/plots/99/clear", map[string]bool{"confirm": true})
+}
+
+// The full single-plot loop the MVP promises: plant, harvest, clear, plant again.
+func TestSinglePlotLoopRepeats(t *testing.T) {
+	e := newFreshEnv(t)
+	for i := 1; i <= 3; i++ {
+		e.expect(201, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "daisy"})
+		e.clock.Advance(10 * time.Minute)
+		e.expect(200, "POST", "/api/plots/1/harvest", nil)
+		e.expect(200, "POST", "/api/plots/1/clear", map[string]bool{"confirm": true})
+		if got := e.state().Player.FocusPoints; got != int64(i) {
+			t.Fatalf("loop %d: focus = %d", i, got)
+		}
+	}
+}

@@ -72,6 +72,35 @@ func New(db *sql.DB, clock game.Clock) *fiber.App {
 		return respondState(c, svc, fiber.StatusCreated)
 	})
 
+	app.Post("/api/plots/:id/clear", func(c *fiber.Ctx) error {
+		id, err := c.ParamsInt("id")
+		if err != nil {
+			return fail(c, service.ErrInvalid)
+		}
+		var req struct {
+			Confirm bool `json:"confirm"`
+		}
+		_ = c.BodyParser(&req) // body is optional
+		if err := svc.ClearPlot(c.UserContext(), int64(id), req.Confirm); err != nil {
+			return fail(c, err)
+		}
+		return respondState(c, svc, fiber.StatusOK)
+	})
+
+	app.Post("/api/settings", func(c *fiber.Ctx) error {
+		var req struct {
+			Key   string `json:"key"`
+			Value string `json:"value"`
+		}
+		if err := c.BodyParser(&req); err != nil {
+			return fail(c, service.ErrInvalid)
+		}
+		if err := svc.SetSetting(c.UserContext(), req.Key, req.Value); err != nil {
+			return fail(c, err)
+		}
+		return respondState(c, svc, fiber.StatusOK)
+	})
+
 	app.Post("/api/plots/:id/harvest", func(c *fiber.Ctx) error {
 		id, err := c.ParamsInt("id")
 		if err != nil {
@@ -112,6 +141,8 @@ var statusOf = map[error]int{
 	service.ErrConflict:          fiber.StatusConflict,
 	service.ErrAlreadyUnlocked:   fiber.StatusConflict,
 	service.ErrInsufficientFocus: fiber.StatusConflict,
+	service.ErrHarvestFirst:      fiber.StatusConflict,
+	service.ErrNeedsConfirmation: fiber.StatusConflict,
 }
 
 // fail writes {"error": code}. Unknown errors are logged and hidden behind a 500.

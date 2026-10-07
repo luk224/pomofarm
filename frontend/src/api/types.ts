@@ -40,6 +40,7 @@ export interface PomodoroState {
   remaining_ms: number
   started_at: string
   paused_at: string | null
+  tag: string | null
 }
 
 export interface GameState {
@@ -48,6 +49,8 @@ export interface GameState {
   plots: PlotState[]
   seeds: SeedState[]
   pomodoro: PomodoroState | null
+  recent_tags: string[]
+  settings: Record<string, string>
 }
 
 export interface PlantRequest {

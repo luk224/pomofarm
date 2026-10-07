@@ -81,10 +81,11 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P1-05b Parcela y planta low-poly por etapa; barra circular flotante del timer
   - **Hecho:** escena visible en el navegador con una planta animada.
 
-- [ ] **P1-06** UI de juego (plantar, pausar, cosechar) — agente: `frontend-3d` — dep: P1-04, P1-05
-  - [ ] P1-06a Selector de semilla y de etiqueta opcional (GDD §2.2)
-  - [ ] P1-06b Botones pausar/reanudar/cancelar; cosecha al hacer clic en planta madura
-  - [ ] P1-06c Tutorial de 3 pasos y primer Pomodoro gratis (GDD §2.1)
+- [x] **P1-06** UI de juego (plantar, pausar, cosechar) — agente: `frontend-3d` — dep: P1-04, P1-05
+  - [x] P1-06a Selector de semilla y de etiqueta opcional (GDD §2.2)
+  - [x] P1-06b Botones pausar/reanudar/cancelar; cosecha al hacer clic en planta madura
+  - [x] P1-06c Tutorial de 3 pasos y primer Pomodoro gratis (GDD §2.1)
+  - [x] P1-06d (añadida) Retirar planta cosechada, para poder replantar con una sola parcela; etiquetas recientes y ajustes en el estado
   - **Hecho:** flujo completo plantar → esperar → cosechar → 💧 jugable.
 
 - [ ] **P1-07** Notificación y sonido de fin — agente: `frontend-3d` — dep: P1-06

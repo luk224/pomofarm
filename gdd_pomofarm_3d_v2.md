@@ -401,6 +401,7 @@ Pomodoros completados por semana, horas de foco por mes y si sigues abriendo la 
 5. El Prestigio conserva 💧, parcelas y Silo; reinicia las 🪙 y la automatización (4.9).
 6. Animales: desbloqueo con 💧, compra con 🪙 (4.7), para reconciliar dos frases del GDD original que se contradecían.
 7. Perro Pastor = +12 h de Silo (el original solo decía "extiende la capacidad").
+8. Retirar una planta madura exige haberla cosechado antes (el 💧 nunca se pierde) y una confirmación en dos pasos; una marchita se retira gratis (3.1).
 
 **Limitaciones de la simulación:** modelo agregado (no coloca plantas en el mapa), bonos de sinergia como medias supuestas, visitas frecuentes al día, sin multiplicador de prestigio, y ritmo de compra "voraz". Sirve para dimensionar precios, no para predecir jugadores reales. **Hace falta una semana de juego propio para recalibrar** antes de dar los precios por buenos.
 
