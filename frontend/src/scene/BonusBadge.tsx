@@ -48,20 +48,24 @@ function badgeTexture(text: string, gold: boolean): CanvasTexture {
 }
 
 interface Props {
+  /** Position inside the parent group. */
+  position?: [number, number, number]
+  /** Width in world units (the label is twice as wide as tall). */
+  size?: number
   text: string
   /** Gold for the Huerto completo; green for plain adjacency. */
   gold: boolean
-  y: number
+  y?: number
 }
 
 /**
  * A small floating label over a producing plant that earns a synergy bonus (GDD §4.6). Always faces the camera
  * and is drawn on top, so a tall neighbour never hides it. Colour is not the only signal: the text says the number.
  */
-export function BonusBadge({ text, gold, y }: Props) {
+export function BonusBadge({ text, gold, y = 0, position, size = 0.62 }: Props) {
   const tex = useMemo(() => badgeTexture(text, gold), [text, gold])
   return (
-    <sprite name="bonus-badge" position={[0, y, 0]} scale={[0.62, 0.31, 1]} renderOrder={10} userData={{ text, gold }}>
+    <sprite name="bonus-badge" position={position ?? [0, y, 0]} scale={[size, size / 2, 1]} renderOrder={10} userData={{ text, gold }}>
       <spriteMaterial map={tex} transparent depthTest={false} />
     </sprite>
   )

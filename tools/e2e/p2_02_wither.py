@@ -28,7 +28,8 @@ def force(matured_hours_ago, harvested, life_h=24, plant="daisy"):
         "INSERT INTO settings (player_id,key,value) VALUES (1,'tutorial_done','1') ON CONFLICT(player_id,key) DO UPDATE SET value='1'")
 btn = lambda pg, n: pg.get_by_role("button", name=n, exact=True)
 SCENE = "window.__three.scene.getObjectByName('plant-daisy')"
-FIRST_COLOR = SCENE + ".children[0].children[0].material.color.getHexString()"
+# Plant colours live in the geometry (vertex colours): compare the first vertex with the withered tint.
+FIRST_COLOR_IS_WITHERED = "(() => { const C = window.__three.scene.background.constructor; const w = new C('#a89a78'); const a = window.__three.scene.getObjectByName('plant-daisy').children[0].children[0].geometry.attributes.color; return Math.abs(a.getX(0)-w.r) < 1e-3 && Math.abs(a.getY(0)-w.g) < 1e-3 && Math.abs(a.getZ(0)-w.b) < 1e-3 })()"
 
 with sync_playwright() as p:
     b = p.chromium.launch(args=["--use-gl=swiftshader", "--enable-unsafe-swiftshader"])
@@ -41,7 +42,7 @@ with sync_playwright() as p:
     st = call("GET", "/api/state")
     check("el servidor la marca como marchita al abrir", st["plots"][0]["state"] == "withered" and not st["plots"][0]["harvested"], st["plots"][0]["state"])
     check("el dock explica que se marchitó pero aún se puede cosechar", "se marchitó" in pg.inner_text(".dock") and "cosechar" in pg.inner_text(".dock"), pg.inner_text(".dock"))
-    check("la planta se dibuja apagada (color de marchita)", pg.evaluate(FIRST_COLOR) == "a89a78", pg.evaluate(FIRST_COLOR))
+    check("la planta se dibuja apagada (color de marchita)", pg.evaluate(FIRST_COLOR_IS_WITHERED))
     check("conserva el destello de 'cosechar'", pg.evaluate(SCENE + ".children.length") == 2)
     check("su producción se detuvo y el Silo guarda como máximo 10 🪙", st["silo"]["rate_milli_per_h"] == 0 and 9900 <= st["silo"]["content_milli"] <= 10000, str(st["silo"]))
     pg.screenshot(path=f"{OUT}/withered.png")

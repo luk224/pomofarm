@@ -139,9 +139,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P2-06b (añadida) Descanso en el servidor (migración 0003), ventana de 15 min, aviso al terminar con cuenco y notificación, ajustes de activación y de las tres duraciones; el audio se desbloquea con el primer gesto de cualquier tipo
   - **Hecho:** descanso aparece tras cosechar y se puede saltar.
 
-- [ ] **P2-07** Granja 3D completa — agente: `frontend-3d` — dep: P2-03
-  - [ ] P2-07a Cuadrícula de hasta 4×4 con `InstancedMesh`, silo y contador de 🪙
-  - [ ] P2-07b Iconos de sinergia, panel de compras con 💧 y 🪙
+- [x] **P2-07** Granja 3D completa — agente: `frontend-3d` — dep: P2-03
+  - [x] P2-07a Cuadrícula de hasta 4×4 con `InstancedMesh` (suelo y parcelas), Silo 3D con indicador de llenado y clic para recoger, contador de 🪙. 16 plantas maduras: de 409 a 60 llamadas de dibujo
+  - [x] P2-07b Iconos de sinergia (etiquetas en la esquina de cada parcela) y panel de compras con 💧
+  - [ ] P2-07c Comprar con 🪙 (colmenas, Perro, decoración): no hay nada que comprar con 🪙 hasta la Fase 3 (P3-01/P3-02)
   - **Hecho:** granja de 16 parcelas fluida en el navegador.
 
 - [ ] **P2-08** Verificación de Fase 2 — agente: `qa-tester` — dep: P2-01..P2-07

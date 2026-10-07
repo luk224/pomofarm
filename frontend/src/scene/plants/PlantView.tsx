@@ -1,10 +1,27 @@
 import { useFrame } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
-import { MathUtils, type Group } from 'three'
+import { MathUtils, MeshStandardMaterial, type Group } from 'three'
 import { popScale, useReducedMotion } from '../motion'
 import { palette as P } from '../palette'
 import { PLANT_HEIGHT, type PlantKind } from './kinds'
-import { Daisy, Sunflower, Tomato, Tree } from './parts'
+import { orbsGeometry, plantGeometry } from './geometry'
+
+// One material for every plant: colours live in the geometry (vertex colours), so all plants batch cheaply.
+const PLANT_MATERIAL = new MeshStandardMaterial({ vertexColors: true, flatShading: true })
+const ORB_MATERIAL = new MeshStandardMaterial({ color: P.magic, emissive: P.magic, emissiveIntensity: 1.4, flatShading: true, vertexColors: true })
+
+/** Slowly orbiting blue orbs: what makes the Oak "Mágico". */
+function MagicOrbs() {
+  const ref = useRef<Group>(null)
+  useFrame((_, dt) => {
+    if (ref.current) ref.current.rotation.y += dt * 0.8
+  })
+  return (
+    <group ref={ref} position={[0, 0.9, 0]}>
+      <mesh geometry={orbsGeometry()} material={ORB_MATERIAL} dispose={null} />
+    </group>
+  )
+}
 
 /** Smallest size (sprout) and how fast the plant eases towards its target size. */
 const MIN_SCALE = 0.3
@@ -61,15 +78,11 @@ export function PlantView({ kind, growth, mature, withered = false, ready = fals
     }
   })
 
-  const props = { mature, withered }
   return (
     <group name={`plant-${kind}`}>
       <group ref={body} scale={MIN_SCALE}>
-        {kind === 'daisy' && <Daisy {...props} />}
-        {kind === 'tomato' && <Tomato {...props} />}
-        {kind === 'sunflower' && <Sunflower {...props} />}
-        {kind === 'apple' && <Tree {...props} oak={false} />}
-        {kind === 'oak' && <Tree {...props} oak />}
+        <mesh geometry={plantGeometry(kind, mature, withered)} material={PLANT_MATERIAL} castShadow dispose={null} />
+        {kind === 'oak' && mature && !withered && <MagicOrbs />}
       </group>
       {ready && (
         <group ref={sparkle} position={[0, PLANT_HEIGHT[kind] + 0.25, 0]}>

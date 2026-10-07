@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useGame } from './game'
+import { siloNow } from './economy'
 import { restRemainingMs } from './rest'
 import { remainingMs } from './time'
 
@@ -68,4 +69,18 @@ export function useRestRemainingMs(): number | null {
     if (ms === 0) void refresh()
   }, [ms, refresh])
   return ms
+}
+
+/** Ticks once a second while the Silo is filling, only to repaint; the server holds the real amount. */
+export function useSiloAmount(): number {
+  const silo = useGame((s) => s.state?.silo)
+  const fetchedAt = useGame((s) => s.fetchedAt)
+  const [now, setNow] = useState(() => performance.now())
+  const filling = !!silo && !silo.full && silo.rate_milli_per_h > 0
+  useEffect(() => {
+    if (!filling) return
+    const id = window.setInterval(() => setNow(performance.now()), 1000)
+    return () => window.clearInterval(id)
+  }, [filling])
+  return silo ? siloNow(silo, fetchedAt, Math.max(now, fetchedAt)) : 0
 }

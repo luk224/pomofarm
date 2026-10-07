@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { unlockAudioOnFirstGesture } from './audio/bowl'
 import { Farm } from './scene/Farm'
 import { Gallery } from './scene/Gallery'
@@ -19,6 +19,8 @@ export default function App() {
   useShortcuts()
   useCompletionAlerts()
   useEffect(() => unlockAudioOnFirstGesture(), [])
+  // Fit the 4×4 farm and the Silo on narrow screens: roughly 8.4 world units across (the 4×4 field plus the Silo).
+  const [fitZoom] = useState(() => Math.min(95, Math.max(34, window.innerWidth / 8.4)))
   const gallery = import.meta.env.DEV && new URLSearchParams(location.search).get('lab') === 'plants'
   return (
     <>
@@ -30,7 +32,7 @@ export default function App() {
         }}
       >
         <color attach="background" args={[palette.sky]} />
-        <IsoCamera center={gallery ? [3.4, 2.55] : [1.5, 1.5]} initialZoom={gallery ? 62 : 95} />
+        <IsoCamera center={gallery ? [3.4, 2.55] : [1.5, 1.5]} initialZoom={gallery ? 62 : fitZoom} />
         <hemisphereLight args={['#ffffff', '#9ac27a', 0.9]} />
         <directionalLight
           position={[6, 10, 4]}

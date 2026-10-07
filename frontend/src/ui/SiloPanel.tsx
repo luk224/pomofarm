@@ -1,22 +1,8 @@
-import { useEffect, useState } from 'react'
 import { useGame } from '../store/game'
-import { formatCoins, siloFill, siloNow } from '../store/economy'
+import { formatCoins, siloFill } from '../store/economy'
+import { useSiloAmount } from '../store/hooks'
 import { collectSilo } from './actions'
 import { CoinIcon, SiloIcon } from './icons'
-
-/** Ticks once a second while the Silo is filling, only to repaint; the server holds the real amount. */
-function useSiloAmount(): number {
-  const silo = useGame((s) => s.state?.silo)
-  const fetchedAt = useGame((s) => s.fetchedAt)
-  const [now, setNow] = useState(() => performance.now())
-  const filling = !!silo && !silo.full && silo.rate_milli_per_h > 0
-  useEffect(() => {
-    if (!filling) return
-    const id = window.setInterval(() => setNow(performance.now()), 1000)
-    return () => window.clearInterval(id)
-  }, [filling])
-  return silo ? siloNow(silo, fetchedAt, Math.max(now, fetchedAt)) : 0
-}
 
 /** Shown once the farm has produced or can produce 🪙. Collecting is a deliberate tap (GDD §3.4). */
 export function SiloPanel() {

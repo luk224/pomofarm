@@ -8,32 +8,11 @@ import { bonusLabel } from '../store/bonus'
 import { effectivePlot } from '../ui/selection'
 import { BonusBadge } from './BonusBadge'
 import { Ground } from './Ground'
-import { palette as P } from './palette'
-import { isPlantKind, PLANT_HEIGHT } from './plants/kinds'
+import { Pads } from './Pads'
+import { Silo3D } from './Silo3D'
+import { isPlantKind } from './plants/kinds'
 import { PlantView } from './plants/PlantView'
 import { RingAnchor } from './RingAnchor'
-
-/** Tilled soil: rim, bed and three furrows. */
-function Pad() {
-  return (
-    <group>
-      <mesh receiveShadow position={[0, 0.02, 0]}>
-        <boxGeometry args={[0.92, 0.06, 0.92]} />
-        <meshStandardMaterial color={P.dirtRim} flatShading />
-      </mesh>
-      <mesh receiveShadow position={[0, 0.045, 0]}>
-        <boxGeometry args={[0.8, 0.06, 0.8]} />
-        <meshStandardMaterial color={P.dirt} flatShading />
-      </mesh>
-      {[-0.22, 0, 0.22].map((z) => (
-        <mesh key={z} position={[0, 0.08, z]}>
-          <boxGeometry args={[0.7, 0.02, 0.06]} />
-          <meshStandardMaterial color={P.dirtDark} flatShading />
-        </mesh>
-      ))}
-    </group>
-  )
-}
 
 /** Square outline around the plot the dock is talking about. */
 function SelectionMarker() {
@@ -61,10 +40,10 @@ function PlotView({ plot, growth, selected }: { plot: PlotState; growth: number;
       }}
       onPointerOver={() => { document.body.style.cursor = 'pointer' }}
       onPointerOut={() => { document.body.style.cursor = '' }}>
-      <Pad />
       {selected && <SelectionMarker />}
       {kind && label && plot.state === 'mature' && (
-        <BonusBadge text={label} gold={!!plot.bonus?.garden} y={0.08 + PLANT_HEIGHT[kind] + (ready ? 0.62 : 0.42)} />
+        // Small tag on the front corner of the soil: always readable and never on top of a neighbour's tree.
+        <BonusBadge text={label} gold={!!plot.bonus?.garden} position={[0.3, 0.2, 0.3]} size={0.42} />
       )}
       {kind && plot.state !== 'empty' && (
         <group position={[0, 0.08, 0]}>
@@ -77,6 +56,11 @@ function PlotView({ plot, growth, selected }: { plot: PlotState; growth: number;
 }
 
 /** Draws the farm from the server state. The client never decides game outcomes. */
+function pickPlot(plot: PlotState) {
+  useUi.getState().selectPlot(plot.id)
+  if ((plot.state === 'mature' || plot.state === 'withered') && !plot.harvested) void harvestPlot(plot.id)
+}
+
 export function Farm() {
   const plots = useGame((s) => s.state?.plots)
   const pomodoro = useGame((s) => s.state?.pomodoro ?? null)
@@ -88,6 +72,8 @@ export function Farm() {
   return (
     <>
       <Ground />
+      <Silo3D />
+      {plots && <Pads plots={plots} onPick={pickPlot} />}
       {plots?.map((p) => (
         <PlotView key={p.id} plot={p} growth={pomodoro && p.id === pomodoro.plot_id ? growth : 1} selected={p.id === looking && !pomodoro && (plots?.length ?? 0) > 1} />
       ))}
