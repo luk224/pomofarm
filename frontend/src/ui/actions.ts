@@ -4,6 +4,7 @@ import { formatCoins } from '../store/economy'
 import { canClear, effectivePlot, needsHarvest } from './selection'
 import { useUi } from '../store/ui'
 import { SEED_NAMES } from './names'
+import type { DecorKind } from '../api/types'
 
 /** Player actions as plain functions so buttons, keyboard shortcuts and 3D clicks behave identically. */
 
@@ -22,7 +23,7 @@ export function plantTargetId(): number | null {
 export async function plantSelected() {
   const { selectedSeed, tag, selectSeed, flowMinutes } = useUi.getState()
   const plotId = plantTargetId()
-  if (!selectedSeed || plotId === null || useGame.getState().state?.pomodoro || useUi.getState().placing) return
+  if (!selectedSeed || plotId === null || useGame.getState().state?.pomodoro || useUi.getState().placing || useUi.getState().decorMode) return
   prepareAlerts() // inside the user's click: unlock audio and ask for notification permission
   await useGame.getState().plant({
     plot_id: plotId,
@@ -128,4 +129,49 @@ export async function confirmPlacing() {
     useUi.getState().setPlacing(null)
     useUi.getState().toast(placing.hiveId === null ? 'Colmena colocada: +25% a su alrededor.' : 'Colmena movida.')
   }
+}
+
+// ---------- decoration ----------
+
+export const DECOR_NAMES: Record<string, string> = { path: 'Camino de piedra', fence: 'Valla', lantern: 'Farolillo' }
+
+export function startDecor(piece: DecorKind) {
+  useUi.getState().setDecorMode({ piece, itemId: null })
+}
+
+export function startMovingDecor(itemId: number, piece: DecorKind) {
+  useUi.getState().setDecorMode({ piece, itemId })
+}
+
+export function stopDecor() {
+  useUi.getState().setDecorMode(null)
+}
+
+/** A tap on a background cell while decorating: places the chosen piece there, or moves the piece being moved. */
+export async function decorateCell(x: number, y: number) {
+  const mode = useUi.getState().decorMode
+  if (!mode) return
+  const game = useGame.getState()
+  if (mode.itemId === null) {
+    await game.buyDecor(mode.piece, x, y)
+  } else {
+    await game.moveDecor(mode.itemId, x, y)
+    if (!useGame.getState().error) useUi.getState().setDecorMode(null)
+  }
+}
+
+/** Takes the piece being moved off the farm (free, no refund). */
+export async function removeDecorPiece() {
+  const mode = useUi.getState().decorMode
+  if (!mode || mode.itemId === null) return
+  await useGame.getState().removeDecor(mode.itemId)
+  if (!useGame.getState().error) {
+    useUi.getState().setDecorMode(null)
+    useUi.getState().toast('Pieza retirada.')
+  }
+}
+
+export async function buyHat() {
+  await useGame.getState().buyHat()
+  if (useGame.getState().state?.decor.hat.owned) useUi.getState().toast('El Perro luce su sombrero de paja.')
 }

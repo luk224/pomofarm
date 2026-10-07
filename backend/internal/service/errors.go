@@ -26,4 +26,5 @@ var (
 	ErrAlreadyOwned      = errors.New("already_owned")
 	ErrCellTaken         = errors.New("cell_taken")
 	ErrAnimalLocked      = errors.New("animal_locked")
+	ErrBadCell           = errors.New("bad_cell")
 )

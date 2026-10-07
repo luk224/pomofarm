@@ -30,6 +30,10 @@ HAS = "(name) => !!window.__three.scene.getObjectByName(name)"
 def hive_world(pg, name):
     return pg.evaluate("(n) => { const o = window.__three.scene.getObjectByName(n); return o ? [o.position.x, o.position.y, o.position.z] : null }", name)
 
+# Estado limpio aunque otros scripts hayan usado la misma BD (Perro que recoge solo, parcelas, etc.)
+sql("DELETE FROM structures; DELETE FROM unlocks WHERE kind='animal'; DELETE FROM plots WHERE NOT (x=1 AND y=1); "
+    "UPDATE plots SET state='empty', plant_type=NULL, planted_at=NULL, grow_s=NULL, matured_at=NULL, harvested=0, life_s=NULL, wilts_at=NULL, collected_to=NULL; "
+    "UPDATE players SET silo_micro=0, silo_peak_micro_h=0, silo_level=0, season=1")
 # a 3×3 farm, every plant mature and producing
 t = datetime.now(timezone.utc) - timedelta(hours=2)
 sql("INSERT INTO settings (player_id,key,value) VALUES (1,'tutorial_done','1') ON CONFLICT(player_id,key) DO UPDATE SET value='1'")

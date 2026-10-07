@@ -74,6 +74,7 @@ type State struct {
 	Shop       ShopState         `json:"shop"`
 	Rest       *RestState        `json:"rest"`
 	Automation AutomationState   `json:"automation"`
+	Decor      DecorState        `json:"decor"`
 	RecentTags []string          `json:"recent_tags"`
 	Settings   map[string]string `json:"settings"`
 }
@@ -200,6 +201,9 @@ func (s *Service) State(ctx context.Context) (State, error) {
 			return err
 		}
 		st.Automation = automation
+		if st.Decor, err = decorView(ctx, tx); err != nil {
+			return err
+		}
 		a, err := loadActive(ctx, tx)
 		if err != nil || a == nil {
 			return err

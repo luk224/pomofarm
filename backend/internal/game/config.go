@@ -90,6 +90,32 @@ const (
 	DogSiloBonus = 12    // hours added to the Silo
 )
 
+// Decoration (GDD §4.7): pure aesthetics, bought with coins, free to move or remove, never a prestige requirement.
+// Pieces go on the background cells around the farm: x and y in [DecorMin, DecorMax], outside the 4×4 field
+// (so buying a plot never collides with one) and outside the cells the Silo and the Dog stand on.
+const (
+	DecorMin = -2
+	DecorMax = 5
+	HatCost  = 600 // coins, the Dog's straw hat
+)
+
+// DecorCosts is the price in coins of each placeable piece.
+var DecorCosts = map[string]int{"path": 15, "fence": 25, "lantern": 80}
+
+// DecorKinds lists the pieces in the order the shop shows them.
+var DecorKinds = []string{"path", "fence", "lantern"}
+
+// DecorCellFree reports whether a decoration may stand on (x, y).
+func DecorCellFree(x, y int) bool {
+	if x < DecorMin || x > DecorMax || y < DecorMin || y > DecorMax {
+		return false
+	}
+	if x >= 0 && x < 4 && y >= 0 && y < 4 {
+		return false // the field
+	}
+	return !(x == -1 && y == 4) && !(x == 0 && y == 4) // Silo and Dog
+}
+
 // Synergies (GDD §4.6). Bonuses add up and are capped per plot.
 const (
 	AdjacencyPerNeighbour = 0.10

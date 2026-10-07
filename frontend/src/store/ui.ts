@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { DecorKind } from '../api/types'
 
 export interface Toast {
   id: number
@@ -14,12 +15,15 @@ interface UiStore {
   flowMinutes: number
   /** Hive placement: `hiveId` null buys a new one, otherwise moves that hive. Null when not placing. */
   placing: { hiveId: number | null } | null
+  /** Decoration mode: `itemId` null places new pieces of `piece` one tap at a time; otherwise moves that piece. */
+  decorMode: { piece: DecorKind; itemId: number | null } | null
   tag: string
   toasts: Toast[]
   selectSeed: (key: string | null) => void
   selectPlot: (id: number | null) => void
   setFlowMinutes: (m: number) => void
   setPlacing: (p: { hiveId: number | null } | null) => void
+  setDecorMode: (m: { piece: DecorKind; itemId: number | null } | null) => void
   setTag: (tag: string) => void
   toast: (text: string, kind?: Toast['kind']) => void
   dismiss: (id: number) => void
@@ -32,12 +36,14 @@ export const useUi = create<UiStore>((set, get) => ({
   selectedPlotId: null,
   flowMinutes: 60,
   placing: null,
+  decorMode: null,
   tag: '',
   toasts: [],
   selectSeed: (key) => set({ selectedSeed: key }),
   selectPlot: (id) => set({ selectedPlotId: id }),
   setFlowMinutes: (m) => set({ flowMinutes: m }),
-  setPlacing: (p) => set({ placing: p }),
+  setPlacing: (p) => set({ placing: p, decorMode: p ? null : get().decorMode }),
+  setDecorMode: (m) => set({ decorMode: m, placing: m ? null : get().placing }),
   setTag: (tag) => set({ tag }),
   toast: (text, kind = 'info') => {
     if (get().toasts.some((t) => t.text === text)) return // never stack identical messages

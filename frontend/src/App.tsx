@@ -8,6 +8,7 @@ import { palette } from './scene/palette'
 import { useCompletionAlerts } from './alerts/hooks'
 import { useGameSync } from './store/hooks'
 import { Dock } from './ui/Dock'
+import { DecorBar } from './ui/DecorBar'
 import { PlacingBar } from './ui/PlacingBar'
 import { PlotAnnouncer } from './ui/PlotAnnouncer'
 import { SiloPanel } from './ui/SiloPanel'
@@ -55,6 +56,7 @@ export default function App() {
       {!gallery && <TimerRing />}
       {!gallery && <Dock />}
       {!gallery && <PlacingBar />}
+      {!gallery && <DecorBar />}
       <Toasts />
       <PlotAnnouncer />
     </>

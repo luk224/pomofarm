@@ -28,8 +28,9 @@ function hiveGeometry(): BufferGeometry {
   return hiveGeo
 }
 
-let dogGeo: BufferGeometry | null = null
-function dogGeometry(): BufferGeometry {
+const dogGeos = new Map<boolean, BufferGeometry>()
+function dogGeometry(hat: boolean): BufferGeometry {
+  let dogGeo = dogGeos.get(hat)
   if (!dogGeo) {
     const parts: Part[] = [
       { shape: 'box', args: [0.34, 0.2, 0.18], pos: [0, 0.22, 0], color: '#c9894a' },
@@ -43,7 +44,13 @@ function dogGeometry(): BufferGeometry {
       { shape: 'box', args: [0.05, 0.14, 0.05], pos: [0.12, 0.07, -0.06], color: '#c9894a' },
       { shape: 'box', args: [0.16, 0.05, 0.05], pos: [-0.24, 0.34, 0], rot: [0, 0, 0.6], color: '#c9894a' },
     ]
+    if (hat) {
+      parts.push({ shape: 'cyl', args: [0.17, 0.17, 0.02, 10], pos: [0.2, 0.45, 0], color: '#e6c36a' })
+      parts.push({ shape: 'cyl', args: [0.08, 0.1, 0.09, 10], pos: [0.2, 0.5, 0], color: '#d9ad4a' })
+      parts.push({ shape: 'cyl', args: [0.1, 0.1, 0.02, 10], pos: [0.2, 0.52, 0], color: '#a8553b' })
+    }
     dogGeo = mergeParts(parts)
+    dogGeos.set(hat, dogGeo)
   }
   return dogGeo
 }
@@ -75,6 +82,7 @@ function CoveragePreview() {
 export function Automation3D() {
   const hives = useGame((s) => s.state?.automation.bees.hives)
   const dog = useGame((s) => s.state?.automation.dog.owned)
+  const hat = useGame((s) => s.state?.decor.hat.owned ?? false)
   const geometry = useMemo(() => hiveGeometry(), [])
   return (
     <>
@@ -91,7 +99,7 @@ export function Automation3D() {
       ))}
       {dog && (
         <group name="dog-3d" position={DOG_POSITION} rotation-y={-Math.PI / 4}>
-          <mesh geometry={dogGeometry()} material={BODY_MAT} castShadow dispose={null} />
+          <mesh geometry={dogGeometry(hat)} material={BODY_MAT} castShadow dispose={null} />
         </group>
       )}
       <CoveragePreview />

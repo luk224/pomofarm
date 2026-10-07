@@ -51,5 +51,9 @@ export const api = {
   buyDog: () => request<GameState>('POST', '/api/structures', { kind: 'dog' }),
   moveHive: (hiveId: number, plotId: number) =>
     request<GameState>('POST', `/api/structures/${hiveId}/move`, { plot_id: plotId }),
+  buyDecor: (kind: string, x: number, y: number) => request<GameState>('POST', '/api/decor', { kind, x, y }),
+  buyHat: () => request<GameState>('POST', '/api/decor', { kind: 'hat' }),
+  moveDecor: (id: number, x: number, y: number) => request<GameState>('POST', `/api/decor/${id}/move`, { x, y }),
+  removeDecor: (id: number) => request<GameState>('DELETE', `/api/decor/${id}`),
   unlockSeed: (key: string) => request<GameState>('POST', '/api/unlocks', { kind: 'seed', key }),
 }

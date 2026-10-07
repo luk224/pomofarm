@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../store/game'
 import { formatPrice } from '../store/automation'
-import { buyDog, buyPlot, startPlacing, unlockAnimal, upgradeSilo } from './actions'
+import { buyDog, buyHat, buyPlot, DECOR_NAMES, startDecor, startPlacing, unlockAnimal, upgradeSilo } from './actions'
 import { CoinIcon, DropIcon, SiloIcon } from './icons'
 
 function PlotIcon() {
@@ -53,6 +53,7 @@ export function Shop() {
   const focus = useGame((s) => s.state?.player.focus_points ?? 0)
   const silo = useGame((s) => s.state?.silo)
   const auto = useGame((s) => s.state?.automation)
+  const decor = useGame((s) => s.state?.decor)
   const coins = useGame((s) => Math.floor((s.state?.player.coins_milli ?? 0) / 1000))
   const root = useRef<HTMLDivElement>(null)
 
@@ -68,7 +69,7 @@ export function Shop() {
     }
   }, [open])
 
-  if (!shop || !silo || !auto) return null
+  if (!shop || !silo || !auto || !decor) return null
   const affordable = (shop.next_plot && focus >= shop.next_plot.cost) || (shop.silo_upgrade && focus >= shop.silo_upgrade.cost)
   return (
     <div className="settings" ref={root}>
@@ -118,6 +119,16 @@ export function Shop() {
           ) : (
             <p className="hint">El Perro Pastor vigila el Silo.</p>
           )}
+          {decor.hat.available && (
+            <Offer testId="buy-hat" icon={<span>👒</span>} title="Sombrero del Perro" detail="Solo para presumir"
+              cost={decor.hat.cost} funds={coins} currency="coin" onBuy={() => void buyHat()} />
+          )}
+          <p className="hint offer__group">Decoración (no cuenta para el prestigio)</p>
+          {decor.catalog.map((c) => (
+            <Offer key={c.kind} testId={`decor-${c.kind}`} icon={<span>{c.kind === 'path' ? '🪨' : c.kind === 'fence' ? '🪵' : '🏮'}</span>}
+              title={DECOR_NAMES[c.kind] ?? c.kind} detail="Se coloca en el terreno de alrededor"
+              cost={c.cost} funds={coins} currency="coin" onBuy={() => { setOpen(false); startDecor(c.kind) }} />
+          ))}
         </div>
       )}
     </div>

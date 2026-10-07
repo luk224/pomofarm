@@ -2,8 +2,8 @@ import { useLayoutEffect, useRef } from 'react'
 import { Color, Object3D, type InstancedMesh } from 'three'
 import { palette as P } from './palette'
 
-const SIZE = 6 // tiles per side, centred on the 4×4 farm
-const FROM = -1
+const SIZE = 8 // tiles per side, centred on the 4×4 farm; the decoration area (server: DecorMin..DecorMax)
+const FROM = -2
 
 /** Checkerboard grass as ONE instanced mesh (one draw call). */
 export function Ground() {

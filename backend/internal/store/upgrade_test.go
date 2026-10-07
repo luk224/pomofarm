@@ -48,8 +48,8 @@ func TestUpgradingAnOldDatabaseKeepsEveryRow(t *testing.T) {
 		t.Fatalf("opening an old database: %v", err)
 	}
 	defer db.Close()
-	if v, _ := SchemaVersion(db); v != 4 {
-		t.Fatalf("schema version = %d, want 4", v)
+	if v, _ := SchemaVersion(db); v != 5 {
+		t.Fatalf("schema version = %d, want 5", v)
 	}
 
 	var name string
@@ -100,8 +100,8 @@ func TestMigrationsApplyOnceAndInOrderEvenFromHalfwayStates(t *testing.T) {
 		var n int
 		db.QueryRow(`SELECT COUNT(*) FROM schema_migrations`).Scan(&n)
 		db.Close()
-		if n != 4 {
-			t.Fatalf("open #%d: %d migrations recorded, want 4", i+1, n)
+		if n != 5 {
+			t.Fatalf("open #%d: %d migrations recorded, want 5", i+1, n)
 		}
 	}
 	if _, err := os.Stat(path); err != nil {

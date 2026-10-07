@@ -122,6 +122,26 @@ export interface AutomationState {
   dog: DogState
 }
 
+export type DecorKind = 'path' | 'fence' | 'lantern'
+
+export interface DecorItem {
+  id: number
+  kind: DecorKind
+  x: number
+  y: number
+}
+
+export interface DecorState {
+  items: DecorItem[]
+  /** Pieces for sale, in shop order, with their price in whole 🪙. */
+  catalog: { kind: DecorKind; cost: number }[]
+  /** Background cells run from min to max on both axes (the 4×4 field itself is never decorated). */
+  min: number
+  max: number
+  hat: { owned: boolean; available: boolean; cost: number }
+  blocked: [number, number][]
+}
+
 export interface GameState {
   server_time: string
   player: PlayerState
@@ -132,6 +152,7 @@ export interface GameState {
   shop: ShopState
   rest: RestState | null
   automation: AutomationState
+  decor: DecorState
   recent_tags: string[]
   settings: Record<string, string>
 }

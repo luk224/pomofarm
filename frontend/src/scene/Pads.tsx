@@ -13,6 +13,8 @@ function place(mesh: InstancedMesh | null, slots: [number, number, number][]) {
   slots.forEach(([x, y, z], i) => mesh.setMatrixAt(i, m.compose(new Vector3(x, y, z), ID, ONE)))
   mesh.count = slots.length
   mesh.instanceMatrix.needsUpdate = true
+  // Raycasting caches a bounding sphere on first use: refresh it, or pieces that moved stop being clickable.
+  mesh.computeBoundingSphere()
 }
 
 interface Props {

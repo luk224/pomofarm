@@ -125,6 +125,57 @@ func New(db *sql.DB, clock game.Clock) *fiber.App {
 		return respondState(c, svc, fiber.StatusOK)
 	})
 
+	// Decoration: placed on background cells, moved and removed for free; the Dog's hat is a one-off purchase.
+	app.Post("/api/decor", func(c *fiber.Ctx) error {
+		var req struct {
+			Kind string `json:"kind"`
+			X    int    `json:"x"`
+			Y    int    `json:"y"`
+		}
+		if err := c.BodyParser(&req); err != nil {
+			return fail(c, service.ErrInvalid)
+		}
+		var err error
+		if req.Kind == "hat" {
+			err = svc.BuyHat(c.UserContext())
+		} else {
+			err = svc.BuyDecor(c.UserContext(), req.Kind, req.X, req.Y)
+		}
+		if err != nil {
+			return fail(c, err)
+		}
+		return respondState(c, svc, fiber.StatusCreated)
+	})
+
+	app.Post("/api/decor/:id/move", func(c *fiber.Ctx) error {
+		id, err := c.ParamsInt("id")
+		if err != nil {
+			return fail(c, service.ErrInvalid)
+		}
+		var req struct {
+			X int `json:"x"`
+			Y int `json:"y"`
+		}
+		if err := c.BodyParser(&req); err != nil {
+			return fail(c, service.ErrInvalid)
+		}
+		if err := svc.MoveDecor(c.UserContext(), int64(id), req.X, req.Y); err != nil {
+			return fail(c, err)
+		}
+		return respondState(c, svc, fiber.StatusOK)
+	})
+
+	app.Delete("/api/decor/:id", func(c *fiber.Ctx) error {
+		id, err := c.ParamsInt("id")
+		if err != nil {
+			return fail(c, service.ErrInvalid)
+		}
+		if err := svc.RemoveDecor(c.UserContext(), int64(id)); err != nil {
+			return fail(c, err)
+		}
+		return respondState(c, svc, fiber.StatusOK)
+	})
+
 	app.Post("/api/plots/:id/clear", func(c *fiber.Ctx) error {
 		id, err := c.ParamsInt("id")
 		if err != nil {
@@ -235,6 +286,7 @@ var statusOf = map[error]int{
 	service.ErrAlreadyOwned:      fiber.StatusConflict,
 	service.ErrCellTaken:         fiber.StatusConflict,
 	service.ErrAnimalLocked:      fiber.StatusForbidden,
+	service.ErrBadCell:           fiber.StatusBadRequest,
 	service.ErrNeedsConfirmation: fiber.StatusConflict,
 }
 

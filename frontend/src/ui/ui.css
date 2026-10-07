@@ -37,7 +37,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 .btn--big { min-height: 52px; padding: 0 28px; font-size: 18px; }
 
 /* ---------- top bar ---------- */
-.topbar { position: fixed; top: 12px; left: 12px; }
+.topbar { position: fixed; top: 12px; left: 12px; z-index: 25; }
 .chip {
   display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 10px; border-radius: 999px;
   background: var(--panel); backdrop-filter: blur(6px); font-weight: 600; font-size: 18px;
@@ -54,7 +54,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 .check { display: flex; align-items: center; gap: 10px; min-height: 36px; cursor: pointer; font-weight: 500; }
 .check input { width: 20px; height: 20px; accent-color: var(--leaf); }
 .panelbox .hint { margin: 0; }
-.panelbox--wide { width: 320px; }
+.panelbox--wide { width: 320px; max-height: calc(100vh - 70px); overflow-y: auto; }
 .chip--button { gap: 8px; }
 .chip--attention { box-shadow: 0 0 0 3px var(--sun); }
 .offer { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 8px 4px; }
