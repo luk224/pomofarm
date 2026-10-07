@@ -8,11 +8,11 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
 
 ## Fase 0 — Preparación
 
-- [~] **P0-01** Toolchain y acceso a `wyse` — agente: `devops` — dep: —
+- [x] **P0-01** Toolchain y acceso a `wyse` — agente: `devops` — dep: —
   - [x] P0-01a Go instalado (1.26.0)
   - [x] P0-01b `docker compose` v5.1.4 en local
-  - [ ] P0-01c Comprobar en `wyse` (con confirmación): arquitectura, Docker + Compose, espacio en disco, acceso SSH por Tailscale
-  - [ ] P0-01d Documentar versiones y datos de `wyse` en `README.md`
+  - [x] P0-01c Comprobado en `wyse`: amd64, Docker 29.0.1 + Compose v2.40.3, 429 GB libres, SSH como `luk`
+  - [x] P0-01d Documentar versiones y datos de `wyse` en `README.md`
   - **Hecho:** `go version`, `docker compose version`, `node -v` responden y `wyse` es alcanzable con Docker funcionando.
 
 - [ ] **P0-02** Estructura del proyecto y esqueletos — agente: `backend-go`, `frontend-3d` — dep: P0-01
