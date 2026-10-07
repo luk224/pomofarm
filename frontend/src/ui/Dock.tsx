@@ -4,8 +4,10 @@ import { useRemainingMs } from '../store/hooks'
 import { formatClock } from '../store/time'
 import { formatLife, lifeLeftMs } from '../store/life'
 import { useUi } from '../store/ui'
-import { clearableId, firstFreePlotId, harvestableId, harvestPlot, plantSelected, togglePause } from './actions'
+import { harvestPlot, plantSelected, plantTargetId, togglePause } from './actions'
 import { SEED_NAMES } from './names'
+import type { PlotState } from '../api/types'
+import { canClear, effectivePlot, needsHarvest } from './selection'
 import { SeedPacket } from './SeedPacket'
 import { Tutorial } from './Tutorial'
 
@@ -66,7 +68,7 @@ function IdleDock() {
   const tag = useUi((s) => s.tag)
   const setTag = useUi((s) => s.setTag)
   if (!state) return null
-  const free = firstFreePlotId() !== null
+  const free = plantTargetId() !== null
   return (
     <div className="dock dock--idle">
       <div className="packets" role="radiogroup" aria-label="Semillas">
@@ -91,29 +93,37 @@ function IdleDock() {
   )
 }
 
-function ReadyDock() {
-  const id = harvestableId()
-  const withered = useGame((s) => s.state?.plots.find((p) => p.id === id)?.state === 'withered')
+/** When the plot in view has nothing to plant, a way to jump to a free one. */
+function GoToFree() {
+  const select = useUi((s) => s.selectPlot)
+  const free = useGame((s) => s.state?.plots.find((p) => p.state === 'empty'))
+  if (!free) return null
+  return <button type="button" className="btn btn--quiet" onClick={() => select(free.id)}>Sembrar en otra parcela</button>
+}
+
+function ReadyDock({ plot }: { plot: PlotState }) {
+  const id = plot.id
+  const withered = plot.state === 'withered'
   return (
     <div className="dock dock--ready">
       <p className="dock__msg">{withered ? 'Tu planta se marchitó, pero aún puedes cosechar.' : 'Tu planta está lista.'}</p>
-      <button type="button" className="btn btn--sun btn--big" data-testid="harvest" onClick={() => id !== null && void harvestPlot(id)}>
+      <button type="button" className="btn btn--sun btn--big" data-testid="harvest" onClick={() => void harvestPlot(id)}>
         Cosechar
       </button>
+      <GoToFree />
     </div>
   )
 }
 
-function ClearDock() {
-  const id = clearableId()
-  const plot = useGame((s) => s.state?.plots.find((p) => p.id === id))
+function ClearDock({ plot }: { plot: PlotState }) {
+  const id = plot.id
   const serverTime = useGame((s) => s.state?.server_time)
   const fetchedAt = useGame((s) => s.fetchedAt)
   const clearPlot = useGame((s) => s.clearPlot)
-  const confirm = useConfirm(() => id !== null && void clearPlot(id, true))
-  const withered = plot?.state === 'withered'
+  const confirm = useConfirm(() => void clearPlot(id, true))
+  const withered = plot.state === 'withered'
   // Life left as of the last sync (the state refreshes every 30 s).
-  const left = plot && serverTime ? lifeLeftMs(plot, serverTime, fetchedAt, fetchedAt) : null
+  const left = serverTime ? lifeLeftMs(plot, serverTime, fetchedAt, fetchedAt) : null
   return (
     <div className="dock dock--clear">
       <p className="dock__msg">
@@ -122,7 +132,7 @@ function ClearDock() {
           : `Cosechada y produciendo 🪙${left !== null ? ` · se marchita en ${formatLife(left)}` : ''}.`}
       </p>
       {withered ? (
-        <button type="button" className="btn btn--primary" data-testid="clear" onClick={() => id !== null && void clearPlot(id, false)}>
+        <button type="button" className="btn btn--primary" data-testid="clear" onClick={() => void clearPlot(id, false)}>
           Retirar planta
         </button>
       ) : (
@@ -130,20 +140,23 @@ function ClearDock() {
           {confirm.armed ? '¿Seguro? Deja de producir' : 'Retirar planta'}
         </button>
       )}
+      <GoToFree />
     </div>
   )
 }
 
 export function Dock() {
   const state = useGame((s) => s.state)
+  const selectedPlotId = useUi((s) => s.selectedPlotId)
   if (!state) return null
-  const mode = state.pomodoro ? 'running' : harvestableId() !== null ? 'ready' : clearableId() !== null ? 'clear' : 'idle'
+  const plot = effectivePlot(state.plots, selectedPlotId)
+  const mode = state.pomodoro ? 'running' : plot && needsHarvest(plot) ? 'ready' : plot && canClear(plot) ? 'clear' : 'idle'
   return (
     <div className="dockwrap">
       <Tutorial />
       {mode === 'running' && <RunningDock />}
-      {mode === 'ready' && <ReadyDock />}
-      {mode === 'clear' && <ClearDock />}
+      {mode === 'ready' && plot && <ReadyDock plot={plot} />}
+      {mode === 'clear' && plot && <ClearDock plot={plot} />}
       {mode === 'idle' && <IdleDock />}
     </div>
   )

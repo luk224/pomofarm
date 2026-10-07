@@ -38,6 +38,8 @@ export const api = {
   cancel: () => request<GameState>('POST', '/api/pomodoros/active/cancel'),
   harvest: (plotId: number) =>
     request<{ reward_focus: number; state: GameState }>('POST', `/api/plots/${plotId}/harvest`),
+  buyPlot: () => request<GameState>('POST', '/api/plots'),
+  upgradeSilo: () => request<GameState>('POST', '/api/silo/upgrade'),
   collectSilo: () => request<{ collected_milli: number; state: GameState }>('POST', '/api/silo/collect'),
   clearPlot: (plotId: number, confirm: boolean) =>
     request<GameState>('POST', `/api/plots/${plotId}/clear`, { confirm }),

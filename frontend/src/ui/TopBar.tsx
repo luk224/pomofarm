@@ -5,6 +5,7 @@ import { tabTitle } from '../store/time'
 import { formatCoins } from '../store/economy'
 import { CoinIcon, DropIcon } from './icons'
 import { Settings } from './Settings'
+import { Shop } from './Shop'
 
 export function TopBar() {
   const state = useGame((s) => s.state)
@@ -29,6 +30,7 @@ export function TopBar() {
           <span>{formatCoins(state.player.coins_milli)}</span>
         </div>
       )}
+      <Shop />
       <Settings />
     </div>
   )

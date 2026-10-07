@@ -10,6 +10,7 @@ const state = (plots: PlotState[], active: boolean): GameState => ({
   player: { name: 'x', focus_points: 0, lifetime_focus: 0, coins_milli: 0, silo_level: 0, season: 1 },
   plots, seeds: [], recent_tags: [], settings: {},
   silo: { content_milli: 0, capacity_milli: 0, capacity_hours: 12, rate_milli_per_h: 0, full: false },
+  shop: { plots_owned: 1, plots_max: 16, next_plot: null, silo_upgrade: null },
   pomodoro: active ? { id: 7, plot_id: 1, plant_type: 'daisy', status: 'running', planned_s: 600, remaining_ms: 1000, started_at: 't', paused_at: null, tag: null } : null,
 })
 

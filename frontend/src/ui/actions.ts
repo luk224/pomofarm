@@ -1,19 +1,27 @@
 import { prepareAlerts } from '../alerts/announce'
 import { useGame } from '../store/game'
 import { formatCoins } from '../store/economy'
+import { canClear, effectivePlot, needsHarvest } from './selection'
 import { useUi } from '../store/ui'
 import { SEED_NAMES } from './names'
 
 /** Player actions as plain functions so buttons, keyboard shortcuts and 3D clicks behave identically. */
 
 export function firstFreePlotId(): number | null {
-  const plot = useGame.getState().state?.plots.find((p) => p.state === 'empty' || p.state === 'withered')
+  const plot = useGame.getState().state?.plots.find((p) => p.state === 'empty')
   return plot ? plot.id : null
+}
+
+/** Where the chosen seed goes: the plot the player is looking at if it is free, otherwise the first free one. */
+export function plantTargetId(): number | null {
+  const plots = useGame.getState().state?.plots ?? []
+  const looking = effectivePlot(plots, useUi.getState().selectedPlotId)
+  return looking?.state === 'empty' ? looking.id : firstFreePlotId()
 }
 
 export async function plantSelected() {
   const { selectedSeed, tag, selectSeed } = useUi.getState()
-  const plotId = firstFreePlotId()
+  const plotId = plantTargetId()
   if (!selectedSeed || plotId === null || useGame.getState().state?.pomodoro) return
   prepareAlerts() // inside the user's click: unlock audio and ask for notification permission
   await useGame.getState().plant({ plot_id: plotId, plant_type: selectedSeed, tag: tag.trim() || undefined })
@@ -39,14 +47,18 @@ export async function harvestPlot(plotId: number) {
   }
 }
 
-/** A plant waiting for its 💧: mature, or withered while the player was away (the reward is never lost). */
+/** The plant to harvest: the one in view if it is ready, otherwise the first one that is. */
 export function harvestableId(): number | null {
-  const plot = useGame.getState().state?.plots.find((p) => (p.state === 'mature' || p.state === 'withered') && !p.harvested)
+  const plots = useGame.getState().state?.plots ?? []
+  const looking = effectivePlot(plots, useUi.getState().selectedPlotId)
+  const plot = looking && needsHarvest(looking) ? looking : plots.find(needsHarvest)
   return plot ? plot.id : null
 }
 
 export function clearableId(): number | null {
-  const plot = useGame.getState().state?.plots.find((p) => (p.state === 'mature' && p.harvested) || (p.state === 'withered' && p.harvested))
+  const plots = useGame.getState().state?.plots ?? []
+  const looking = effectivePlot(plots, useUi.getState().selectedPlotId)
+  const plot = looking && canClear(looking) ? looking : plots.find(canClear)
   return plot ? plot.id : null
 }
 
@@ -54,4 +66,22 @@ export function clearableId(): number | null {
 export async function collectSilo() {
   const got = await useGame.getState().collectSilo()
   if (got > 0) useUi.getState().toast(`+${formatCoins(got)} 🪙`, 'coin')
+}
+
+/** Buys the next plot, then looks at it so the dock offers to plant there. */
+export async function buyPlot() {
+  const had = new Set(useGame.getState().state?.plots.map((p) => p.id))
+  await useGame.getState().buyPlot()
+  const added = useGame.getState().state?.plots.find((p) => !had.has(p.id))
+  if (added) {
+    useUi.getState().selectPlot(added.id)
+    useUi.getState().toast('Nueva parcela. ¡A sembrar!')
+  }
+}
+
+export async function upgradeSilo() {
+  const before = useGame.getState().state?.silo.capacity_hours ?? 0
+  await useGame.getState().upgradeSilo()
+  const now = useGame.getState().state?.silo.capacity_hours ?? 0
+  if (now > before) useUi.getState().toast(`Silo ampliado: ahora guarda ${now} h de producción.`)
 }

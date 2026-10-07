@@ -52,6 +52,27 @@ export interface SiloState {
   full: boolean
 }
 
+export interface PlotOffer {
+  number: number
+  cost: number
+  x: number
+  y: number
+}
+
+export interface SiloOffer {
+  level: number
+  cost: number
+  capacity_hours: number
+}
+
+/** What can be bought and for how much (prices come from the server, never hardcoded here). */
+export interface ShopState {
+  plots_owned: number
+  plots_max: number
+  next_plot: PlotOffer | null
+  silo_upgrade: SiloOffer | null
+}
+
 export interface GameState {
   server_time: string
   player: PlayerState
@@ -59,6 +80,7 @@ export interface GameState {
   seeds: SeedState[]
   pomodoro: PomodoroState | null
   silo: SiloState
+  shop: ShopState
   recent_tags: string[]
   settings: Record<string, string>
 }

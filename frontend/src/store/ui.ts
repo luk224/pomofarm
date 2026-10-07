@@ -8,9 +8,12 @@ export interface Toast {
 
 interface UiStore {
   selectedSeed: string | null
+  /** The plot the player is looking at; it decides what the dock offers. */
+  selectedPlotId: number | null
   tag: string
   toasts: Toast[]
   selectSeed: (key: string | null) => void
+  selectPlot: (id: number | null) => void
   setTag: (tag: string) => void
   toast: (text: string, kind?: Toast['kind']) => void
   dismiss: (id: number) => void
@@ -20,9 +23,11 @@ let nextId = 1
 
 export const useUi = create<UiStore>((set, get) => ({
   selectedSeed: null,
+  selectedPlotId: null,
   tag: '',
   toasts: [],
   selectSeed: (key) => set({ selectedSeed: key }),
+  selectPlot: (id) => set({ selectedPlotId: id }),
   setTag: (tag) => set({ tag }),
   toast: (text, kind = 'info') => {
     if (get().toasts.some((t) => t.text === text)) return // never stack identical messages
