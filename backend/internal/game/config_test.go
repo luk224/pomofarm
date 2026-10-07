@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 )
 
 // xlsx mirrors testdata/balance_xlsx.json, produced by tools/export_balance.py.
@@ -225,5 +226,22 @@ func TestPlotOrderFillsTheGridOnceInTheDocumentedOrder(t *testing.T) {
 	}
 	if _, _, ok := PlotPosition(17); ok {
 		t.Fatal("plot 17 exists")
+	}
+}
+
+func TestRestBucketsFollowTheGDDTable(t *testing.T) {
+	// GDD §3.2: ≤25 min -> 5, 26–45 -> 10, 46 or more -> 15
+	for d, want := range map[int]string{1: "short", 10: "short", 25: "short", 26: "medium", 35: "medium", 45: "medium", 46: "long", 60: "long", 120: "long"} {
+		if got := RestBucket(d); got != want {
+			t.Errorf("RestBucket(%d) = %s, want %s", d, got, want)
+		}
+	}
+	for d, want := range map[int]int{10: 5, 25: 5, 35: 10, 45: 10, 60: 15, 120: 15} {
+		if got := RestMin(d); got != want {
+			t.Errorf("RestMin(%d) = %d, want %d", d, got, want)
+		}
+	}
+	if RestOfferWindow != 15*time.Minute {
+		t.Errorf("offer window = %v", RestOfferWindow)
 	}
 }

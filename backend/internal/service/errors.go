@@ -19,6 +19,7 @@ var (
 	ErrHarvestFirst      = errors.New("harvest_first")
 	ErrSiloEmpty         = errors.New("silo_empty")
 	ErrMaxedOut          = errors.New("maxed_out")
+	ErrNoRest            = errors.New("no_rest")
 	ErrNeedsConfirmation = errors.New("needs_confirmation")
 	ErrInsufficientFocus = errors.New("insufficient_focus")
 )

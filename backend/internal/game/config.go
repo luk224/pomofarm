@@ -3,7 +3,10 @@
 // against tools/export_balance.py) and gdd_pomofarm_3d_v2.md §4.
 package game
 
-import "math"
+import (
+	"math"
+	"time"
+)
 
 // Coins are stored in thousandths (INTEGER) so no fractions are lost.
 const MilliPerCoin = 1000
@@ -114,6 +117,23 @@ func RestMin(durationMin int) int {
 		return 10
 	default:
 		return 15
+	}
+}
+
+// RestOfferWindow: a rest is only offered when the player harvests this soon after the Pomodoro ended. Harvesting
+// hours later (or a plant that withered while away) means they have already had their break.
+const RestOfferWindow = 15 * time.Minute
+
+// RestBucket says which configurable rest duration applies to a Pomodoro of durationMin: "short" (≤25),
+// "medium" (26–45) or "long" (46 or more).
+func RestBucket(durationMin int) string {
+	switch {
+	case durationMin <= 25:
+		return "short"
+	case durationMin <= 45:
+		return "medium"
+	default:
+		return "long"
 	}
 }
 

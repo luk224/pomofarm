@@ -71,6 +71,7 @@ type State struct {
 	Pomodoro   *PomodoroState    `json:"pomodoro"`
 	Silo       SiloState         `json:"silo"`
 	Shop       ShopState         `json:"shop"`
+	Rest       *RestState        `json:"rest"`
 	RecentTags []string          `json:"recent_tags"`
 	Settings   map[string]string `json:"settings"`
 }
@@ -139,6 +140,11 @@ func (s *Service) State(ctx context.Context) (State, error) {
 			return err
 		}
 		st.Shop = shop
+		rest, err := restView(ctx, tx, now)
+		if err != nil {
+			return err
+		}
+		st.Rest = rest
 		st.RecentTags = []string{}
 		trows, err := tx.QueryContext(ctx, `SELECT t.name FROM tags t JOIN pomodoros p ON p.tag_id = t.id
 			WHERE t.player_id = ? GROUP BY t.id ORDER BY MAX(p.id) DESC LIMIT 8`, PlayerID)

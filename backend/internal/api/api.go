@@ -119,6 +119,13 @@ func New(db *sql.DB, clock game.Clock) *fiber.App {
 		return c.JSON(fiber.Map{"collected_milli": milli, "state": st})
 	})
 
+	app.Post("/api/rest/skip", func(c *fiber.Ctx) error {
+		if err := svc.SkipRest(c.UserContext()); err != nil {
+			return fail(c, err)
+		}
+		return respondState(c, svc, fiber.StatusOK)
+	})
+
 	app.Post("/api/settings", func(c *fiber.Ctx) error {
 		var req struct {
 			Key   string `json:"key"`
@@ -176,6 +183,7 @@ var statusOf = map[error]int{
 	service.ErrHarvestFirst:      fiber.StatusConflict,
 	service.ErrSiloEmpty:         fiber.StatusConflict,
 	service.ErrMaxedOut:          fiber.StatusConflict,
+	service.ErrNoRest:            fiber.StatusConflict,
 	service.ErrNeedsConfirmation: fiber.StatusConflict,
 }
 

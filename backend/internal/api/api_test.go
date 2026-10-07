@@ -102,7 +102,7 @@ func TestHealthReportsSchema(t *testing.T) {
 		SchemaVersion int    `json:"schema_version"`
 	}
 	json.Unmarshal(e.expect(200, "GET", "/api/health", nil), &body)
-	if body.Status != "ok" || body.SchemaVersion != 2 {
+	if body.Status != "ok" || body.SchemaVersion != 3 {
 		t.Fatalf("body = %+v", body)
 	}
 }

@@ -105,6 +105,9 @@ func (s *Service) Plant(ctx context.Context, req PlantRequest) error {
 		if n, _ := upd.RowsAffected(); n != 1 {
 			return ErrConflict
 		}
+		if err := endRest(ctx, tx); err != nil { // starting a new Pomodoro ends any break
+			return err
+		}
 		return addEvent(ctx, tx, pid, "start", now)
 	})
 }
@@ -163,8 +166,9 @@ func (s *Service) Harvest(ctx context.Context, plotID int64) (reward int, err er
 		}
 		var state, plant string
 		var harvested, version, growS int64
-		err := tx.QueryRowContext(ctx, `SELECT state, COALESCE(plant_type,''), harvested, version, COALESCE(grow_s, 0) FROM plots WHERE id = ? AND player_id = ?`,
-			plotID, PlayerID).Scan(&state, &plant, &harvested, &version, &growS)
+		var maturedAt sql.NullString
+		err := tx.QueryRowContext(ctx, `SELECT state, COALESCE(plant_type,''), harvested, version, COALESCE(grow_s, 0), matured_at FROM plots WHERE id = ? AND player_id = ?`,
+			plotID, PlayerID).Scan(&state, &plant, &harvested, &version, &growS, &maturedAt)
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrNotFound
 		}
@@ -196,9 +200,15 @@ func (s *Service) Harvest(ctx context.Context, plotID int64) (reward int, err er
 		if _, err := tx.ExecContext(ctx, `UPDATE pomodoros SET reward_focus = ? WHERE id = (SELECT id FROM pomodoros WHERE plot_id = ? AND status = 'completed' ORDER BY id DESC LIMIT 1)`, reward, plotID); err != nil {
 			return err
 		}
-		_, err = tx.ExecContext(ctx, `UPDATE players SET focus_points = focus_points + ?, lifetime_focus = lifetime_focus + ?,
-			version = version + 1 WHERE id = ?`, reward, reward, PlayerID)
-		return err
+		if _, err := tx.ExecContext(ctx, `UPDATE players SET focus_points = focus_points + ?, lifetime_focus = lifetime_focus + ?,
+			version = version + 1 WHERE id = ?`, reward, reward, PlayerID); err != nil {
+			return err
+		}
+		var matured time.Time
+		if maturedAt.Valid {
+			matured = parseTime(maturedAt.String)
+		}
+		return startRest(ctx, tx, now, growS, matured)
 	})
 	return reward, err
 }
