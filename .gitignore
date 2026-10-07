@@ -1,0 +1,9 @@
+node_modules/
+dist/
+backend/bin/
+*.db
+*.db-wal
+*.db-shm
+data/
+backups/
+.env

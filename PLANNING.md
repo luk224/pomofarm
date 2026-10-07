@@ -15,10 +15,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P0-01d Documentar versiones y datos de `wyse` en `README.md`
   - **Hecho:** `go version`, `docker compose version`, `node -v` responden y `wyse` es alcanzable con Docker funcionando.
 
-- [ ] **P0-02** Estructura del proyecto y esqueletos — agente: `backend-go`, `frontend-3d` — dep: P0-01
-  - [ ] P0-02a `backend/`: `go mod init`, Fiber, endpoint `GET /api/health`
-  - [ ] P0-02b `frontend/`: Vite + React + TS + Zustand + R3F, página en blanco con canvas
-  - [ ] P0-02c `Makefile` (`make dev`, `make test`, `make build`) y `.gitignore`
+- [x] **P0-02** Estructura del proyecto y esqueletos — agente: `backend-go`, `frontend-3d` — dep: P0-01
+  - [x] P0-02a `backend/`: `go mod init`, Fiber, endpoint `GET /api/health`
+  - [x] P0-02b `frontend/`: Vite + React + TS + Zustand + R3F, página en blanco con canvas
+  - [x] P0-02c `Makefile` (`make dev`, `make test`, `make build`) y `.gitignore`
   - **Hecho:** `make test` y `make build` pasan; `/api/health` devuelve 200; el frontend arranca.
 
 - [ ] **P0-03** Esquema de BD y migraciones — agente: `backend-go` — dep: P0-02
