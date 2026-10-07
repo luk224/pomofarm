@@ -151,6 +151,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P2-08c Hallazgos corregidos: elegir parcela con el teclado (flechas + anuncio), mínimo de 0,1 🪙 para recoger
   - **Hecho:** informe de QA en `docs/qa/fase-2.md`.
 
+- [x] **P2-09** Despliegue de la Fase 2 en `wyse` (2026-10-07) — agente: `devops`
+  - [x] Copia previa de la BD de `wyse` (`~/pomofarm-backups/`), verificada (integridad, jugador, parcela, historial)
+  - [x] `deploy/deploy.sh`: esquema 1 → 3 sin pérdida; la partida (margarita madura sin cosechar) intacta; web sin errores
+
 ---
 
 ## Fase 3 — Automatización y estética
