@@ -1,31 +1,45 @@
 import { Canvas } from '@react-three/fiber'
-import { lazy, Suspense } from 'react'
+import { Farm } from './scene/Farm'
+import { Gallery } from './scene/Gallery'
+import { IsoCamera } from './scene/IsoCamera'
+import { palette } from './scene/palette'
 import { useGameSync } from './store/hooks'
 import { DevPanel } from './ui/DevPanel'
-import { IsoCamera } from './scene/IsoCamera'
 import { Hud } from './ui/Hud'
-
-const ArtLab = lazy(() => import('./lab/ArtLab'))
+import { TimerRing } from './ui/TimerRing'
 
 export default function App() {
   useGameSync()
-  const lab = new URLSearchParams(location.search).get('lab')
-  if (import.meta.env.DEV && (lab === 'procedural' || lab === 'kenney' || lab === 'hybrid')) {
-    return <Suspense fallback={null}><ArtLab style={lab} /></Suspense>
-  }
+  const gallery = import.meta.env.DEV && new URLSearchParams(location.search).get('lab') === 'plants'
   return (
     <>
-      <Canvas orthographic>
-        <IsoCamera />
-        <ambientLight intensity={0.8} />
-        <directionalLight position={[5, 10, 5]} />
-        <mesh>
-          <boxGeometry />
-          <meshStandardMaterial color="#6ab04c" />
-        </mesh>
+      <Canvas
+        orthographic
+        shadows="percentage"
+        onCreated={(state) => {
+          if (import.meta.env.DEV) (window as unknown as { __three?: unknown }).__three = state
+        }}
+      >
+        <color attach="background" args={[palette.sky]} />
+        <IsoCamera center={gallery ? [3.4, 2.55] : [1.5, 1.5]} initialZoom={gallery ? 62 : 95} />
+        <hemisphereLight args={['#ffffff', '#9ac27a', 0.9]} />
+        <directionalLight
+          position={[6, 10, 4]}
+          intensity={1.6}
+          castShadow
+          shadow-mapSize={[1024, 1024]}
+          shadow-camera-left={-8}
+          shadow-camera-right={8}
+          shadow-camera-top={8}
+          shadow-camera-bottom={-8}
+          shadow-bias={-0.0004}
+          shadow-normalBias={0.03}
+        />
+        {gallery ? <Gallery /> : <Farm />}
       </Canvas>
       <Hud />
-      {import.meta.env.DEV && <DevPanel />}
+      {!gallery && <TimerRing />}
+      {import.meta.env.DEV && !gallery && <DevPanel />}
     </>
   )
 }

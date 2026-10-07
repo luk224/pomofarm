@@ -29,3 +29,9 @@ export function tabTitle(p: PomodoroState | null, ms: number): string {
   const icon = p.status === 'paused' ? '⏸' : '⏱'
   return `${icon} ${formatClock(ms)} · PomoFarm`
 }
+
+/** How much of the Pomodoro has elapsed, 0..1 (drives the plant's growth). */
+export function growthFraction(plannedS: number, remaining: number): number {
+  if (plannedS <= 0) return 1
+  return Math.min(1, Math.max(0, 1 - remaining / (plannedS * 1000)))
+}

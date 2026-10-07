@@ -26,7 +26,7 @@ func (s *Service) EnsurePlayer(ctx context.Context, name string) error {
 			PlayerID, name, t, t); err != nil {
 			return err
 		}
-		if _, err := tx.ExecContext(ctx, `INSERT INTO plots (player_id, x, y) VALUES (?, 0, 0)`, PlayerID); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO plots (player_id, x, y) VALUES (?, 1, 1)`, PlayerID); err != nil {
 			return err
 		}
 		for _, c := range game.Crops {

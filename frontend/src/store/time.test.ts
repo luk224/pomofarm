@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { PomodoroState } from '../api/types'
-import { formatClock, remainingMs, tabTitle } from './time'
+import { formatClock, growthFraction, remainingMs, tabTitle } from './time'
 
 const base: PomodoroState = {
   id: 1, plot_id: 1, plant_type: 'daisy', status: 'running', planned_s: 600,
@@ -52,4 +52,17 @@ describe('tabTitle', () => {
     expect(tabTitle({ ...base, status: 'paused' }, 125_000)).toBe('⏸ 2:05 · PomoFarm')
   })
   it('is plain when idle', () => expect(tabTitle(null, 0)).toBe('PomoFarm'))
+})
+
+describe('growthFraction', () => {
+  it('goes from 0 at the start to 1 at the end', () => {
+    expect(growthFraction(600, 600_000)).toBe(0)
+    expect(growthFraction(600, 300_000)).toBeCloseTo(0.5)
+    expect(growthFraction(600, 0)).toBe(1)
+  })
+  it('is clamped and safe', () => {
+    expect(growthFraction(600, 700_000)).toBe(0)
+    expect(growthFraction(600, -5)).toBe(1)
+    expect(growthFraction(0, 0)).toBe(1)
+  })
 })
