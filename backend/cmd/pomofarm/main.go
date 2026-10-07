@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/luk224/pomofarm/backend/internal/api"
+	"github.com/luk224/pomofarm/backend/internal/game"
 	"github.com/luk224/pomofarm/backend/internal/store"
 )
 
@@ -45,5 +46,5 @@ func main() {
 	stop := make(chan struct{})
 	defer close(stop)
 	go store.RunBackups(db, backupDir, keepBackups, 24*time.Hour, time.Hour, stop, log.Printf)
-	log.Fatal(api.New(db).Listen(env("POMOFARM_ADDR", ":8080")))
+	log.Fatal(api.New(db, game.SystemClock{}).Listen(env("POMOFARM_ADDR", ":8080")))
 }

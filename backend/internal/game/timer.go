@@ -116,11 +116,21 @@ func (p *Pomodoro) Complete(now time.Time) error {
 	if p.Remaining(now) > 0 {
 		return ErrNotDone
 	}
-	t := laterOf(now, p.StartedAt)
+	t := p.FinishedAt()
 	p.EndedAt = &t
 	p.PausedAt = nil
 	p.Status = StatusCompleted
 	return nil
+}
+
+// FinishedAt is the instant the planned time was (or will be) used up: the
+// pause time if paused, otherwise start + planned + total pauses. Recording it
+// instead of "now" keeps completion exact even if the server only notices later.
+func (p *Pomodoro) FinishedAt() time.Time {
+	if p.PausedAt != nil {
+		return *p.PausedAt
+	}
+	return p.StartedAt.Add(time.Duration(p.PlannedS+p.PausedTotalS) * time.Second)
 }
 
 // Finished reports whether the planned time has fully elapsed (it may still

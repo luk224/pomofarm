@@ -21,11 +21,12 @@ var migrationsFS embed.FS
 // foreign keys on, and applies every pending migration.
 func Open(path string) (*sql.DB, error) {
 	dsn := "file:" + path +
-		"?_pragma=journal_mode(WAL)&_pragma=foreign_keys(1)&_pragma=busy_timeout(5000)"
+		"?_pragma=journal_mode(WAL)&_pragma=foreign_keys(1)&_pragma=busy_timeout(5000)&_txlock=immediate"
 	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		return nil, err
 	}
+	db.SetMaxOpenConns(4) // SQLite serialises writers; transactions start IMMEDIATE so they queue instead of failing
 	if err := Migrate(db); err != nil {
 		db.Close()
 		return nil, err

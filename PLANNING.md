@@ -59,10 +59,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P1-01c Tests: pausa/reanuda, cierre y vuelta ±1 s, reloj retrocedido
   - **Hecho:** tests de tiempo pasan.
 
-- [ ] **P1-02** API de Pomodoro — agente: `backend-go` — dep: P1-01
-  - [ ] P1-02a `POST /pomodoros` (plantar), `/pause`, `/resume`, `/cancel`, `GET /state`
-  - [ ] P1-02b Un solo Pomodoro activo (409 si ya hay uno); `version` optimista
-  - [ ] P1-02c `POST /plots/:id/harvest` otorga 💧 (recompensa de GDD §4.3)
+- [x] **P1-02** API de Pomodoro — agente: `backend-go` — dep: P1-01
+  - [x] P1-02a `POST /pomodoros` (plantar), `/pause`, `/resume`, `/cancel`, `GET /state`
+  - [x] P1-02b Un solo Pomodoro activo (409 si ya hay uno); `version` optimista
+  - [x] P1-02c `POST /plots/:id/harvest` otorga 💧 (recompensa de GDD §4.3)
   - **Hecho:** tests de API incluyen "dos dispositivos, un Pomodoro".
 
 - [ ] **P1-03** Estado inicial y FTUE de datos — agente: `backend-go` — dep: P1-02
