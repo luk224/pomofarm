@@ -58,6 +58,20 @@ func New(db *sql.DB, clock game.Clock) *fiber.App {
 		})
 	}
 
+	app.Post("/api/unlocks", func(c *fiber.Ctx) error {
+		var req struct {
+			Kind string `json:"kind"`
+			Key  string `json:"key"`
+		}
+		if err := c.BodyParser(&req); err != nil || req.Kind != "seed" {
+			return fail(c, service.ErrInvalid)
+		}
+		if err := svc.UnlockSeed(c.UserContext(), req.Key); err != nil {
+			return fail(c, err)
+		}
+		return respondState(c, svc, fiber.StatusCreated)
+	})
+
 	app.Post("/api/plots/:id/harvest", func(c *fiber.Ctx) error {
 		id, err := c.ParamsInt("id")
 		if err != nil {
@@ -85,17 +99,19 @@ func respondState(c *fiber.Ctx, svc *service.Service, status int) error {
 }
 
 var statusOf = map[error]int{
-	service.ErrNoPlayer:         fiber.StatusNotFound,
-	service.ErrNotFound:         fiber.StatusNotFound,
-	service.ErrInvalid:          fiber.StatusBadRequest,
-	service.ErrSeedLocked:       fiber.StatusForbidden,
-	service.ErrPomodoroActive:   fiber.StatusConflict,
-	service.ErrNoActivePomodoro: fiber.StatusConflict,
-	service.ErrPlotBusy:         fiber.StatusConflict,
-	service.ErrNotMature:        fiber.StatusConflict,
-	service.ErrAlreadyHarvested: fiber.StatusConflict,
-	service.ErrWrongState:       fiber.StatusConflict,
-	service.ErrConflict:         fiber.StatusConflict,
+	service.ErrNoPlayer:          fiber.StatusNotFound,
+	service.ErrNotFound:          fiber.StatusNotFound,
+	service.ErrInvalid:           fiber.StatusBadRequest,
+	service.ErrSeedLocked:        fiber.StatusForbidden,
+	service.ErrPomodoroActive:    fiber.StatusConflict,
+	service.ErrNoActivePomodoro:  fiber.StatusConflict,
+	service.ErrPlotBusy:          fiber.StatusConflict,
+	service.ErrNotMature:         fiber.StatusConflict,
+	service.ErrAlreadyHarvested:  fiber.StatusConflict,
+	service.ErrWrongState:        fiber.StatusConflict,
+	service.ErrConflict:          fiber.StatusConflict,
+	service.ErrAlreadyUnlocked:   fiber.StatusConflict,
+	service.ErrInsufficientFocus: fiber.StatusConflict,
 }
 
 // fail writes {"error": code}. Unknown errors are logged and hidden behind a 500.

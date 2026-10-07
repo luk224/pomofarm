@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/luk224/pomofarm/backend/internal/api"
 	"github.com/luk224/pomofarm/backend/internal/game"
+	"github.com/luk224/pomofarm/backend/internal/service"
 	"github.com/luk224/pomofarm/backend/internal/store"
 )
 
@@ -41,6 +43,10 @@ func main() {
 		}
 		fmt.Println(p)
 		return
+	}
+
+	if err := service.New(db, game.SystemClock{}).EnsurePlayer(context.Background(), env("POMOFARM_PLAYER", "Granjero")); err != nil {
+		log.Fatal(err)
 	}
 
 	stop := make(chan struct{})

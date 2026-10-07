@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/luk224/pomofarm/backend/internal/game"
 )
 
 type PlayerState struct {
@@ -38,12 +40,23 @@ type PomodoroState struct {
 	PausedAt    *string `json:"paused_at"`
 }
 
+// SeedState lets the client list seeds and their prices without knowing the balance.
+type SeedState struct {
+	Key         string `json:"key"`
+	DurationMin int    `json:"duration_min"`
+	UnlockCost  int    `json:"unlock_cost"`
+	Reward      int    `json:"reward"`
+	LifeH       int    `json:"life_h"`
+	Unlocked    bool   `json:"unlocked"`
+}
+
 // State is everything the client needs to draw the game. The client displays it
 // and never computes economy or time itself.
 type State struct {
 	ServerTime string         `json:"server_time"`
 	Player     PlayerState    `json:"player"`
 	Plots      []PlotState    `json:"plots"`
+	Seeds      []SeedState    `json:"seeds"`
 	Pomodoro   *PomodoroState `json:"pomodoro"`
 }
 
@@ -80,6 +93,26 @@ func (s *Service) State(ctx context.Context) (State, error) {
 		}
 		if err := rows.Err(); err != nil {
 			return err
+		}
+		unlocked := map[string]bool{}
+		urows, err := tx.QueryContext(ctx, `SELECT key FROM unlocks WHERE player_id = ? AND kind = 'seed'`, PlayerID)
+		if err != nil {
+			return err
+		}
+		defer urows.Close()
+		for urows.Next() {
+			var k string
+			if err := urows.Scan(&k); err != nil {
+				return err
+			}
+			unlocked[k] = true
+		}
+		if err := urows.Err(); err != nil {
+			return err
+		}
+		st.Seeds = make([]SeedState, 0, len(game.Crops))
+		for _, c := range game.Crops {
+			st.Seeds = append(st.Seeds, SeedState{c.Key, c.DurationMin, c.Unlock, c.Reward, c.LifeH, unlocked[c.Key]})
 		}
 		a, err := loadActive(ctx, tx)
 		if err != nil || a == nil {

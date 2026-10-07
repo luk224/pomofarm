@@ -4,15 +4,17 @@ import "errors"
 
 // Domain errors; the api package maps them to HTTP statuses.
 var (
-	ErrNoPlayer         = errors.New("no_player")
-	ErrNotFound         = errors.New("not_found")
-	ErrInvalid          = errors.New("invalid_request")
-	ErrSeedLocked       = errors.New("seed_locked")
-	ErrPomodoroActive   = errors.New("pomodoro_active")
-	ErrNoActivePomodoro = errors.New("no_active_pomodoro")
-	ErrPlotBusy         = errors.New("plot_busy")
-	ErrNotMature        = errors.New("not_mature")
-	ErrAlreadyHarvested = errors.New("already_harvested")
-	ErrWrongState       = errors.New("wrong_state") // e.g. pausing a paused Pomodoro
-	ErrConflict         = errors.New("version_conflict")
+	ErrNoPlayer          = errors.New("no_player")
+	ErrNotFound          = errors.New("not_found")
+	ErrInvalid           = errors.New("invalid_request")
+	ErrSeedLocked        = errors.New("seed_locked")
+	ErrPomodoroActive    = errors.New("pomodoro_active")
+	ErrNoActivePomodoro  = errors.New("no_active_pomodoro")
+	ErrPlotBusy          = errors.New("plot_busy")
+	ErrNotMature         = errors.New("not_mature")
+	ErrAlreadyHarvested  = errors.New("already_harvested")
+	ErrWrongState        = errors.New("wrong_state") // e.g. pausing a paused Pomodoro
+	ErrConflict          = errors.New("version_conflict")
+	ErrAlreadyUnlocked   = errors.New("already_unlocked")
+	ErrInsufficientFocus = errors.New("insufficient_focus")
 )

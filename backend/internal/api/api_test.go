@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"encoding/json"
 	"net/http/httptest"
@@ -300,5 +301,109 @@ func TestUnlockedSeedAndFlowReward(t *testing.T) {
 	matured, _ := time.Parse(time.RFC3339Nano, *e.state().Plots[0].MaturedAt)
 	if wilts.Sub(matured) != time.Duration(game.FlowLifeH(90))*time.Hour {
 		t.Fatalf("life = %v", wilts.Sub(matured))
+	}
+}
+
+// newFreshEnv is a brand-new installation: no player until EnsurePlayer runs.
+func newFreshEnv(t *testing.T) *env {
+	t.Helper()
+	db, err := store.Open(filepath.Join(t.TempDir(), "t.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { db.Close() })
+	clock := &game.FakeClock{T: time.Date(2026, 3, 1, 9, 0, 0, 0, time.UTC)}
+	if err := service.New(db, clock).EnsurePlayer(context.Background(), "luk"); err != nil {
+		t.Fatal(err)
+	}
+	return &env{t: t, app: New(db, clock), db: db, clock: clock}
+}
+
+func TestFreshInstallIsPlayable(t *testing.T) {
+	e := newFreshEnv(t)
+	st := e.state()
+	if st.Player.Name != "luk" || st.Player.FocusPoints != 0 || len(st.Plots) != 1 || st.Plots[0].State != "empty" {
+		t.Fatalf("fresh state = %+v", st)
+	}
+	var unlocked []string
+	for _, s := range st.Seeds {
+		if s.Unlocked {
+			unlocked = append(unlocked, s.Key)
+		}
+	}
+	if len(st.Seeds) != 5 || len(unlocked) != 1 || unlocked[0] != "daisy" {
+		t.Fatalf("seeds = %+v", st.Seeds)
+	}
+	e.expect(201, "POST", "/api/pomodoros", service.PlantRequest{PlotID: st.Plots[0].ID, PlantType: "daisy"})
+}
+
+func TestEnsurePlayerIsIdempotent(t *testing.T) {
+	e := newFreshEnv(t)
+	dbExec(t, e, `UPDATE players SET focus_points = 7`)
+	if err := service.New(e.db, e.clock).EnsurePlayer(context.Background(), "otro"); err != nil {
+		t.Fatal(err)
+	}
+	st := e.state()
+	if st.Player.Name != "luk" || st.Player.FocusPoints != 7 || len(st.Plots) != 1 {
+		t.Fatalf("second EnsurePlayer changed things: %+v", st)
+	}
+}
+
+func TestUnlockSeedSpendsFocusOnce(t *testing.T) {
+	e := newFreshEnv(t)
+	body := map[string]string{"kind": "seed", "key": "tomato"}
+	if code := errCode(e.expect(409, "POST", "/api/unlocks", body)); code != "insufficient_focus" {
+		t.Fatalf("code = %s", code)
+	}
+	dbExec(t, e, `UPDATE players SET focus_points = 10`)
+	if code := errCode(e.expect(403, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "tomato"})); code != "seed_locked" {
+		t.Fatalf("planting locked seed: %s", code)
+	}
+	e.expect(201, "POST", "/api/unlocks", body)
+	st := e.state()
+	if st.Player.FocusPoints != 2 { // 10 − 8
+		t.Fatalf("focus = %d, want 2", st.Player.FocusPoints)
+	}
+	for _, s := range st.Seeds {
+		if s.Key == "tomato" && !s.Unlocked {
+			t.Fatal("tomato not unlocked")
+		}
+	}
+	if code := errCode(e.expect(409, "POST", "/api/unlocks", body)); code != "already_unlocked" {
+		t.Fatalf("second purchase code = %s", code)
+	}
+	if e.state().Player.FocusPoints != 2 {
+		t.Fatal("second purchase charged again")
+	}
+	e.expect(201, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "tomato"})
+	if e.state().Pomodoro.PlannedS != 1500 {
+		t.Fatal("tomato should plan 25 min")
+	}
+}
+
+func TestUnlockValidation(t *testing.T) {
+	e := newFreshEnv(t)
+	e.expect(400, "POST", "/api/unlocks", map[string]string{"kind": "seed", "key": "potato"})
+	e.expect(400, "POST", "/api/unlocks", map[string]string{"kind": "animal", "key": "dog"})
+	if code := errCode(e.expect(409, "POST", "/api/unlocks", map[string]string{"kind": "seed", "key": "daisy"})); code != "already_unlocked" {
+		t.Fatalf("daisy code = %s", code)
+	}
+}
+
+// Earning 💧 and spending them end to end: harvest, then buy.
+func TestHarvestThenBuyTomatoes(t *testing.T) {
+	e := newFreshEnv(t)
+	for i := 0; i < 8; i++ { // 8 daisies = 8 💧
+		e.expect(201, "POST", "/api/pomodoros", service.PlantRequest{PlotID: 1, PlantType: "daisy"})
+		e.clock.Advance(10 * time.Minute)
+		e.expect(200, "POST", "/api/plots/1/harvest", nil)
+		dbExec(t, e, `UPDATE plots SET state='empty', harvested=0 WHERE id=1`) // stand-in for removing the plant (later task)
+	}
+	if got := e.state().Player.FocusPoints; got != 8 {
+		t.Fatalf("focus after 8 daisies = %d", got)
+	}
+	e.expect(201, "POST", "/api/unlocks", map[string]string{"kind": "seed", "key": "tomato"})
+	if got := e.state().Player.FocusPoints; got != 0 {
+		t.Fatalf("focus after buying = %d", got)
 	}
 }

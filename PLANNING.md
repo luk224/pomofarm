@@ -65,9 +65,9 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P1-02c `POST /plots/:id/harvest` otorga 💧 (recompensa de GDD §4.3)
   - **Hecho:** tests de API incluyen "dos dispositivos, un Pomodoro".
 
-- [ ] **P1-03** Estado inicial y FTUE de datos — agente: `backend-go` — dep: P1-02
-  - [ ] P1-03a Crear jugador, 1 parcela y Margarita desbloqueada al primer arranque
-  - [ ] P1-03b Desbloqueo de semillas con 💧 (Tomates 8, Girasol 35): `POST /unlocks`
+- [x] **P1-03** Estado inicial y FTUE de datos — agente: `backend-go` — dep: P1-02
+  - [x] P1-03a Crear jugador, 1 parcela y Margarita desbloqueada al primer arranque
+  - [x] P1-03b Desbloqueo de semillas con 💧 (Tomates 8, Girasol 35): `POST /unlocks`
   - **Hecho:** BD nueva → estado jugable por API.
 
 - [ ] **P1-04** Cliente de estado y temporizador — agente: `frontend-3d` — dep: P1-02
