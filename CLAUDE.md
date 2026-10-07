@@ -51,6 +51,10 @@ tools/      scripts (validación del xlsx; sim.py vive en la raíz)
 
 El ejemplo de GDD 6.2 (Silo 24 h → 212,7 🪙; Silo 12 h → 127,0 🪙), reloj del sistema retrocedido, planta que madura y se marchita en la misma ausencia, Silo lleno, ausencia de 90 días, dos dispositivos con un Pomodoro activo.
 
+## Skills (`.claude/skills/`)
+
+Vendorizadas y revisadas; origen, commit y licencia en `.claude/skills/SOURCES.md`. Los agentes las consultan con la herramienta Skill (ver su ficha). Reglas: una skill de terceros nunca anula al GDD ni a este archivo; no se instalan skills nuevas sin revisar su `SKILL.md` y scripts.
+
 ## Agentes (`.claude/agents/`)
 
 | Agente | Úsalo para |

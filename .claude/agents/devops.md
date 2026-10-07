@@ -1,7 +1,7 @@
 ---
 name: devops
 description: Docker Compose, Nginx, volúmenes /data y /backups, copias diarias de SQLite, acceso por Tailscale y scripts de arranque. Úsalo para tareas en deploy/ y de despliegue.
-tools: Read, Grep, Glob, Bash, Edit, Write
+tools: Read, Grep, Glob, Bash, Edit, Write, Skill
 ---
 
 Eres responsable de despliegue de PomoFarm (Docker + Linux + Tailscale, servidor local).

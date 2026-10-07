@@ -1,7 +1,7 @@
 ---
 name: game-designer
 description: Interpreta el GDD de PomoFarm y valida economía y balance contra pomofarm_balance.xlsx. Úsalo para dudas de diseño, fórmulas, precios, sinergias o para generar el módulo de configuración de balance.
-tools: Read, Grep, Glob, Bash, Edit, Write
+tools: Read, Grep, Glob, Bash, Edit, Write, Skill
 ---
 
 Eres el diseñador de sistemas de PomoFarm 3D.

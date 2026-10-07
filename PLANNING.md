@@ -77,6 +77,7 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
 
 - [ ] **P1-05** Escena isométrica mínima — agente: `frontend-3d` — dep: P0-02
   - [ ] P1-05a Cámara ortográfica isométrica con zoom y paneo
+  - [ ] P1-05c Dirección de arte antes de modelar (skill `frontend-design`): paleta cálida y accesible (apta para daltonismo), tipografía, 1 elemento firma; decidir con el usuario entre 3D procedural en R3F o packs CC0 (Kenney / Quaternius) + `threejs-agents-model-optimizer`
   - [ ] P1-05b Parcela y planta low-poly por etapa; barra circular flotante del timer
   - **Hecho:** escena visible en el navegador con una planta animada.
 
