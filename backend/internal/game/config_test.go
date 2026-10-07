@@ -195,3 +195,35 @@ func TestCoinsInMilli(t *testing.T) {
 		t.Error("CropByKey(oak) not found")
 	}
 }
+
+func TestPlotOrderFillsTheGridOnceInTheDocumentedOrder(t *testing.T) {
+	seen := map[[2]int]int{}
+	for n := 1; n <= MaxPlots; n++ {
+		x, y, ok := PlotPosition(n)
+		if !ok || x < 0 || x > 3 || y < 0 || y > 3 {
+			t.Fatalf("plot %d at (%d,%d) ok=%v is outside the 4×4 grid", n, x, y, ok)
+		}
+		if prev, dup := seen[[2]int{x, y}]; dup {
+			t.Fatalf("plots %d and %d share cell (%d,%d)", prev, n, x, y)
+		}
+		seen[[2]int{x, y}] = n
+	}
+	if len(seen) != 16 {
+		t.Fatalf("%d cells used, want 16", len(seen))
+	}
+	// the first plot is the one every new player starts with, and the first four make the central 2×2
+	if x, y, _ := PlotPosition(1); x != 1 || y != 1 {
+		t.Fatalf("first plot at (%d,%d), want (1,1)", x, y)
+	}
+	for n := 1; n <= 4; n++ {
+		if x, y, _ := PlotPosition(n); x < 1 || x > 2 || y < 1 || y > 2 {
+			t.Fatalf("plot %d at (%d,%d) is not in the central 2×2", n, x, y)
+		}
+	}
+	if _, _, ok := PlotPosition(0); ok {
+		t.Fatal("plot 0 exists")
+	}
+	if _, _, ok := PlotPosition(17); ok {
+		t.Fatal("plot 17 exists")
+	}
+}

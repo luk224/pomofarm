@@ -52,6 +52,22 @@ const (
 	MaxPlots   = 16
 )
 
+// PlotOrder is where each purchased plot appears on the 4×4 grid (x, y). The first four form the central 2×2,
+// where the "Huerto completo" pattern (GDD §4.6) is first reachable; the rest grow outwards.
+var PlotOrder = [MaxPlots][2]int{
+	{1, 1}, {2, 1}, {1, 2}, {2, 2},
+	{0, 1}, {0, 2}, {3, 1}, {3, 2}, {1, 0}, {2, 0}, {1, 3}, {2, 3},
+	{0, 0}, {3, 0}, {0, 3}, {3, 3},
+}
+
+// PlotPosition is the grid cell of the n-th plot (1-based); ok is false past MaxPlots.
+func PlotPosition(n int) (x, y int, ok bool) {
+	if n < 1 || n > MaxPlots {
+		return 0, 0, false
+	}
+	return PlotOrder[n-1][0], PlotOrder[n-1][1], true
+}
+
 // SiloLevel capacity is in hours of production; Cost in 💧.
 type SiloLevel struct {
 	CapacityH int

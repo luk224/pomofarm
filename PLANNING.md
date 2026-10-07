@@ -117,7 +117,7 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [ ] P2-02c (anotada para P2-07) Con varias parcelas el dock único no basta: cosechar/retirar debe poder hacerse sobre cada planta (clic en la parcela), no solo en el dock
   - **Hecho:** tests de transición de estado.
 
-- [ ] **P2-03** Parcelas y Silo — agente: `backend-go` — dep: P2-01
+- [~] **P2-03** Parcelas y Silo — agente: `backend-go` — dep: P2-01
   - [ ] P2-03a Compra de parcelas (2–16) con `ceil(3·1,4^(n−2))`
   - [ ] P2-03b Niveles de Silo en horas (GDD §4.5)
   - **Hecho:** compras cuadran con las tablas del GDD.

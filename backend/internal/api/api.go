@@ -87,6 +87,20 @@ func New(db *sql.DB, clock game.Clock) *fiber.App {
 		return respondState(c, svc, fiber.StatusOK)
 	})
 
+	app.Post("/api/plots", func(c *fiber.Ctx) error {
+		if err := svc.BuyPlot(c.UserContext()); err != nil {
+			return fail(c, err)
+		}
+		return respondState(c, svc, fiber.StatusCreated)
+	})
+
+	app.Post("/api/silo/upgrade", func(c *fiber.Ctx) error {
+		if err := svc.UpgradeSilo(c.UserContext()); err != nil {
+			return fail(c, err)
+		}
+		return respondState(c, svc, fiber.StatusOK)
+	})
+
 	app.Post("/api/silo/collect", func(c *fiber.Ctx) error {
 		milli, err := svc.CollectSilo(c.UserContext())
 		if err != nil {
@@ -155,6 +169,7 @@ var statusOf = map[error]int{
 	service.ErrInsufficientFocus: fiber.StatusConflict,
 	service.ErrHarvestFirst:      fiber.StatusConflict,
 	service.ErrSiloEmpty:         fiber.StatusConflict,
+	service.ErrMaxedOut:          fiber.StatusConflict,
 	service.ErrNeedsConfirmation: fiber.StatusConflict,
 }
 
