@@ -16,6 +16,8 @@ export interface PlotBonus {
   multiplier: number
   neighbours: number
   garden: boolean
+  /** Inside the 3×3 area of a hive. */
+  bees: boolean
 }
 
 export interface PlotState {
@@ -91,6 +93,35 @@ export interface RestState {
   ends_at: string
 }
 
+export interface HiveState {
+  id: number
+  plot_id: number
+  x: number
+  y: number
+}
+
+/** Bees: unlocked with 💧, then up to `max` hives bought with 🪙 (GDD §4.7). Costs are whole 🪙. */
+export interface BeesState {
+  unlocked: boolean
+  unlock_cost: number
+  hives: HiveState[]
+  max: number
+  next_cost: number | null
+}
+
+export interface DogState {
+  unlocked: boolean
+  unlock_cost: number
+  owned: boolean
+  cost: number
+  silo_bonus_hours: number
+}
+
+export interface AutomationState {
+  bees: BeesState
+  dog: DogState
+}
+
 export interface GameState {
   server_time: string
   player: PlayerState
@@ -100,6 +131,7 @@ export interface GameState {
   silo: SiloState
   shop: ShopState
   rest: RestState | null
+  automation: AutomationState
   recent_tags: string[]
   settings: Record<string, string>
 }

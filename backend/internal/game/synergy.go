@@ -17,7 +17,23 @@ type Bonus struct {
 	Neighbours int     // orthogonal neighbours that are compatible, up to 4
 	Adjacency  float64 // +10% each, capped at +40%
 	Garden     bool    // part of a 2×2 block of four different crops
+	Bees       bool    // inside the 3×3 area of a hive
 	Total      float64 // 1 + adjacency + garden (+ bees), capped at PlotMultiplierCap; prestige is applied above it
+}
+
+// BeeCoverage is every cell inside the 3×3 area of at least one hive: the hive's own cell and its eight neighbours.
+// Areas overlap freely but a plot is covered once (the bonus does not stack, GDD §4.6). Four hives on the central
+// 2×2 cover the whole 4×4 field, as the GDD says.
+func BeeCoverage(hives [][2]int) map[[2]int]bool {
+	out := map[[2]int]bool{}
+	for _, h := range hives {
+		for dx := -1; dx <= 1; dx++ {
+			for dy := -1; dy <= 1; dy++ {
+				out[[2]int{h[0] + dx, h[1] + dy}] = true
+			}
+		}
+	}
+	return out
 }
 
 // ringIndex is each crop's place in the compatibility ring Daisy–Tomato–Sunflower–Apple–Oak–(Daisy).
@@ -87,7 +103,7 @@ func Synergies(cells []Cell, bees map[[2]int]bool) map[[2]int]Bonus {
 				n++
 			}
 		}
-		b := Bonus{Neighbours: n, Garden: garden[pos]}
+		b := Bonus{Neighbours: n, Garden: garden[pos], Bees: bees[pos]}
 		b.Adjacency = minFloat(AdjacencyPerNeighbour*float64(n), AdjacencyCap)
 		total := 1 + b.Adjacency
 		if b.Garden {

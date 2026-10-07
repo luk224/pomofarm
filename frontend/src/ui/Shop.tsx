@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../store/game'
-import { buyPlot, upgradeSilo } from './actions'
-import { DropIcon, SiloIcon } from './icons'
+import { formatPrice } from '../store/automation'
+import { buyDog, buyPlot, startPlacing, unlockAnimal, upgradeSilo } from './actions'
+import { CoinIcon, DropIcon, SiloIcon } from './icons'
 
 function PlotIcon() {
   return (
@@ -18,24 +19,28 @@ interface OfferProps {
   title: string
   detail: string
   cost: number
-  focus: number
+  /** What the player has of the currency this costs. */
+  funds: number
+  currency?: 'drop' | 'coin'
   onBuy: () => void
   testId: string
 }
 
-function Offer({ icon, title, detail, cost, focus, onBuy, testId }: OfferProps) {
-  const missing = cost - focus
+function Offer({ icon, title, detail, cost, funds, currency = 'drop', onBuy, testId }: OfferProps) {
+  const missing = cost - funds
+  const Icon = currency === 'drop' ? DropIcon : CoinIcon
+  const word = currency === 'drop' ? 'gotas' : 'monedas'
   return (
     <div className="offer">
       <span className="offer__icon" aria-hidden="true">{icon}</span>
       <div className="offer__text">
         <strong>{title}</strong>
         <span>{detail}</span>
-        {missing > 0 && <span className="offer__missing">Te faltan {missing} <DropIcon size={12} /></span>}
+        {missing > 0 && <span className="offer__missing">Te faltan {formatPrice(missing)} <Icon size={12} /></span>}
       </div>
       <button type="button" className="btn btn--primary offer__buy" data-testid={testId} disabled={missing > 0} onClick={onBuy}
-        aria-label={`Comprar ${title} por ${cost} gotas`}>
-        {cost} <DropIcon size={14} />
+        aria-label={`Comprar ${title} por ${cost} ${word}`}>
+        {formatPrice(cost)} <Icon size={14} />
       </button>
     </div>
   )
@@ -47,6 +52,8 @@ export function Shop() {
   const shop = useGame((s) => s.state?.shop)
   const focus = useGame((s) => s.state?.player.focus_points ?? 0)
   const silo = useGame((s) => s.state?.silo)
+  const auto = useGame((s) => s.state?.automation)
+  const coins = useGame((s) => Math.floor((s.state?.player.coins_milli ?? 0) / 1000))
   const root = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -61,7 +68,7 @@ export function Shop() {
     }
   }, [open])
 
-  if (!shop || !silo) return null
+  if (!shop || !silo || !auto) return null
   const affordable = (shop.next_plot && focus >= shop.next_plot.cost) || (shop.silo_upgrade && focus >= shop.silo_upgrade.cost)
   return (
     <div className="settings" ref={root}>
@@ -74,17 +81,42 @@ export function Shop() {
         <div id="shop-panel" className="panelbox panelbox--wide" role="group" aria-label="Mejoras de la granja" data-testid="shop-panel">
           {shop.next_plot ? (
             <Offer testId="buy-plot" icon={<PlotIcon />} title={`Parcela ${shop.next_plot.number}`}
-              detail={`Tienes ${shop.plots_owned} de ${shop.plots_max}`} cost={shop.next_plot.cost} focus={focus}
+              detail={`Tienes ${shop.plots_owned} de ${shop.plots_max}`} cost={shop.next_plot.cost} funds={focus}
               onBuy={() => void buyPlot()} />
           ) : (
             <p className="hint">Tienes las {shop.plots_max} parcelas.</p>
           )}
           {shop.silo_upgrade ? (
             <Offer testId="upgrade-silo" icon={<SiloIcon size={22} />} title="Ampliar el Silo"
-              detail={`${silo.capacity_hours} h → ${shop.silo_upgrade.capacity_hours} h de producción`} cost={shop.silo_upgrade.cost} focus={focus}
+              detail={`${silo.capacity_hours} h → ${shop.silo_upgrade.capacity_hours} h de producción`} cost={shop.silo_upgrade.cost} funds={focus}
               onBuy={() => void upgradeSilo()} />
           ) : (
             <p className="hint">El Silo está al máximo ({silo.capacity_hours} h).</p>
+          )}
+          <p className="hint offer__group">Con 🪙 del Silo</p>
+          {!auto.bees.unlocked ? (
+            <Offer testId="unlock-bees" icon={<span>🐝</span>} title="Desbloquear las Abejas"
+              detail="Luego compras colmenas con 🪙" cost={auto.bees.unlock_cost} funds={focus} onBuy={() => void unlockAnimal('bees')} />
+          ) : auto.bees.next_cost !== null ? (
+            <Offer testId="buy-hive" icon={<span>🍯</span>} title={`Colmena ${auto.bees.hives.length + 1}`}
+              detail={`+25% a las 9 parcelas de alrededor. Tienes ${auto.bees.hives.length} de ${auto.bees.max}`}
+              cost={auto.bees.next_cost} funds={coins} currency="coin"
+              onBuy={() => { setOpen(false); startPlacing(null) }} />
+          ) : (
+            <p className="hint">Tienes las {auto.bees.max} colmenas.</p>
+          )}
+          {auto.bees.hives.length > 0 && (
+            <p className="hint">Toca una colmena en la granja para moverla gratis.</p>
+          )}
+          {!auto.dog.unlocked ? (
+            <Offer testId="unlock-dog" icon={<span>🐕</span>} title="Desbloquear el Perro Pastor"
+              detail="Recoge el Silo solo" cost={auto.dog.unlock_cost} funds={focus} onBuy={() => void unlockAnimal('dog')} />
+          ) : !auto.dog.owned ? (
+            <Offer testId="buy-dog" icon={<span>🐕</span>} title="Perro Pastor"
+              detail={`Recoge el Silo solo y guarda ${auto.dog.silo_bonus_hours} h más`}
+              cost={auto.dog.cost} funds={coins} currency="coin" onBuy={() => void buyDog()} />
+          ) : (
+            <p className="hint">El Perro Pastor vigila el Silo.</p>
           )}
         </div>
       )}

@@ -35,6 +35,7 @@ type PlotBonus struct {
 	Multiplier float64 `json:"multiplier"` // total applied to its production (synergies × prestige)
 	Neighbours int     `json:"neighbours"` // compatible orthogonal neighbours
 	Garden     bool    `json:"garden"`     // inside a Huerto completo
+	Bees       bool    `json:"bees"`       // inside the 3×3 area of a hive
 }
 
 type PomodoroState struct {
@@ -72,6 +73,7 @@ type State struct {
 	Silo       SiloState         `json:"silo"`
 	Shop       ShopState         `json:"shop"`
 	Rest       *RestState        `json:"rest"`
+	Automation AutomationState   `json:"automation"`
 	RecentTags []string          `json:"recent_tags"`
 	Settings   map[string]string `json:"settings"`
 }
@@ -182,13 +184,22 @@ func (s *Service) State(ctx context.Context) (State, error) {
 		if err != nil {
 			return err
 		}
-		bonuses := game.CurrentBonuses(farm, now, beeCells())
+		bees, err := beeCells(ctx, tx)
+		if err != nil {
+			return err
+		}
+		bonuses := game.CurrentBonuses(farm, now, bees)
 		prestige := prestigeMultiplier(st.Player.Season)
 		for i := range st.Plots {
 			if b, ok := bonuses[st.Plots[i].ID]; ok {
-				st.Plots[i].Bonus = &PlotBonus{Multiplier: b.Total * prestige, Neighbours: b.Neighbours, Garden: b.Garden}
+				st.Plots[i].Bonus = &PlotBonus{Multiplier: b.Total * prestige, Neighbours: b.Neighbours, Garden: b.Garden, Bees: b.Bees}
 			}
 		}
+		automation, err := automationView(ctx, tx)
+		if err != nil {
+			return err
+		}
+		st.Automation = automation
 		a, err := loadActive(ctx, tx)
 		if err != nil || a == nil {
 			return err

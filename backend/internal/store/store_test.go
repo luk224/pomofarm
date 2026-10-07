@@ -18,8 +18,8 @@ func TestMigrateEmptyDBAndIdempotent(t *testing.T) {
 		t.Fatal(err)
 	}
 	v, err := SchemaVersion(db)
-	if err != nil || v != 3 {
-		t.Fatalf("version = %d, err = %v; want 3", v, err)
+	if err != nil || v != 4 {
+		t.Fatalf("version = %d, err = %v; want 4", v, err)
 	}
 	var mode string
 	db.QueryRow(`PRAGMA journal_mode`).Scan(&mode)
@@ -35,8 +35,8 @@ func TestMigrateEmptyDBAndIdempotent(t *testing.T) {
 	defer db.Close()
 	var n int
 	db.QueryRow(`SELECT COUNT(*) FROM schema_migrations`).Scan(&n)
-	if n != 3 {
-		t.Fatalf("schema_migrations rows = %d, want 3", n)
+	if n != 4 {
+		t.Fatalf("schema_migrations rows = %d, want 4", n)
 	}
 }
 

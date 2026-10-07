@@ -102,7 +102,7 @@ func TestHealthReportsSchema(t *testing.T) {
 		SchemaVersion int    `json:"schema_version"`
 	}
 	json.Unmarshal(e.expect(200, "GET", "/api/health", nil), &body)
-	if body.Status != "ok" || body.SchemaVersion != 3 {
+	if body.Status != "ok" || body.SchemaVersion != 4 {
 		t.Fatalf("body = %+v", body)
 	}
 }
@@ -384,7 +384,7 @@ func TestUnlockSeedSpendsFocusOnce(t *testing.T) {
 func TestUnlockValidation(t *testing.T) {
 	e := newFreshEnv(t)
 	e.expect(400, "POST", "/api/unlocks", map[string]string{"kind": "seed", "key": "potato"})
-	e.expect(400, "POST", "/api/unlocks", map[string]string{"kind": "animal", "key": "dog"})
+	e.expect(400, "POST", "/api/unlocks", map[string]string{"kind": "mineral", "key": "dog"})
 	if code := errCode(e.expect(409, "POST", "/api/unlocks", map[string]string{"kind": "seed", "key": "daisy"})); code != "already_unlocked" {
 		t.Fatalf("daisy code = %s", code)
 	}

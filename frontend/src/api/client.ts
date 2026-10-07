@@ -46,5 +46,10 @@ export const api = {
   clearPlot: (plotId: number, confirm: boolean) =>
     request<GameState>('POST', `/api/plots/${plotId}/clear`, { confirm }),
   setSetting: (key: string, value: string) => request<GameState>('POST', '/api/settings', { key, value }),
+  unlockAnimal: (key: 'bees' | 'dog') => request<GameState>('POST', '/api/unlocks', { kind: 'animal', key }),
+  buyHive: (plotId: number) => request<GameState>('POST', '/api/structures', { kind: 'hive', plot_id: plotId }),
+  buyDog: () => request<GameState>('POST', '/api/structures', { kind: 'dog' }),
+  moveHive: (hiveId: number, plotId: number) =>
+    request<GameState>('POST', `/api/structures/${hiveId}/move`, { plot_id: plotId }),
   unlockSeed: (key: string) => request<GameState>('POST', '/api/unlocks', { kind: 'seed', key }),
 }

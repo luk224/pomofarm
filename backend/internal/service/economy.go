@@ -38,7 +38,11 @@ func (s *Service) accrue(ctx context.Context, tx *sql.Tx, now time.Time) error {
 		return err
 	}
 	// Synergies change whenever a neighbour matures or wilts, so the farm is counted piece by piece (game.FarmProducers).
-	producers := game.FarmProducers(farm, now, prestigeMultiplier(season), beeCells())
+	bees, err := beeCells(ctx, tx)
+	if err != nil {
+		return err
+	}
+	producers := game.FarmProducers(farm, now, prestigeMultiplier(season), bees)
 	if len(producers) > 0 {
 		stock = stock.Accrue(producers, game.SiloCapacityHours(level, dog))
 		if _, err := tx.ExecContext(ctx, `UPDATE players SET silo_micro = ?, silo_peak_micro_h = ? WHERE id = ?`,
@@ -68,8 +72,24 @@ func (s *Service) accrue(ctx context.Context, tx *sql.Tx, now time.Time) error {
 	return err
 }
 
-// beeCells: the plots covered by beehives (GDD §4.7). Beehives arrive with Phase 3; until then nothing is covered.
-func beeCells() map[[2]int]bool { return nil }
+// beeCells reads the player's hives and returns the cells their 3×3 areas cover (GDD §4.6, §4.7). Hives only change
+// through requests that settle production first, so coverage is constant between two settlements.
+func beeCells(ctx context.Context, tx *sql.Tx) (map[[2]int]bool, error) {
+	rows, err := tx.QueryContext(ctx, `SELECT x, y FROM structures WHERE player_id = ? AND kind = 'hive'`, PlayerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var hives [][2]int
+	for rows.Next() {
+		var h [2]int
+		if err := rows.Scan(&h[0], &h[1]); err != nil {
+			return nil, err
+		}
+		hives = append(hives, h)
+	}
+	return game.BeeCoverage(hives), rows.Err()
+}
 
 // loadFarm reads every plot that holds (or held) a mature plant, with the times production depends on.
 func loadFarm(ctx context.Context, tx *sql.Tx) ([]game.FarmPlot, error) {
@@ -175,8 +195,12 @@ func siloView(ctx context.Context, tx *sql.Tx, now time.Time) (SiloState, error)
 	if err != nil {
 		return SiloState{}, err
 	}
+	bees, err := beeCells(ctx, tx)
+	if err != nil {
+		return SiloState{}, err
+	}
 	var rate float64
-	bonuses := game.CurrentBonuses(farm, now, beeCells())
+	bonuses := game.CurrentBonuses(farm, now, bees)
 	for _, p := range farm {
 		if b, producing := bonuses[p.ID]; producing {
 			rate += game.ProducerMicroPerHour(p.GrowS, p.LifeS, b.Total*prestigeMultiplier(seas))

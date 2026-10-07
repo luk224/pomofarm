@@ -6,6 +6,7 @@ import { growthFraction } from '../store/time'
 import type { PlotState } from '../api/types'
 import { bonusLabel } from '../store/bonus'
 import { effectivePlot } from '../ui/selection'
+import { Automation3D } from './Automation3D'
 import { BonusBadge } from './BonusBadge'
 import { Ground } from './Ground'
 import { Pads } from './Pads'
@@ -73,6 +74,7 @@ export function Farm() {
     <>
       <Ground />
       <Silo3D />
+      <Automation3D />
       {plots && <Pads plots={plots} onPick={pickPlot} />}
       {plots?.map((p) => (
         <PlotView key={p.id} plot={p} growth={pomodoro && p.id === pomodoro.plot_id ? growth : 1} selected={p.id === looking && !pomodoro && (plots?.length ?? 0) > 1} />

@@ -300,3 +300,33 @@ func TestCurrentBonusesOnlyForPlantsProducingNow(t *testing.T) {
 		t.Fatalf("at 3 h daisy and tomato help each other: %+v", got)
 	}
 }
+
+func TestBeeCoverageIsAThreeByThreeAreaThatDoesNotStack(t *testing.T) {
+	one := BeeCoverage([][2]int{{1, 1}})
+	if len(one) != 9 || !one[[2]int{0, 0}] || !one[[2]int{2, 2}] || !one[[2]int{1, 1}] || one[[2]int{3, 1}] || one[[2]int{1, 3}] {
+		t.Fatalf("one hive at (1,1) covers %v", one)
+	}
+	// GDD §4.7: four hives cover the 4×4 field; the central 2×2 is the layout that does it
+	four := BeeCoverage([][2]int{{1, 1}, {2, 1}, {1, 2}, {2, 2}})
+	for x := 0; x < 4; x++ {
+		for y := 0; y < 4; y++ {
+			if !four[[2]int{x, y}] {
+				t.Errorf("cell (%d,%d) is not covered by four central hives", x, y)
+			}
+		}
+	}
+	// a hive in a corner covers only the cells that exist around it, plus off-grid cells that nothing uses
+	if c := BeeCoverage([][2]int{{0, 0}}); !c[[2]int{0, 0}] || !c[[2]int{1, 1}] || c[[2]int{2, 0}] {
+		t.Errorf("corner hive: %v", c)
+	}
+	if len(BeeCoverage(nil)) != 0 {
+		t.Error("no hives, no coverage")
+	}
+}
+
+func TestBeesFlagAndBonusInSynergies(t *testing.T) {
+	b := Synergies([]Cell{cell(0, 0, "daisy")}, BeeCoverage([][2]int{{0, 0}}))[[2]int{0, 0}]
+	if !b.Bees || !near2(b.Total, 1.25) {
+		t.Fatalf("%+v", b)
+	}
+}

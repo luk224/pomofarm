@@ -142,7 +142,7 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
 - [x] **P2-07** Granja 3D completa — agente: `frontend-3d` — dep: P2-03
   - [x] P2-07a Cuadrícula de hasta 4×4 con `InstancedMesh` (suelo y parcelas), Silo 3D con indicador de llenado y clic para recoger, contador de 🪙. 16 plantas maduras: de 409 a 60 llamadas de dibujo
   - [x] P2-07b Iconos de sinergia (etiquetas en la esquina de cada parcela) y panel de compras con 💧
-  - [ ] P2-07c Comprar con 🪙 (colmenas, Perro, decoración): no hay nada que comprar con 🪙 hasta la Fase 3 (P3-01/P3-02)
+  - [~] P2-07c Comprar con 🪙: colmenas y Perro hechos en P3-01; decoración en P3-02
   - **Hecho:** granja de 16 parcelas fluida en el navegador.
 
 - [x] **P2-08** Verificación de Fase 2 — agente: `qa-tester` — dep: P2-01..P2-07
@@ -159,10 +159,11 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
 
 ## Fase 3 — Automatización y estética
 
-- [ ] **P3-01** Abejas y Perro Pastor — agente: `backend-go` — dep: P2-05
-  - [ ] P3-01a Estructuras en `structures`; Abejas (área 3×3, +25%, sin acumular) 4.000/6.000/9.000/13.500 🪙
-  - [ ] P3-01b Perro (30.000 🪙, recoge solo, +12 h de Silo)
-  - **Hecho:** tests de bonos y recogida automática.
+- [x] **P3-01** Abejas y Perro Pastor — agente: `backend-go` — dep: P2-05
+  - [x] P3-01a Estructuras en `structures`; Abejas (área 3×3, +25%, sin acumular) 4.000/6.000/9.000/13.500 🪙
+  - [x] P3-01b Perro (30.000 🪙, recoge solo, +12 h de Silo)
+  - [x] P3-01c Frontend: tienda (desbloqueo con 💧, compra con 🪙), colocación con vista previa de cobertura y confirmación, mover gratis tocando la colmena, colmena y Perro en 3D
+  - **Hecho:** tests de bonos y recogida automática; E2E `p3_01_automation.py`; GDD decisión 13.
 
 - [ ] **P3-02** Decoración — agente: `backend-go`, `frontend-3d` — dep: P3-01
   - [ ] P3-02a Caminos, vallas, farolillos, accesorios; colocación en la escena

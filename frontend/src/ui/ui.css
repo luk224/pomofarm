@@ -193,6 +193,15 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 @keyframes toast-in { from { opacity: 0; transform: translateY(-6px); } }
 @keyframes reward-pop { 0% { opacity: 0; transform: translateY(14px) scale(0.7); } 100% { opacity: 1; transform: none; } }
 
+/* ---------- hive placement ---------- */
+.placing { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 20; width: min(460px, calc(100vw - 32px));
+  box-sizing: border-box; padding: 12px 14px; border-radius: 18px; background: var(--panel); backdrop-filter: blur(8px);
+  box-shadow: 0 6px 24px #3b2a1f40; display: grid; gap: 10px; }
+.placing__text { margin: 0; font-size: 15px; }
+.placing__buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+.placing__buttons .btn { min-height: 44px; }
+.offer__group { margin-top: 6px; font-weight: 600; }
+
 /* ---------- small screens ---------- */
 @media (max-width: 640px) {
   .panelbox, .panelbox--wide { position: fixed; top: 58px; left: 12px; right: 12px; width: auto; }

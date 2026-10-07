@@ -22,4 +22,8 @@ var (
 	ErrNoRest            = errors.New("no_rest")
 	ErrNeedsConfirmation = errors.New("needs_confirmation")
 	ErrInsufficientFocus = errors.New("insufficient_focus")
+	ErrInsufficientCoins = errors.New("insufficient_coins")
+	ErrAlreadyOwned      = errors.New("already_owned")
+	ErrCellTaken         = errors.New("cell_taken")
+	ErrAnimalLocked      = errors.New("animal_locked")
 )

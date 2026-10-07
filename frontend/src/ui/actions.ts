@@ -22,7 +22,7 @@ export function plantTargetId(): number | null {
 export async function plantSelected() {
   const { selectedSeed, tag, selectSeed, flowMinutes } = useUi.getState()
   const plotId = plantTargetId()
-  if (!selectedSeed || plotId === null || useGame.getState().state?.pomodoro) return
+  if (!selectedSeed || plotId === null || useGame.getState().state?.pomodoro || useUi.getState().placing) return
   prepareAlerts() // inside the user's click: unlock audio and ask for notification permission
   await useGame.getState().plant({
     plot_id: plotId,
@@ -89,4 +89,43 @@ export async function upgradeSilo() {
   await useGame.getState().upgradeSilo()
   const now = useGame.getState().state?.silo.capacity_hours ?? 0
   if (now > before) useUi.getState().toast(`Silo ampliado: ahora guarda ${now} h de producción.`)
+}
+
+/** Unlocks Bees or the Dog with 💧. */
+export async function unlockAnimal(key: 'bees' | 'dog') {
+  await useGame.getState().unlockAnimal(key)
+  if (useGame.getState().state?.automation[key === 'bees' ? 'bees' : 'dog'].unlocked) {
+    useUi.getState().toast(key === 'bees' ? 'Abejas desbloqueadas. Ya puedes comprar colmenas.' : 'Perro desbloqueado. Ya puedes comprarlo.')
+  }
+}
+
+export async function buyDog() {
+  await useGame.getState().buyDog()
+  if (useGame.getState().state?.automation.dog.owned) useUi.getState().toast('El Perro vigila el Silo: lo recoge solo y guarda 12 h más.')
+}
+
+/** Starts choosing where a new hive goes (hiveId null) or where an existing one moves to. */
+export function startPlacing(hiveId: number | null) {
+  useUi.getState().setPlacing({ hiveId })
+}
+
+export function cancelPlacing() {
+  useUi.getState().setPlacing(null)
+}
+
+/** Confirms the placement on the plot in view: buys the hive there, or moves it for free. */
+export async function confirmPlacing() {
+  const { placing, selectedPlotId } = useUi.getState()
+  const plots = useGame.getState().state?.plots ?? []
+  const target = effectivePlot(plots, selectedPlotId)
+  if (!placing || !target) return
+  const before = useGame.getState().state?.automation.bees.hives.length ?? 0
+  if (placing.hiveId === null) await useGame.getState().buyHive(target.id)
+  else await useGame.getState().moveHive(placing.hiveId, target.id)
+  const after = useGame.getState().state?.automation.bees.hives
+  const hive = after?.find((h) => (placing.hiveId === null ? true : h.id === placing.hiveId) && h.plot_id === target.id)
+  if (hive && (placing.hiveId !== null || (after?.length ?? 0) > before)) {
+    useUi.getState().setPlacing(null)
+    useUi.getState().toast(placing.hiveId === null ? 'Colmena colocada: +25% a su alrededor.' : 'Colmena movida.')
+  }
 }

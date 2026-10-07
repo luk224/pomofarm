@@ -12,6 +12,7 @@ const state = (plots: PlotState[], active: boolean): GameState => ({
   silo: { content_milli: 0, capacity_milli: 0, capacity_hours: 12, rate_milli_per_h: 0, full: false },
   shop: { plots_owned: 1, plots_max: 16, next_plot: null, silo_upgrade: null },
   rest: null,
+  automation: { bees: { unlocked: false, unlock_cost: 30, hives: [], max: 4, next_cost: 4000 }, dog: { unlocked: false, unlock_cost: 120, owned: false, cost: 30000, silo_bonus_hours: 12 } },
   pomodoro: active ? { id: 7, plot_id: 1, plant_type: 'daisy', status: 'running', planned_s: 600, remaining_ms: 1000, started_at: 't', paused_at: null, tag: null } : null,
 })
 

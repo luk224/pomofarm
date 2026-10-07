@@ -68,7 +68,7 @@ describe('describePlot (screen reader text)', () => {
     [4, 'Parcela 4 de 6: cosechada y produciendo'], [5, 'Parcela 5 de 6: marchita, aún se puede cosechar'], [6, 'Parcela 6 de 6: marchita'],
   ])('plot %i', (id, text) => expect(describePlot(all, all.find((p) => p.id === id))).toBe(text))
   it('mentions a synergy bonus', () => {
-    const b = { ...plot(4, 'mature', true), bonus: { multiplier: 1.35, neighbours: 2, garden: true } }
+    const b = { ...plot(4, 'mature', true), bonus: { multiplier: 1.35, neighbours: 2, garden: true, bees: false } }
     expect(describePlot([b], b)).toBe('Parcela 1 de 1: cosechada y produciendo, bono de 35 por ciento')
   })
   it('is empty without a plot', () => expect(describePlot([], undefined)).toBe(''))

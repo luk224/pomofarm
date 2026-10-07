@@ -1,7 +1,7 @@
 import type { SiloState } from '../api/types'
 
-const nf1 = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 })
-const nf0 = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 })
+const nf1 = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1, useGrouping: 'always' })
+const nf0 = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0, useGrouping: 'always' })
 
 /**
  * Thousandths of a coin -> text. One decimal below 100 🪙 (a daisy makes under 1/h), whole numbers above.

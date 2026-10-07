@@ -18,6 +18,10 @@ interface GameStore {
   collectSilo: () => Promise<number>
   unlockSeed: (key: string) => Promise<void>
   buyPlot: () => Promise<void>
+  unlockAnimal: (key: 'bees' | 'dog') => Promise<void>
+  buyHive: (plotId: number) => Promise<void>
+  buyDog: () => Promise<void>
+  moveHive: (hiveId: number, plotId: number) => Promise<void>
   skipRest: () => Promise<void>
   upgradeSilo: () => Promise<void>
   clearPlot: (plotId: number, confirm: boolean) => Promise<void>
@@ -78,6 +82,10 @@ export const useGame = create<GameStore>((set) => {
     cancel: () => act(() => api.cancel()),
     unlockSeed: (key) => act(() => api.unlockSeed(key)),
     buyPlot: () => act(() => api.buyPlot()),
+    unlockAnimal: (key) => act(() => api.unlockAnimal(key)),
+    buyHive: (plotId) => act(() => api.buyHive(plotId)),
+    buyDog: () => act(() => api.buyDog()),
+    moveHive: (hiveId, plotId) => act(() => api.moveHive(hiveId, plotId)),
     skipRest: () => act(() => api.skipRest()),
     upgradeSilo: () => act(() => api.upgradeSilo()),
     clearPlot: (plotId, confirm) => act(() => api.clearPlot(plotId, confirm)),

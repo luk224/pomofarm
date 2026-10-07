@@ -69,13 +69,60 @@ func New(db *sql.DB, clock game.Clock) *fiber.App {
 			Kind string `json:"kind"`
 			Key  string `json:"key"`
 		}
-		if err := c.BodyParser(&req); err != nil || req.Kind != "seed" {
+		if err := c.BodyParser(&req); err != nil || (req.Kind != "seed" && req.Kind != "animal") {
 			return fail(c, service.ErrInvalid)
 		}
-		if err := svc.UnlockSeed(c.UserContext(), req.Key); err != nil {
+		var err error
+		if req.Kind == "animal" {
+			err = svc.UnlockAnimal(c.UserContext(), req.Key)
+		} else {
+			err = svc.UnlockSeed(c.UserContext(), req.Key)
+		}
+		if err != nil {
 			return fail(c, err)
 		}
 		return respondState(c, svc, fiber.StatusCreated)
+	})
+
+	// Structures bought with 🪙: hives (placed beside a plot) and the Dog.
+	app.Post("/api/structures", func(c *fiber.Ctx) error {
+		var req struct {
+			Kind   string `json:"kind"`
+			PlotID int64  `json:"plot_id"`
+		}
+		if err := c.BodyParser(&req); err != nil {
+			return fail(c, service.ErrInvalid)
+		}
+		var err error
+		switch req.Kind {
+		case "hive":
+			err = svc.BuyHive(c.UserContext(), req.PlotID)
+		case "dog":
+			err = svc.BuyDog(c.UserContext())
+		default:
+			err = service.ErrInvalid
+		}
+		if err != nil {
+			return fail(c, err)
+		}
+		return respondState(c, svc, fiber.StatusCreated)
+	})
+
+	app.Post("/api/structures/:id/move", func(c *fiber.Ctx) error {
+		id, err := c.ParamsInt("id")
+		if err != nil {
+			return fail(c, service.ErrInvalid)
+		}
+		var req struct {
+			PlotID int64 `json:"plot_id"`
+		}
+		if err := c.BodyParser(&req); err != nil {
+			return fail(c, service.ErrInvalid)
+		}
+		if err := svc.MoveHive(c.UserContext(), int64(id), req.PlotID); err != nil {
+			return fail(c, err)
+		}
+		return respondState(c, svc, fiber.StatusOK)
 	})
 
 	app.Post("/api/plots/:id/clear", func(c *fiber.Ctx) error {
@@ -184,6 +231,10 @@ var statusOf = map[error]int{
 	service.ErrSiloEmpty:         fiber.StatusConflict,
 	service.ErrMaxedOut:          fiber.StatusConflict,
 	service.ErrNoRest:            fiber.StatusConflict,
+	service.ErrInsufficientCoins: fiber.StatusConflict,
+	service.ErrAlreadyOwned:      fiber.StatusConflict,
+	service.ErrCellTaken:         fiber.StatusConflict,
+	service.ErrAnimalLocked:      fiber.StatusForbidden,
 	service.ErrNeedsConfirmation: fiber.StatusConflict,
 }
 
