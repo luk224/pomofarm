@@ -1,14 +1,17 @@
 """E2E P1-07: aviso al terminar (sonido, notificación, toast, título), permiso en el primer Pomodoro, ajustes.
 
-Requiere backend (:8080) y Vite (:5173). Resetea la BD de desarrollo. Para no esperar 10 min se retrasa
+Se ejecuta con tools/e2e/run_isolated.sh (backend y Vite propios, BD temporal). Resetea la BD de desarrollo. Para no esperar 10 min se retrasa
 `started_at` en la BD y se dispara el evento `focus`, que es lo que hace el navegador al volver a la pestaña.
 Uso: python3 tools/e2e/p1_07_alerts.py
 """
 import json, os, subprocess, sys, urllib.request
 from playwright.sync_api import sync_playwright
 
-BASE = os.environ.get("POMOFARM_URL", "http://localhost:5173")
-DB = os.environ.get("POMOFARM_DB", "backend/data/pomofarm.db")
+if "POMOFARM_URL" not in os.environ:
+    sys.exit("Estos tests resetean la BD y no deben tocar tu partida. Ejecútalos con: tools/e2e/run_isolated.sh tools/e2e/<script>.py")
+
+BASE = os.environ["POMOFARM_URL"]
+DB = os.environ.get("POMOFARM_DB", "")
 fails = []
 def check(name, ok, detail=""):
     print(("PASS " if ok else "FAIL ") + name + (f"  [{detail}]" if detail else ""))

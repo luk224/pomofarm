@@ -92,9 +92,11 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P1-07a Permiso de Notification en el primer Pomodoro; alerta sonora suave
   - **Hecho:** al acabar con la pestaña en segundo plano llega aviso.
 
-- [ ] **P1-08** Verificación de Fase 1 — agente: `qa-tester` — dep: P1-01..P1-07
-  - [ ] P1-08a Criterios GDD §8: cierre/vuelta, dos dispositivos, hora del cliente alterada
-  - **Hecho:** informe de QA con resultados reales; bugs registrados como subtareas.
+- [x] **P1-08** Verificación de Fase 1 — agente: `qa-tester` — dep: P1-01..P1-07
+  - [x] P1-08a Criterios GDD §8: cierre/vuelta, dos dispositivos, hora del cliente alterada
+  - [x] P1-08b Bugs hallados y corregidos: doble clic en Plantar, aviso de conexión con 502, contrastes AA, dock en móvil (ver `docs/qa/fase-1.md`)
+  - [ ] P1-08c Probar WebKit/Safari (requiere `sudo apt-get install libmanette-0.2-0`) y, si se usa en iPhone, la web instalada como app
+  - **Hecho:** informe de QA con resultados reales en `docs/qa/fase-1.md`; bugs registrados como subtareas.
 
 ---
 
@@ -191,6 +193,7 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
 - [ ] **P5-02** Notificación "tu granja necesita atención" — agente: `backend-go`, `frontend-3d` — dep: P2-02
 - [ ] **P5-03** Suite de pruebas de tiempo completa — agente: `qa-tester` — dep: P2-01
 - [ ] **P5-04** Revisión de backups y restauración — agente: `devops` — dep: P0-05
+- [ ] **P5-06** Notificaciones con el navegador cerrado (Web Push) — agente: `backend-go`, `frontend-3d` — dep: P1-07 — *valorar si hace falta*
 - [ ] **P5-05** Despliegue final en `wyse` y cierre — agente: `devops` — dep: P5-04
   - [ ] P5-05a Despliegue estable con reinicio automático tras reiniciar `wyse`
   - [ ] P5-05b Backups corriendo en `wyse` y restauración probada allí

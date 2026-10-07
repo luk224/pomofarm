@@ -1,13 +1,16 @@
 """E2E P1-06: UI de juego completa (tutorial, plantar con etiqueta, atajos, cancelar, cosechar con clic, retirar, desbloquear, errores, móvil).
 
-Requiere backend (:8080) y Vite (:5173). Resetea la BD de desarrollo (backend/data/pomofarm.db).
+Se ejecuta con tools/e2e/run_isolated.sh (backend y Vite propios, BD temporal). Resetea la BD de desarrollo (backend/data/pomofarm.db).
 Uso: python3 tools/e2e/p1_06_ui.py
 """
 import json, os, subprocess, sys, urllib.request
 from playwright.sync_api import sync_playwright
 
-BASE = os.environ.get("POMOFARM_URL", "http://localhost:5173")
-DB = os.environ.get("POMOFARM_DB", "backend/data/pomofarm.db")
+if "POMOFARM_URL" not in os.environ:
+    sys.exit("Estos tests resetean la BD y no deben tocar tu partida. Ejecútalos con: tools/e2e/run_isolated.sh tools/e2e/<script>.py")
+
+BASE = os.environ["POMOFARM_URL"]
+DB = os.environ.get("POMOFARM_DB", "")
 OUT = "/tmp/pomofarm-e2e"; os.makedirs(OUT, exist_ok=True)
 fails = []
 def check(name, ok, detail=""):

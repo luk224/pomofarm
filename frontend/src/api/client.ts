@@ -22,6 +22,9 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   } catch {
     throw new ApiError(0, 'network')
   }
+  // 502/503/504 come from the proxy (Nginx/Vite) when the game server is down or restarting: that is a
+  // connection problem, whatever body the proxy sends.
+  if (res.status === 502 || res.status === 503 || res.status === 504) throw new ApiError(res.status, 'network')
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw new ApiError(res.status, typeof data?.error === 'string' ? data.error : 'unknown')
   return data as T

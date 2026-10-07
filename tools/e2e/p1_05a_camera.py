@@ -1,8 +1,11 @@
-"""E2E P1-05a: cámara isométrica con zoom (rueda), paneo (arrastre) y límites. Requiere Vite en :5173 (modo dev)."""
+"""E2E P1-05a: cámara isométrica con zoom (rueda), paneo (arrastre) y límites. Se ejecuta con tools/e2e/run_isolated.sh."""
 import os, sys
 from playwright.sync_api import sync_playwright
 
-BASE = os.environ.get("POMOFARM_URL", "http://localhost:5173")
+if "POMOFARM_URL" not in os.environ:
+    sys.exit("Estos tests resetean la BD y no deben tocar tu partida. Ejecútalos con: tools/e2e/run_isolated.sh tools/e2e/<script>.py")
+
+BASE = os.environ["POMOFARM_URL"]
 OUT = "/tmp/pomofarm-e2e"; os.makedirs(OUT, exist_ok=True)
 fails = []
 def check(name, ok, detail=""):

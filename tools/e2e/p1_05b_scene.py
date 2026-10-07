@@ -1,13 +1,16 @@
 """E2E P1-05b: plantas por etapa, presupuesto de triángulos, anillo del temporizador, madurez y movimiento reducido.
 
-Requiere backend (:8080) y Vite (:5173). Toca la BD de desarrollo (parcela 1) y la deja vacía.
+Se ejecuta con tools/e2e/run_isolated.sh (backend y Vite propios, BD temporal). Toca la BD de desarrollo (parcela 1) y la deja vacía.
 Uso: python3 tools/e2e/p1_05b_scene.py
 """
 import json, os, re, subprocess, sys, urllib.request
 from playwright.sync_api import sync_playwright
 
-BASE = os.environ.get("POMOFARM_URL", "http://localhost:5173")
-DB = os.environ.get("POMOFARM_DB", "backend/data/pomofarm.db")
+if "POMOFARM_URL" not in os.environ:
+    sys.exit("Estos tests resetean la BD y no deben tocar tu partida. Ejecútalos con: tools/e2e/run_isolated.sh tools/e2e/<script>.py")
+
+BASE = os.environ["POMOFARM_URL"]
+DB = os.environ.get("POMOFARM_DB", "")
 OUT = "/tmp/pomofarm-e2e"; os.makedirs(OUT, exist_ok=True)
 MAX_TRIS = 2000  # GDD §2: presupuesto por planta
 fails = []

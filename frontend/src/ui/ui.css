@@ -1,9 +1,10 @@
 :root {
   --ink: #3b2a1f;
-  --ink-soft: #6b5a4c;
+  --ink-soft: #5a4a3d;
   --leaf: #2f7d32;
   --leaf-hover: #276b2a;
-  --water: #1f84c9;
+  --water: #1f84c9;       /* gráficos y texto grande */
+  --water-deep: #17689f;  /* texto pequeño y fondos de botón: 6:1 sobre blanco */
   --sun: #ffc400;
   --kraft: #e6cf9f;
   --kraft-edge: #c9ad74;
@@ -79,7 +80,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
   min-height: 44px; box-sizing: border-box; padding: 0 14px; border: 0; border-radius: 14px;
   background: #fff; box-shadow: inset 0 0 0 2px #0002;
 }
-.field::placeholder { color: #8a7a6b; }
+.field::placeholder { color: #75665a; }
 .hint { margin: 0; font-size: 13px; color: var(--ink-soft); }
 
 /* ---------- seed packets: the one flourish ---------- */
@@ -102,13 +103,13 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 .packet__meta { font-size: 12px; color: var(--ink-soft); }
 .packet__stamp {
   position: absolute; right: -8px; top: -8px; display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px;
-  border-radius: 999px; background: #fff; border: 2px solid var(--water); font-size: 12px; font-weight: 600; color: var(--water);
+  border-radius: 999px; background: #fff; border: 2px solid var(--water-deep); font-size: 12px; font-weight: 600; color: var(--water-deep);
   transform: rotate(8deg); pointer-events: none;
 }
 .packet--locked .packet__body { filter: saturate(0.35) brightness(0.97); cursor: not-allowed; }
 .packet__unlock {
   box-sizing: border-box; width: 100%; min-height: 32px; padding: 0 6px; border: 0; border-radius: 999px; cursor: pointer;
-  font-weight: 600; font-size: 11.5px; background: var(--water); color: #fff;
+  font-weight: 600; font-size: 11.5px; background: var(--water-deep); color: #fff;
   display: inline-flex; align-items: center; justify-content: center; gap: 3px; white-space: nowrap;
 }
 .packet__unlock:disabled { background: #fff; color: var(--ink-soft); box-shadow: inset 0 0 0 2px #0002; cursor: not-allowed; }

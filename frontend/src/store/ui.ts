@@ -25,9 +25,10 @@ export const useUi = create<UiStore>((set, get) => ({
   selectSeed: (key) => set({ selectedSeed: key }),
   setTag: (tag) => set({ tag }),
   toast: (text, kind = 'info') => {
+    if (get().toasts.some((t) => t.text === text)) return // never stack identical messages
     const id = nextId++
     set({ toasts: [...get().toasts.slice(-2), { id, text, kind }] })
-    window.setTimeout(() => get().dismiss(id), kind === 'error' ? 6000 : 4000)
+    setTimeout(() => get().dismiss(id), kind === 'error' ? 6000 : 4000)
   },
   dismiss: (id) => set({ toasts: get().toasts.filter((t) => t.id !== id) }),
 }))

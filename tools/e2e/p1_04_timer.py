@@ -1,12 +1,15 @@
 """E2E P1-04: el temporizador sobrevive a recargas, ignora el reloj del navegador y se congela en pausa.
 
-Requiere el backend (:8080) y Vite (:5173) en marcha. Uso: python3 tools/e2e/p1_04_timer.py
+Se ejecuta con tools/e2e/run_isolated.sh (backend y Vite propios, BD temporal). Uso: python3 tools/e2e/p1_04_timer.py
 Deja capturas en /tmp/pomofarm-e2e/.
 """
 import json, os, re, sys, time, urllib.request
 from playwright.sync_api import sync_playwright
 
-BASE = os.environ.get("POMOFARM_URL", "http://localhost:5173")
+if "POMOFARM_URL" not in os.environ:
+    sys.exit("Estos tests resetean la BD y no deben tocar tu partida. Ejecútalos con: tools/e2e/run_isolated.sh tools/e2e/<script>.py")
+
+BASE = os.environ["POMOFARM_URL"]
 OUT = "/tmp/pomofarm-e2e"; os.makedirs(OUT, exist_ok=True)
 
 def call(method, path, body=None):

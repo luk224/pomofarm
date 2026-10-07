@@ -5,9 +5,9 @@ Sujeto: alguien que se concentra durante horas con la granja de fondo. **La UI s
 ## Tokens
 | Rol | Valor |
 | :--- | :--- |
-| Tinta (texto) | `#3b2a1f` |
+| Tinta (texto) | `#3b2a1f`; suave `#5a4a3d` (5,6:1 sobre kraft) |
 | Hoja (acción principal, anillo) | `#2f7d32` / hover `#276b2a` |
-| Agua (💧) | `#1f84c9` |
+| Agua (💧) | `#1f84c9` para gráficos y texto grande; `#17689f` para texto pequeño y fondos de botón (6:1) |
 | Sol (listo para cosechar) | `#ffc400` |
 | Kraft (sobres de semillas) | `#e6cf9f` / borde `#c9ad74` |
 | Panel | blanco 88 % con desenfoque, texto tinta |
