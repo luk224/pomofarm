@@ -95,7 +95,8 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
 - [x] **P1-08** Verificación de Fase 1 — agente: `qa-tester` — dep: P1-01..P1-07
   - [x] P1-08a Criterios GDD §8: cierre/vuelta, dos dispositivos, hora del cliente alterada
   - [x] P1-08b Bugs hallados y corregidos: doble clic en Plantar, aviso de conexión con 502, contrastes AA, dock en móvil (ver `docs/qa/fase-1.md`)
-  - [ ] P1-08c Probar WebKit/Safari (requiere `sudo apt-get install libmanette-0.2-0`) y, si se usa en iPhone, la web instalada como app
+  - [x] P1-08c WebKit 26.6 y Firefox 155 pasan el humo (carga, plantar, cuenta atrás, recarga, lienzo 3D)
+  - [ ] P1-08d Probar en el iPhone real por Tailscale (táctil, Safari, web instalada como app)
   - **Hecho:** informe de QA con resultados reales en `docs/qa/fase-1.md`; bugs registrados como subtareas.
 
 ---

@@ -1,6 +1,6 @@
 # Informe de QA — Fase 1 (MVP jugable)
 
-Fecha: 2026-10-07 · Commit base: `7490677` · Entorno: Chromium 1243 y Firefox 155 (Playwright), Go 1.26, Node 24, Docker 29.
+Fecha: 2026-10-07 · Commit base: `7490677` · Entorno: Chromium 1243, Firefox 155 y WebKit 26.6 (Playwright), Go 1.26, Node 24, Docker 29.
 Todos los E2E se ejecutan con `tools/e2e/run_isolated.sh` (backend y Vite propios, BD temporal), nunca contra la partida de desarrollo.
 
 ## Resultado
@@ -9,7 +9,7 @@ Todos los E2E se ejecutan con `tools/e2e/run_isolated.sh` (backend y Vite propio
 | :--- | :--- |
 | Tests Go (`go test ./... -race`) | 42 pasan, 0 fallan |
 | Tests frontend (vitest) | 44 pasan |
-| E2E (Playwright), 6 scripts | 111 comprobaciones pasan, 0 fallan, 1 omitida |
+| E2E (Playwright), 6 scripts | 115 comprobaciones pasan, 0 fallan, 0 omitidas |
 | Restauración en instalación limpia (`qa_restore.sh`) | 7 de 7 |
 | Lint (oxlint), `tsc -b`, build de producción | limpios |
 | `npm audit --omit=dev` | 0 vulnerabilidades |
@@ -39,10 +39,10 @@ Todos los E2E se ejecutan con `tools/e2e/run_isolated.sh` (backend y Vite propio
 Además, de proceso: los E2E reseteaban la BD de la partida de desarrollo y un test dejaba un backend huérfano. Ahora los scripts se niegan a ejecutarse fuera de `run_isolated.sh`, que usa BD temporal, puertos propios y comprueba que no queden procesos.
 
 ## Otras comprobaciones que pasan
-Teclado solo (Tab → elegir con Espacio → Plantar con Intro; foco visible de 3 px; Espacio en un botón no dispara el atajo global) · etiqueta con HTML mostrada como texto (sin XSS) · etiqueta con SQL guardada como texto · límite de 60 caracteres en cliente y servidor (400) · reinicio del backend a mitad de Pomodoro: el tiempo continúa (600 s → 597 s) y la UI se recupera sola · 360×640 sin scroll horizontal · Firefox: carga, planta, cuenta atrás, recarga y lienzo 3D sin errores · contraste AA en los 15 pares de color medidos.
+Teclado solo (Tab → elegir con Espacio → Plantar con Intro; foco visible de 3 px; Espacio en un botón no dispara el atajo global) · etiqueta con HTML mostrada como texto (sin XSS) · etiqueta con SQL guardada como texto · límite de 60 caracteres en cliente y servidor (400) · reinicio del backend a mitad de Pomodoro: el tiempo continúa (600 s → 597 s) y la UI se recupera sola · 360×640 sin scroll horizontal · Firefox y WebKit: carga, planta, cuenta atrás, recarga y lienzo 3D sin errores de consola · contraste AA en los 15 pares de color medidos.
 
 ## Limitaciones conocidas (no son fallos de esta fase)
-- **WebKit/Safari sin probar**: el sistema no tiene `libmanette-0.2-0` (`sudo apt-get install libmanette-0.2-0`).
+- **Safari en iPhone sin probar**: WebKit de escritorio pasa, pero iOS tiene reglas propias (p. ej. las notificaciones exigen instalar la web como app). Se comprobará con el móvil real.
 - **Sonido sin oír**: se verifica que se programa (8 osciladores) y que no puede saturar; la calidad al oído la juzga una persona.
 - **Segundo plano real**: se simula con `hasFocus`, no con una pestaña oculta durante minutos.
 - **Navegador cerrado**: no hay notificación (requeriría Web Push con servicio en el servidor).
