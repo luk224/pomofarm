@@ -33,49 +33,26 @@ func (s *Service) accrue(ctx context.Context, tx *sql.Tx, now time.Time) error {
 		return err
 	}
 
-	rows, err := tx.QueryContext(ctx, `SELECT id, grow_s, life_s, collected_to, wilts_at FROM plots
-		WHERE player_id = ? AND matured_at IS NOT NULL AND collected_to IS NOT NULL AND wilts_at IS NOT NULL
-		AND grow_s > 0 AND life_s > 0`, PlayerID)
+	farm, err := loadFarm(ctx, tx)
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
-	type counted struct {
-		id int64
-		to time.Time
-	}
-	var producers []game.Producer
-	var advance []counted
-	mult := prestigeMultiplier(season)
-	for rows.Next() {
-		var id, growS, lifeS int64
-		var collected, wilts string
-		if err := rows.Scan(&id, &growS, &lifeS, &collected, &wilts); err != nil {
-			return err
-		}
-		from, to := parseTime(collected), parseTime(wilts)
-		if now.Before(to) {
-			to = now
-		}
-		if !to.After(from) {
-			continue
-		}
-		producers = append(producers, game.Producer{MicroPerHour: game.ProducerMicroPerHour(growS, lifeS, mult), From: from, To: to})
-		advance = append(advance, counted{id, to})
-	}
-	if err := rows.Err(); err != nil {
-		return err
-	}
-	rows.Close()
-
+	// Synergies change whenever a neighbour matures or wilts, so the farm is counted piece by piece (game.FarmProducers).
+	producers := game.FarmProducers(farm, now, prestigeMultiplier(season), beeCells())
 	if len(producers) > 0 {
 		stock = stock.Accrue(producers, game.SiloCapacityHours(level, dog))
 		if _, err := tx.ExecContext(ctx, `UPDATE players SET silo_micro = ?, silo_peak_micro_h = ? WHERE id = ?`,
 			stock.Micro, stock.PeakMicroPerHour, PlayerID); err != nil {
 			return err
 		}
-		for _, a := range advance {
-			if _, err := tx.ExecContext(ctx, `UPDATE plots SET collected_to = ? WHERE id = ?`, fmtTime(a.to), a.id); err != nil {
+	}
+	for _, p := range farm { // move every plant's marker forward to now, or to its death if it died before
+		to := p.Wilts
+		if now.Before(to) {
+			to = now
+		}
+		if to.After(p.Collected) {
+			if _, err := tx.ExecContext(ctx, `UPDATE plots SET collected_to = ? WHERE id = ?`, fmtTime(to), p.ID); err != nil {
 				return err
 			}
 		}
@@ -89,6 +66,30 @@ func (s *Service) accrue(ctx context.Context, tx *sql.Tx, now time.Time) error {
 		_, err = collectSilo(ctx, tx)
 	}
 	return err
+}
+
+// beeCells: the plots covered by beehives (GDD §4.7). Beehives arrive with Phase 3; until then nothing is covered.
+func beeCells() map[[2]int]bool { return nil }
+
+// loadFarm reads every plot that holds (or held) a mature plant, with the times production depends on.
+func loadFarm(ctx context.Context, tx *sql.Tx) ([]game.FarmPlot, error) {
+	rows, err := tx.QueryContext(ctx, `SELECT id, x, y, COALESCE(plant_type, ''), grow_s, life_s, matured_at, wilts_at, collected_to FROM plots
+		WHERE player_id = ? AND matured_at IS NOT NULL AND wilts_at IS NOT NULL AND collected_to IS NOT NULL AND grow_s > 0 AND life_s > 0`, PlayerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var farm []game.FarmPlot
+	for rows.Next() {
+		var p game.FarmPlot
+		var matured, wilts, collected string
+		if err := rows.Scan(&p.ID, &p.X, &p.Y, &p.Crop, &p.GrowS, &p.LifeS, &matured, &wilts, &collected); err != nil {
+			return nil, err
+		}
+		p.Matured, p.Wilts, p.Collected = parseTime(matured), parseTime(wilts), parseTime(collected)
+		farm = append(farm, p)
+	}
+	return farm, rows.Err()
 }
 
 // prestigeMultiplier: +10% of 🪙 per completed season, applied above the per-plot cap (GDD §4.6, §4.9).
@@ -170,25 +171,16 @@ func siloView(ctx context.Context, tx *sql.Tx, now time.Time) (SiloState, error)
 	if err != nil {
 		return SiloState{}, err
 	}
-	rows, err := tx.QueryContext(ctx, `SELECT grow_s, life_s, wilts_at FROM plots WHERE player_id = ? AND matured_at IS NOT NULL
-		AND wilts_at IS NOT NULL AND grow_s > 0 AND life_s > 0`, PlayerID)
+	farm, err := loadFarm(ctx, tx)
 	if err != nil {
 		return SiloState{}, err
 	}
-	defer rows.Close()
 	var rate float64
-	for rows.Next() {
-		var growS, lifeS int64
-		var wilts string
-		if err := rows.Scan(&growS, &lifeS, &wilts); err != nil {
-			return SiloState{}, err
+	bonuses := game.CurrentBonuses(farm, now, beeCells())
+	for _, p := range farm {
+		if b, producing := bonuses[p.ID]; producing {
+			rate += game.ProducerMicroPerHour(p.GrowS, p.LifeS, b.Total*prestigeMultiplier(seas))
 		}
-		if parseTime(wilts).After(now) {
-			rate += game.ProducerMicroPerHour(growS, lifeS, prestigeMultiplier(seas))
-		}
-	}
-	if err := rows.Err(); err != nil {
-		return SiloState{}, err
 	}
 	hours := game.SiloCapacityHours(level, dog)
 	// Capacity follows the highest rate since the last collection, but show at least today's rate.

@@ -27,6 +27,14 @@ type PlotState struct {
 	MaturedAt *string `json:"matured_at"`
 	WiltsAt   *string `json:"wilts_at"`
 	Harvested bool    `json:"harvested"`
+	// Bonus is set only while the plant is producing: what its neighbours and patterns earn it.
+	Bonus *PlotBonus `json:"bonus"`
+}
+
+type PlotBonus struct {
+	Multiplier float64 `json:"multiplier"` // total applied to its production (synergies × prestige)
+	Neighbours int     `json:"neighbours"` // compatible orthogonal neighbours
+	Garden     bool    `json:"garden"`     // inside a Huerto completo
 }
 
 type PomodoroState struct {
@@ -49,6 +57,8 @@ type SeedState struct {
 	Reward      int    `json:"reward"`
 	LifeH       int    `json:"life_h"`
 	Unlocked    bool   `json:"unlocked"`
+	// Compatible are the two crops this one combines with (the ring of GDD §4.6).
+	Compatible []string `json:"compatible"`
 }
 
 // State is everything the client needs to draw the game. The client displays it
@@ -117,7 +127,7 @@ func (s *Service) State(ctx context.Context) (State, error) {
 		}
 		st.Seeds = make([]SeedState, 0, len(game.Crops))
 		for _, c := range game.Crops {
-			st.Seeds = append(st.Seeds, SeedState{c.Key, c.DurationMin, c.Unlock, c.Reward, c.LifeH, unlocked[c.Key]})
+			st.Seeds = append(st.Seeds, SeedState{c.Key, c.DurationMin, c.Unlock, c.Reward, c.LifeH, unlocked[c.Key], game.CompatibleWith(c.Key)})
 		}
 		silo, err := siloView(ctx, tx, now)
 		if err != nil {
@@ -161,6 +171,17 @@ func (s *Service) State(ctx context.Context) (State, error) {
 		}
 		if err := srows.Err(); err != nil {
 			return err
+		}
+		farm, err := loadFarm(ctx, tx)
+		if err != nil {
+			return err
+		}
+		bonuses := game.CurrentBonuses(farm, now, beeCells())
+		prestige := prestigeMultiplier(st.Player.Season)
+		for i := range st.Plots {
+			if b, ok := bonuses[st.Plots[i].ID]; ok {
+				st.Plots[i].Bonus = &PlotBonus{Multiplier: b.Total * prestige, Neighbours: b.Neighbours, Garden: b.Garden}
+			}
 		}
 		a, err := loadActive(ctx, tx)
 		if err != nil || a == nil {

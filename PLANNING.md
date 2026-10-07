@@ -128,7 +128,7 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P2-04b (añadida) Deslizante de Flow en la UI con vista previa servida por el backend (`GET /api/flow`); vida útil continua (sin truncar a horas); duración en horas en el temporizador, el anillo y el título
   - **Hecho:** tabla Flow del GDD §4.3 reproducida en test.
 
-- [ ] **P2-05** Sinergias — agente: `backend-go` — dep: P2-03
+- [~] **P2-05** Sinergias — agente: `backend-go` — dep: P2-03
   - [ ] P2-05a Anillo de compatibilidad, adyacencia +10%/vecino (tope +40%), Huerto completo +15%, tope ×2,0
   - **Hecho:** tests con mapas de ejemplo.
 

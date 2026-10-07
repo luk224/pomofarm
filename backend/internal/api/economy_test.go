@@ -193,7 +193,8 @@ func TestGDDExampleWithTheTwoSiloCaps(t *testing.T) {
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			e := newFreshEnv(t)
-			dbExec(t, e, `INSERT INTO plots (player_id, x, y) VALUES (1, 2, 1), (1, 1, 2)`)
+			// The GDD example assumes M = 1: put the plants far apart so no synergy applies (they have their own tests).
+			dbExec(t, e, `INSERT INTO plots (player_id, x, y) VALUES (1, 3, 3), (1, 3, 0)`)
 			now := e.clock.T
 			t0 := now.Format(time.RFC3339Nano)
 			ago := now.Add(-30 * time.Hour).Format(time.RFC3339Nano)
