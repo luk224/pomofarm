@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../store/game'
 import { useRemainingMs } from '../store/hooks'
 import { formatClock } from '../store/time'
+import { formatMultiplier } from '../store/bonus'
 import { formatLife, lifeLeftMs } from '../store/life'
 import { useUi } from '../store/ui'
 import { harvestPlot, plantSelected, plantTargetId, togglePause } from './actions'
@@ -131,7 +132,7 @@ function ClearDock({ plot }: { plot: PlotState }) {
       <p className="dock__msg">
         {withered
           ? 'Se marchitó. Retírala para sembrar de nuevo.'
-          : `Cosechada y produciendo 🪙${left !== null ? ` · se marchita en ${formatLife(left)}` : ''}.`}
+          : `Cosechada y produciendo 🪙${plot.bonus && plot.bonus.multiplier > 1 ? ` ${formatMultiplier(plot.bonus.multiplier)}` : ''}${left !== null ? ` · se marchita en ${formatLife(left)}` : ''}.`}
       </p>
       {withered ? (
         <button type="button" className="btn btn--primary" data-testid="clear" onClick={() => void clearPlot(id, false)}>

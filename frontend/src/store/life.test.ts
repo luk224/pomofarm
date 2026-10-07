@@ -3,7 +3,7 @@ import type { PlotState } from '../api/types'
 import { formatLife, lifeLeftMs, parseServerTime } from './life'
 
 const plot = (wilts: string | null): PlotState => ({
-  id: 1, x: 1, y: 1, state: 'mature', plant_type: 'daisy', matured_at: null, wilts_at: wilts, harvested: true,
+  id: 1, x: 1, y: 1, state: 'mature', plant_type: 'daisy', matured_at: null, wilts_at: wilts, harvested: true, bonus: null,
 })
 
 describe('parseServerTime', () => {

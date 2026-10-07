@@ -4,10 +4,12 @@ import { harvestPlot } from '../ui/actions'
 import { useRemainingMs } from '../store/hooks'
 import { growthFraction } from '../store/time'
 import type { PlotState } from '../api/types'
+import { bonusLabel } from '../store/bonus'
 import { effectivePlot } from '../ui/selection'
+import { BonusBadge } from './BonusBadge'
 import { Ground } from './Ground'
 import { palette as P } from './palette'
-import { isPlantKind } from './plants/kinds'
+import { isPlantKind, PLANT_HEIGHT } from './plants/kinds'
 import { PlantView } from './plants/PlantView'
 import { RingAnchor } from './RingAnchor'
 
@@ -49,6 +51,7 @@ function PlotView({ plot, growth, selected }: { plot: PlotState; growth: number;
   const kind = isPlantKind(plot.plant_type) ? plot.plant_type : null
   const mature = plot.state === 'mature' || plot.state === 'withered'
   const ready = (plot.state === 'mature' || plot.state === 'withered') && !plot.harvested
+  const label = bonusLabel(plot.bonus)
   return (
     <group position={[plot.x, 0, plot.y]}
       onClick={(e) => {
@@ -60,6 +63,9 @@ function PlotView({ plot, growth, selected }: { plot: PlotState; growth: number;
       onPointerOut={() => { document.body.style.cursor = '' }}>
       <Pad />
       {selected && <SelectionMarker />}
+      {kind && label && plot.state === 'mature' && (
+        <BonusBadge text={label} gold={!!plot.bonus?.garden} y={0.08 + PLANT_HEIGHT[kind] + (ready ? 0.62 : 0.42)} />
+      )}
       {kind && plot.state !== 'empty' && (
         <group position={[0, 0.08, 0]}>
           <PlantView kind={kind} growth={mature ? 1 : growth} mature={mature} withered={plot.state === 'withered'}

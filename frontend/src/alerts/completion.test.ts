@@ -3,7 +3,7 @@ import type { GameState, PlotState } from '../api/types'
 import { detectCompletion } from './completion'
 
 const plot = (over: Partial<PlotState> = {}): PlotState => ({
-  id: 1, x: 1, y: 1, state: 'growing', plant_type: 'daisy', matured_at: null, wilts_at: null, harvested: false, ...over,
+  id: 1, x: 1, y: 1, state: 'growing', plant_type: 'daisy', matured_at: null, wilts_at: null, harvested: false, bonus: null, ...over,
 })
 const state = (plots: PlotState[], active: boolean): GameState => ({
   server_time: 't',

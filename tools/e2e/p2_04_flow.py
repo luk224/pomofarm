@@ -33,7 +33,7 @@ with sync_playwright() as p:
     pg.goto(BASE); pg.wait_for_selector(".packet")
 
     check("el Manzano y el Roble están desbloqueados", pg.locator(".packet__unlock").count() == 2 and pg.locator(".packet__body:not([disabled])").count() == 3, f"{pg.locator('.packet__body:not([disabled])').count()} libres, {pg.locator('.packet__unlock').count()} por desbloquear")
-    oak = pg.get_by_role("radio", name=re.compile("Roble")); apple = pg.get_by_role("radio", name=re.compile("Manzano"))
+    oak = pg.get_by_role("radio", name=re.compile("^Roble")); apple = pg.get_by_role("radio", name=re.compile("^Manzano"))
     check("el sobre del Roble anuncia el rango 60–120 min", "60–120 min" in oak.inner_text(), oak.inner_text().replace("\n", " "))
     check("sin elegir el Roble no hay deslizante", pg.locator("[data-testid=flow]").count() == 0)
     apple.click(); check("el Manzano tiene duración fija: sin deslizante", pg.locator("[data-testid=flow]").count() == 0)
@@ -64,12 +64,12 @@ with sync_playwright() as p:
     btn(pg, "Cancelar").click(); pg.get_by_role("button", name="¿Cancelar? Se pierde la planta").click(); pg.wait_for_selector(".packet")
 
     # el Manzano: 45 min fijos
-    pg.get_by_role("radio", name=re.compile("Manzano")).click(); btn(pg, "Plantar").click(); pg.wait_for_selector("[data-testid=timer][data-status=running]")
+    pg.get_by_role("radio", name=re.compile("^Manzano")).click(); btn(pg, "Plantar").click(); pg.wait_for_selector("[data-testid=timer][data-status=running]")
     st = call("GET", "/api/state")["pomodoro"]; check("el Manzano planta 45 min (2700 s)", st["planned_s"] == 2700, str(st["planned_s"]))
     call("POST", "/api/pomodoros/active/cancel"); pg.reload(); pg.wait_for_selector(".packet")
 
     # móvil
-    pg.set_viewport_size({"width": 360, "height": 640}); pg.reload(); pg.wait_for_selector(".packet"); pg.get_by_role("radio", name=re.compile("Roble")).click(); pg.wait_for_selector("[data-testid=flow]")
+    pg.set_viewport_size({"width": 360, "height": 640}); pg.reload(); pg.wait_for_selector(".packet"); pg.get_by_role("radio", name=re.compile("^Roble")).click(); pg.wait_for_selector("[data-testid=flow]")
     fb = pg.locator("[data-testid=flow]").bounding_box(); db = pg.locator(".dock").bounding_box()
     check("360 px: el deslizante cabe en el dock", fb["x"] >= db["x"] and fb["x"] + fb["width"] <= db["x"] + db["width"] + 0.5, f"{fb['x']:.0f}-{fb['x']+fb['width']:.0f} en dock {db['x']:.0f}-{db['x']+db['width']:.0f}")
     check("360 px: el deslizante usa todo el ancho útil (≥ 280 px)", fb["width"] >= 280, f"{fb['width']:.0f} px")

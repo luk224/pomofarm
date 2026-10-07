@@ -3,7 +3,7 @@ import type { PlotState } from '../api/types'
 import { canClear, effectivePlot, needsHarvest } from './selection'
 
 const plot = (id: number, state: PlotState['state'], harvested = false): PlotState => ({
-  id, x: id, y: 0, state, plant_type: state === 'empty' ? null : 'daisy', matured_at: null, wilts_at: null, harvested,
+  id, x: id, y: 0, state, plant_type: state === 'empty' ? null : 'daisy', matured_at: null, wilts_at: null, harvested, bonus: null,
 })
 
 describe('effectivePlot', () => {

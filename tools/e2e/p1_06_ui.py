@@ -3,7 +3,7 @@
 Se ejecuta con tools/e2e/run_isolated.sh (backend y Vite propios, BD temporal). Resetea la BD de desarrollo (backend/data/pomofarm.db).
 Uso: python3 tools/e2e/p1_06_ui.py
 """
-import json, os, subprocess, sys, urllib.request
+import json, os, re, subprocess, sys, urllib.request
 from playwright.sync_api import sync_playwright
 
 if "POMOFARM_URL" not in os.environ:
@@ -102,7 +102,7 @@ with sync_playwright() as p:
     pg.get_by_role("button", name="Desbloquear Tomates por 8 gotas").click()
     pg.wait_for_function("document.querySelectorAll('.packet__unlock').length === 3")
     check("desbloquear descuenta 8 💧", pg.inner_text("[data-testid=focus]").strip() == "2", pg.inner_text("[data-testid=focus]"))
-    pg.get_by_role("radio", name="Tomates", exact=False).click(); btn(pg, "Plantar").click()
+    pg.get_by_role("radio", name=re.compile("^Tomates")).click(); btn(pg, "Plantar").click()
     pg.wait_for_selector("[data-testid=timer][data-status=running]")
     check("Tomates dura 25 min", pg.inner_text("[data-testid=timer]").startswith("24:") or pg.inner_text("[data-testid=timer]").startswith("25:"), pg.inner_text("[data-testid=timer]"))
     call("POST", "/api/pomodoros/active/cancel")

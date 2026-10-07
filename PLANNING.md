@@ -128,8 +128,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P2-04b (añadida) Deslizante de Flow en la UI con vista previa servida por el backend (`GET /api/flow`); vida útil continua (sin truncar a horas); duración en horas en el temporizador, el anillo y el título
   - **Hecho:** tabla Flow del GDD §4.3 reproducida en test.
 
-- [~] **P2-05** Sinergias — agente: `backend-go` — dep: P2-03
-  - [ ] P2-05a Anillo de compatibilidad, adyacencia +10%/vecino (tope +40%), Huerto completo +15%, tope ×2,0
+- [x] **P2-05** Sinergias — agente: `backend-go` — dep: P2-03
+  - [x] P2-05a Anillo de compatibilidad, adyacencia +10%/vecino (tope +40%), Huerto completo +15%, tope ×2,0
+  - [x] P2-05b (añadida) La liquidación corta la línea de tiempo en los eventos de los vecinos (el multiplicador cambia al madurar/marchitarse uno); insignias flotantes (+N%, doradas en Huerto completo), multiplicador en el dock y combinaciones en cada sobre
+  - [ ] P2-05c (pendiente de Fase 3) Abejas: `beeCells()` devuelve vacío hasta entonces; el cálculo ya admite +25% sin acumular
   - **Hecho:** tests con mapas de ejemplo.
 
 - [ ] **P2-06** Descansos — agente: `backend-go`, `frontend-3d` — dep: P1-06

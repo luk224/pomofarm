@@ -120,7 +120,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
   transform: rotate(var(--tilt)); transition: transform 0.18s cubic-bezier(0.3, 1.4, 0.5, 1); }
 .packet--selected { transform: translateY(-12px) rotate(0deg); }
 .packet__body {
-  position: relative; width: 104px; height: 112px; padding: 26px 6px 8px; box-sizing: border-box; cursor: pointer;
+  position: relative; width: 104px; height: 128px; padding: 26px 6px 8px; box-sizing: border-box; cursor: pointer;
   display: grid; justify-items: center; align-content: start; gap: 1px;
   background: var(--kraft); border: 2px solid var(--kraft-edge); border-radius: 4px 4px 8px 8px;
   box-shadow: 0 3px 0 var(--kraft-edge), 0 6px 10px #3b2a1f22;
@@ -131,6 +131,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
   clip-path: polygon(0 0, 100% 0, 100% 40%, 50% 100%, 0 40%);
 }
 .packet__name { font-weight: 600; font-size: 14px; line-height: 1.1; text-align: center; }
+.packet__pair { display: inline-flex; gap: 2px; margin-top: 1px; opacity: 0.9; }
 .packet__meta { font-size: 12px; color: var(--ink-soft); }
 .packet__stamp {
   position: absolute; right: -8px; top: -8px; display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px;

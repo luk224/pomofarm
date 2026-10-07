@@ -406,6 +406,7 @@ Pomodoros completados por semana, horas de foco por mes y si sigues abriendo la 
 8. Retirar una planta madura exige haberla cosechado antes (el 💧 nunca se pierde) y una confirmación en dos pasos; una marchita se retira gratis (3.1).
 9. Cobro de 🪙 manual: la producción va al Silo y se recoge con un toque; si se llena, la granja deja de producir hasta vaciarlo (3.4). El Perro Pastor lo recoge automáticamente (4.7), lo que le da una función además de las +12 h.
 10. Una planta marchita sin cosechar conserva su 💧: se puede cosechar tras marchitarse, y no se puede sembrar encima ni retirar hasta hacerlo. Retirar una marchita ya cosechada es gratis y sin confirmación (3.1, 3.4).
+11. Sinergias: solo las plantas que producen (maduras y vivas) dan y reciben bonos. Si un vecino aún crece o se marchita, el bono se apaga; el "Huerto completo" exige que las cuatro plantas del 2×2 estén produciendo y se paga una sola vez aunque la planta pertenezca a varios bloques (4.6).
 
 **Limitaciones de la simulación:** modelo agregado (no coloca plantas en el mapa), bonos de sinergia como medias supuestas, visitas frecuentes al día, sin multiplicador de prestigio, y ritmo de compra "voraz". Sirve para dimensionar precios, no para predecir jugadores reales. **Hace falta una semana de juego propio para recalibrar** antes de dar los precios por buenos.
 

@@ -11,6 +11,13 @@ export interface PlayerState {
   season: number
 }
 
+/** What a producing plant earns from its surroundings (GDD §4.6). */
+export interface PlotBonus {
+  multiplier: number
+  neighbours: number
+  garden: boolean
+}
+
 export interface PlotState {
   id: number
   x: number
@@ -20,6 +27,8 @@ export interface PlotState {
   matured_at: string | null
   wilts_at: string | null
   harvested: boolean
+  /** Present only while the plant is producing. */
+  bonus: PlotBonus | null
 }
 
 export interface SeedState {
@@ -29,6 +38,8 @@ export interface SeedState {
   reward: number
   life_h: number
   unlocked: boolean
+  /** The two crops this one combines with. */
+  compatible: string[]
 }
 
 export interface PomodoroState {
