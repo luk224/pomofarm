@@ -21,10 +21,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P0-02c `Makefile` (`make dev`, `make test`, `make build`) y `.gitignore`
   - **Hecho:** `make test` y `make build` pasan; `/api/health` devuelve 200; el frontend arranca.
 
-- [ ] **P0-03** Esquema de BD y migraciones — agente: `backend-go` — dep: P0-02
-  - [ ] P0-03a `migrations/0001_init.sql` con el esquema de GDD §5 (incluido `one_active_pomodoro`)
-  - [ ] P0-03b Runner de migraciones + tabla `schema_migrations`; SQLite en WAL
-  - [ ] P0-03c Test: aplica migraciones sobre BD vacía y rechaza un segundo Pomodoro activo
+- [x] **P0-03** Esquema de BD y migraciones — agente: `backend-go` — dep: P0-02
+  - [x] P0-03a `migrations/0001_init.sql` con el esquema de GDD §5 (incluido `one_active_pomodoro`)
+  - [x] P0-03b Runner de migraciones + tabla `schema_migrations`; SQLite en WAL
+  - [x] P0-03c Test: aplica migraciones sobre BD vacía y rechaza un segundo Pomodoro activo
   - **Hecho:** `go test ./internal/store/...` pasa.
 
 - [ ] **P0-04** Módulo de configuración de balance — agente: `game-designer` + `backend-go` — dep: P0-02
