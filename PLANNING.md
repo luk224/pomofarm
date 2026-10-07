@@ -123,7 +123,7 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P2-03c (añadida) Juego multi-parcela: la parcela seleccionada (clic en el 3D) decide qué ofrece el dock; orden de desbloqueo con el 2×2 central primero; tienda "Mejoras" con precios del servidor
   - **Hecho:** compras cuadran con las tablas del GDD.
 
-- [ ] **P2-04** Manzano, Roble y Modo Flow — agente: `backend-go` — dep: P2-03
+- [~] **P2-04** Manzano, Roble y Modo Flow — agente: `backend-go` — dep: P2-03
   - [ ] P2-04a Semillas 100/250 💧; Flow 60–120 min con 💧 = 25·(d/60)^1,5
   - **Hecho:** tabla Flow del GDD §4.3 reproducida en test.
 

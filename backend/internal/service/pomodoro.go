@@ -26,12 +26,12 @@ func (s *Service) Plant(ctx context.Context, req PlantRequest) error {
 	if !ok {
 		return ErrInvalid
 	}
-	durMin, lifeH := crop.DurationMin, crop.LifeH
+	durMin, lifeS := crop.DurationMin, int64(crop.LifeH)*3600
 	if crop.Key == "oak" && req.DurationMin != 0 {
 		if req.DurationMin < game.FlowMinMin || req.DurationMin > game.FlowMaxMin {
 			return ErrInvalid
 		}
-		durMin, lifeH = req.DurationMin, game.FlowLifeH(req.DurationMin)
+		durMin, lifeS = req.DurationMin, game.FlowLifeSeconds(req.DurationMin)
 	} else if req.DurationMin != 0 && req.DurationMin != crop.DurationMin {
 		return ErrInvalid
 	}
@@ -98,7 +98,7 @@ func (s *Service) Plant(ctx context.Context, req PlantRequest) error {
 		pid, _ := res.LastInsertId()
 		upd, err := tx.ExecContext(ctx, `UPDATE plots SET state = 'growing', plant_type = ?, planted_at = ?, grow_s = ?,
 			matured_at = NULL, harvested = 0, life_s = ?, wilts_at = NULL, collected_to = NULL, version = version + 1
-			WHERE id = ? AND version = ?`, crop.Key, fmtTime(now), plannedS, int64(lifeH)*3600, req.PlotID, version)
+			WHERE id = ? AND version = ?`, crop.Key, fmtTime(now), plannedS, lifeS, req.PlotID, version)
 		if err != nil {
 			return err
 		}

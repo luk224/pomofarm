@@ -25,6 +25,12 @@ func New(db *sql.DB, clock game.Clock) *fiber.App {
 		return c.JSON(fiber.Map{"status": "ok", "schema_version": v})
 	})
 
+	// The Flow table never changes while the server runs: clients may cache it.
+	app.Get("/api/flow", func(c *fiber.Ctx) error {
+		c.Set("Cache-Control", "public, max-age=3600")
+		return c.JSON(game.FlowTable())
+	})
+
 	app.Get("/api/state", func(c *fiber.Ctx) error {
 		st, err := svc.State(c.UserContext())
 		if err != nil {

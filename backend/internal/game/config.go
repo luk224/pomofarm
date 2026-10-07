@@ -143,8 +143,36 @@ func FlowReward(d int) int {
 	return int(math.Round(FlowRewardBase * math.Pow(float64(d)/FlowRefMin, FlowExp)))
 }
 
-// FlowLifeH is the useful life in hours of an Oak Flow session of d minutes.
+// FlowLifeH is the useful life in whole hours of an Oak Flow session of d minutes (for the GDD's round examples).
 func FlowLifeH(d int) int { return FlowLifeBaseH * d / FlowRefMin }
+
+// FlowLifeSeconds is the exact useful life of a Flow session: 108 h · d/60, with no truncation, so a 97-minute
+// session lives 174.6 h and not 174 h.
+func FlowLifeSeconds(d int) int64 { return int64(FlowLifeBaseH) * 3600 * int64(d) / FlowRefMin }
+
+// FlowRow is one line of the Flow table (GDD §4.3), served to the client so it never repeats the formula.
+type FlowRow struct {
+	DurationMin int     `json:"duration_min"`
+	Reward      int     `json:"reward"`
+	LifeH       float64 `json:"life_h"`
+	Yield       float64 `json:"yield"`
+	RestMin     int     `json:"rest_min"`
+}
+
+// FlowTable lists every whole minute of the Flow range.
+func FlowTable() []FlowRow {
+	rows := make([]FlowRow, 0, FlowMaxMin-FlowMinMin+1)
+	for d := FlowMinMin; d <= FlowMaxMin; d++ {
+		rows = append(rows, FlowRow{
+			DurationMin: d,
+			Reward:      FlowReward(d),
+			LifeH:       float64(FlowLifeSeconds(d)) / 3600,
+			Yield:       CycleYield(float64(d)),
+			RestMin:     RestMin(d),
+		})
+	}
+	return rows
+}
 
 // PlotCost is the 💧 cost of plot n (2..MaxPlots). Plot 1 is free (returns 0).
 func PlotCost(n int) int {
