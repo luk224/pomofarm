@@ -1,0 +1,29 @@
+name: pomofarm
+
+services:
+  app:
+    build: ./backend
+    restart: unless-stopped
+    volumes:
+      - data:/data
+      - backups:/backups
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      # POMOFARM_BIND: local = 127.0.0.1 (default); in wyse = its Tailscale IP, so nothing is exposed to the LAN/internet.
+      - "${POMOFARM_BIND:-127.0.0.1}:${POMOFARM_PORT:-8080}:80"
+
+volumes:
+  data:
+  backups:
