@@ -134,8 +134,9 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [ ] P2-05c (pendiente de Fase 3) Abejas: `beeCells()` devuelve vacío hasta entonces; el cálculo ya admite +25% sin acumular
   - **Hecho:** tests con mapas de ejemplo.
 
-- [~] **P2-06** Descansos — agente: `backend-go`, `frontend-3d` — dep: P1-06
-  - [ ] P2-06a Descanso proporcional, saltable y configurable (GDD §3.2)
+- [x] **P2-06** Descansos — agente: `backend-go`, `frontend-3d` — dep: P1-06
+  - [x] P2-06a Descanso proporcional, saltable y configurable (GDD §3.2)
+  - [x] P2-06b (añadida) Descanso en el servidor (migración 0003), ventana de 15 min, aviso al terminar con cuenco y notificación, ajustes de activación y de las tres duraciones; el audio se desbloquea con el primer gesto de cualquier tipo
   - **Hecho:** descanso aparece tras cosechar y se puede saltar.
 
 - [ ] **P2-07** Granja 3D completa — agente: `frontend-3d` — dep: P2-03

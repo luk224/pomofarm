@@ -84,6 +84,13 @@ export interface ShopState {
   silo_upgrade: SiloOffer | null
 }
 
+/** The optional break after a Pomodoro (GDD §3.2). */
+export interface RestState {
+  total_s: number
+  remaining_ms: number
+  ends_at: string
+}
+
 export interface GameState {
   server_time: string
   player: PlayerState
@@ -92,6 +99,7 @@ export interface GameState {
   pomodoro: PomodoroState | null
   silo: SiloState
   shop: ShopState
+  rest: RestState | null
   recent_tags: string[]
   settings: Record<string, string>
 }

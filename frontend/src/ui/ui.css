@@ -107,6 +107,25 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 .field::placeholder { color: #75665a; }
 .hint { margin: 0; font-size: 13px; color: var(--ink-soft); }
 
+/* ---------- rest ---------- */
+.rest { width: min(460px, 100%); box-sizing: border-box; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 12px;
+  padding: 8px 8px 10px 14px; border-radius: 18px; background: var(--panel); backdrop-filter: blur(8px); box-shadow: 0 6px 24px #3b2a1f26; }
+.rest__text { display: grid; line-height: 1.1; }
+.rest__label { font-size: 12px; color: var(--ink-soft); }
+.rest__time { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.rest > svg { grid-area: 1 / 1; }
+.rest__text { grid-area: 1 / 2; }
+.rest .btn { grid-area: 1 / 3; }
+.rest__bar { grid-area: 2 / 1 / 3 / -1; height: 6px; border-radius: 999px; background: #3b2a1f1f; overflow: hidden; }
+.rest__bar span { display: block; height: 100%; border-radius: 999px; background: var(--leaf); transition: width 1s linear; }
+.rest .btn { min-height: 44px; }
+
+.restset { margin: 0; padding: 10px 0 0; border: 0; border-top: 1px solid #3b2a1f1f; display: grid; gap: 6px; }
+.restset legend { padding: 0 6px 0 0; font-weight: 600; font-size: 14px; float: left; width: 100%; }
+.restfield { display: grid; grid-template-columns: 1fr 64px auto; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-soft); }
+.restfield input { box-sizing: border-box; width: 100%; min-height: 40px; padding: 0 8px; border: 0; border-radius: 12px; background: #fff;
+  box-shadow: inset 0 0 0 2px #0002; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; }
+
 /* ---------- Flow slider (Oak) ---------- */
 .flow { display: grid; gap: 2px; }
 .flow__label { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-soft); }

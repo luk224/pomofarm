@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useGame } from './game'
+import { restRemainingMs } from './rest'
 import { remainingMs } from './time'
 
 const SYNC_EVERY_MS = 30_000
@@ -46,5 +47,25 @@ export function useRemainingMs(): number | null {
     if (pomodoro?.status === 'running' && ms === 0) void refresh()
   }, [pomodoro?.status, ms, refresh])
 
+  return ms
+}
+
+/** Milliseconds of rest left (null if none). Repaints every second; asks the server to settle when it reaches zero. */
+export function useRestRemainingMs(): number | null {
+  const rest = useGame((s) => s.state?.rest ?? null)
+  const fetchedAt = useGame((s) => s.fetchedAt)
+  const refresh = useGame((s) => s.refresh)
+  const [now, setNow] = useState(() => performance.now())
+
+  useEffect(() => {
+    if (!rest) return
+    const id = window.setInterval(() => setNow(performance.now()), 1000)
+    return () => window.clearInterval(id)
+  }, [rest])
+
+  const ms = rest ? restRemainingMs(rest, fetchedAt, Math.max(now, fetchedAt)) : null
+  useEffect(() => {
+    if (ms === 0) void refresh()
+  }, [ms, refresh])
   return ms
 }

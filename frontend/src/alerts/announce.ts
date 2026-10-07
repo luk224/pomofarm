@@ -40,3 +40,22 @@ export function announceCompletion(c: Completion): void {
     }
   }
 }
+
+/** The optional rest ended by itself: a gentle invitation, never a demand. */
+export function announceRestEnd(): void {
+  useUi.getState().toast('Descanso terminado. Cuando quieras, siembra otro Pomodoro.')
+  const prefs = usePrefs.getState()
+  if (prefs.sound) playBowl(0.7)
+  const away = document.hidden || !document.hasFocus()
+  if (prefs.notify && away && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    try {
+      const n = new Notification('Descanso terminado', { body: 'Cuando quieras, siembra otro Pomodoro.', tag: 'pomofarm-rest', silent: true })
+      n.onclick = () => {
+        window.focus()
+        n.close()
+      }
+    } catch {
+      /* the in-page toast remains */
+    }
+  }
+}

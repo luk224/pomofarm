@@ -13,6 +13,7 @@ const MESSAGES: Record<string, string> = {
   already_harvested: 'Esa planta ya está cosechada.',
   harvest_first: 'Cosecha la planta antes de retirarla.',
   needs_confirmation: 'Confirma para retirar la planta.',
+  no_rest: 'No hay ningún descanso en marcha.',
   maxed_out: 'Ya lo tienes todo en el máximo.',
   silo_empty: 'El Silo está vacío: aún no ha producido nada que recoger.',
   wrong_state: 'Eso ya está hecho.',

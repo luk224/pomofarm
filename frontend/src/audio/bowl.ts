@@ -64,3 +64,19 @@ export function playBowl(volume = 1): boolean {
   }
   return true
 }
+
+/**
+ * Browsers only start audio after a user gesture, and a reload forgets it. Any first click or key press is a
+ * gesture, so the alerts (end of Pomodoro or rest) work even if the player never planted in this page load.
+ * Returns a function that removes the listeners.
+ */
+export function unlockAudioOnFirstGesture(): () => void {
+  const events = ['pointerdown', 'keydown'] as const
+  const unlock = () => {
+    unlockAudio()
+    off()
+  }
+  const off = () => events.forEach((e) => window.removeEventListener(e, unlock, true))
+  events.forEach((e) => window.addEventListener(e, unlock, true))
+  return off
+}

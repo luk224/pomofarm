@@ -1,4 +1,6 @@
 import { Canvas } from '@react-three/fiber'
+import { useEffect } from 'react'
+import { unlockAudioOnFirstGesture } from './audio/bowl'
 import { Farm } from './scene/Farm'
 import { Gallery } from './scene/Gallery'
 import { IsoCamera } from './scene/IsoCamera'
@@ -16,6 +18,7 @@ export default function App() {
   useGameSync()
   useShortcuts()
   useCompletionAlerts()
+  useEffect(() => unlockAudioOnFirstGesture(), [])
   const gallery = import.meta.env.DEV && new URLSearchParams(location.search).get('lab') === 'plants'
   return (
     <>

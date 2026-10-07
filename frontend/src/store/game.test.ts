@@ -3,7 +3,7 @@ import type { GameState } from '../api/types'
 
 vi.mock('../api/client', async (orig) => {
   const real = await orig<typeof import('../api/client')>()
-  return { ...real, api: { buyPlot: vi.fn(), upgradeSilo: vi.fn(), collectSilo: vi.fn(), state: vi.fn(), plant: vi.fn(), pause: vi.fn(), resume: vi.fn(), cancel: vi.fn(), harvest: vi.fn(), clearPlot: vi.fn(), setSetting: vi.fn(), unlockSeed: vi.fn() } }
+  return { ...real, api: { skipRest: vi.fn(), buyPlot: vi.fn(), upgradeSilo: vi.fn(), collectSilo: vi.fn(), state: vi.fn(), plant: vi.fn(), pause: vi.fn(), resume: vi.fn(), cancel: vi.fn(), harvest: vi.fn(), clearPlot: vi.fn(), setSetting: vi.fn(), unlockSeed: vi.fn() } }
 })
 
 import { api } from '../api/client'
@@ -15,6 +15,7 @@ const empty: GameState = {
   plots: [], seeds: [], pomodoro: null, recent_tags: [], settings: {},
   silo: { content_milli: 0, capacity_milli: 0, capacity_hours: 12, rate_milli_per_h: 0, full: false },
   shop: { plots_owned: 1, plots_max: 16, next_plot: null, silo_upgrade: null },
+  rest: null,
 }
 const later = <T,>(v: T, ms = 20) => new Promise<T>((r) => setTimeout(() => r(v), ms))
 

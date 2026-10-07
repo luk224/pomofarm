@@ -11,6 +11,7 @@ import type { PlotState } from '../api/types'
 import { canClear, effectivePlot, needsHarvest } from './selection'
 import { SeedPacket } from './SeedPacket'
 import { FlowSlider } from './FlowSlider'
+import { RestBanner } from './RestBanner'
 import { Tutorial } from './Tutorial'
 
 const TILTS = [-2.2, 1.6, -1.2, 2.2, -1.8]
@@ -157,6 +158,7 @@ export function Dock() {
   return (
     <div className="dockwrap">
       <Tutorial />
+      <RestBanner />
       {mode === 'running' && <RunningDock />}
       {mode === 'ready' && plot && <ReadyDock plot={plot} />}
       {mode === 'clear' && plot && <ClearDock plot={plot} />}

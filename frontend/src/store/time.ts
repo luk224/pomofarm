@@ -24,8 +24,11 @@ export function formatClock(ms: number): string {
 }
 
 /** Tab title: the time left while a Pomodoro is active (GDD §2). */
-export function tabTitle(p: PomodoroState | null, ms: number, ready = false): string {
-  if (!p) return ready ? '✔ Lista para cosechar · PomoFarm' : 'PomoFarm'
+export function tabTitle(p: PomodoroState | null, ms: number, ready = false, restMs: number | null = null): string {
+  if (!p) {
+    if (restMs !== null && restMs > 0) return `☕ ${formatClock(restMs)} · PomoFarm`
+    return ready ? '✔ Lista para cosechar · PomoFarm' : 'PomoFarm'
+  }
   const icon = p.status === 'paused' ? '⏸' : '⏱'
   return `${icon} ${formatClock(ms)} · PomoFarm`
 }

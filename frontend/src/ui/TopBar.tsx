@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useGame } from '../store/game'
-import { useRemainingMs } from '../store/hooks'
+import { useRemainingMs, useRestRemainingMs } from '../store/hooks'
 import { tabTitle } from '../store/time'
 import { formatCoins } from '../store/economy'
 import { CoinIcon, DropIcon } from './icons'
@@ -10,12 +10,13 @@ import { Shop } from './Shop'
 export function TopBar() {
   const state = useGame((s) => s.state)
   const ms = useRemainingMs()
+  const restMs = useRestRemainingMs()
   const pomodoro = state?.pomodoro ?? null
   const ready = !!state?.plots.some((p) => p.state === 'mature' && !p.harvested)
 
   useEffect(() => {
-    document.title = tabTitle(pomodoro, ms ?? 0, ready)
-  }, [pomodoro, ms, ready])
+    document.title = tabTitle(pomodoro, ms ?? 0, ready, restMs)
+  }, [pomodoro, ms, ready, restMs])
 
   if (!state) return null
   return (

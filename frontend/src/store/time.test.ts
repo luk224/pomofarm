@@ -52,6 +52,12 @@ describe('tabTitle', () => {
     expect(tabTitle({ ...base, status: 'paused' }, 125_000)).toBe('⏸ 2:05 · PomoFarm')
   })
   it('is plain when idle', () => expect(tabTitle(null, 0)).toBe('PomoFarm'))
+  it('shows the rest countdown when there is no Pomodoro', () => {
+    expect(tabTitle(null, 0, false, 272_000)).toBe('☕ 4:32 · PomoFarm')
+    expect(tabTitle(null, 0, true, 272_000)).toBe('☕ 4:32 · PomoFarm')
+    expect(tabTitle(null, 0, true, 0)).toBe('✔ Lista para cosechar · PomoFarm')
+    expect(tabTitle(base, 125_000, false, 272_000)).toBe('⏱ 2:05 · PomoFarm')
+  })
   it('says when a plant is ready, as a visual alert for muted players', () => expect(tabTitle(null, 0, true)).toBe('✔ Lista para cosechar · PomoFarm'))
 })
 

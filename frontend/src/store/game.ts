@@ -18,6 +18,7 @@ interface GameStore {
   collectSilo: () => Promise<number>
   unlockSeed: (key: string) => Promise<void>
   buyPlot: () => Promise<void>
+  skipRest: () => Promise<void>
   upgradeSilo: () => Promise<void>
   clearPlot: (plotId: number, confirm: boolean) => Promise<void>
   setSetting: (key: string, value: string) => Promise<void>
@@ -77,6 +78,7 @@ export const useGame = create<GameStore>((set) => {
     cancel: () => act(() => api.cancel()),
     unlockSeed: (key) => act(() => api.unlockSeed(key)),
     buyPlot: () => act(() => api.buyPlot()),
+    skipRest: () => act(() => api.skipRest()),
     upgradeSilo: () => act(() => api.upgradeSilo()),
     clearPlot: (plotId, confirm) => act(() => api.clearPlot(plotId, confirm)),
     setSetting: (key, value) => act(() => api.setSetting(key, value)),
