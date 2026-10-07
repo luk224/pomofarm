@@ -93,7 +93,7 @@ with sync_playwright() as p:
 
     # --- retirar en dos pasos ---
     btn(pg, "Retirar planta").click(); check("Retirar pide confirmación", "¿Seguro?" in pg.inner_text(".dock"))
-    pg.get_by_role("button", name="¿Seguro? Se quita la planta").click(); pg.wait_for_selector(".packet")
+    pg.get_by_role("button", name="¿Seguro? Deja de producir").click(); pg.wait_for_selector(".packet")
     check("tras retirar vuelve a poder sembrar", btn(pg, "Plantar").is_visible())
 
     # --- desbloquear con 💧 y plantar tomates ---

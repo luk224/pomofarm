@@ -328,7 +328,9 @@ No hay *cron jobs*. Al conectar, el servidor hace lo siguiente:
 2. Reúne los **eventos** de la ventana `[last_seen_at, ahora]`: cada planta madura en `matured_at` y se marchita en `wilts_at`.
 3. Recorre los tramos entre eventos; en cada uno, `ritmo = Σ g · M` de las plantas vivas.
 4. El tope del Silo es `cap_monedas = horas_silo × ritmo_máximo_de_la_ventana`. En cada tramo: `acumulado = min(acumulado + ritmo·Δt, cap_monedas)`.
-5. Ingresa el acumulado y actualiza `last_seen_at`.
+5. Guarda el acumulado **en el Silo** (no en el saldo): el jugador lo recoge con un toque y el Perro Pastor lo hace solo (decisión 9). Actualiza `last_seen_at`.
+
+El contenido del Silo se guarda en millonésimas de moneda y el tope usa el ritmo máximo visto *desde la última recogida* (no solo en esta ventana), de modo que liquidar una vez o mil veces da el mismo resultado.
 
 **Ejemplo** (M = 1, ausencia de 30 h, 3 plantas vivas): Tomates (2,89 🪙/h, se marchita a las 6 h), Girasol (3,53 🪙/h, a las 20 h) y Manzano (4,16 🪙/h, vive todo el tramo).
 
@@ -338,7 +340,7 @@ No hay *cron jobs*. Al conectar, el servidor hace lo siguiente:
 | 6–20 h | 7,69 🪙/h | 107,7 |
 | 20–30 h | 4,16 🪙/h | 41,6 |
 
-Sin tope: 212,7 🪙. Con Silo de 24 h, `cap = 24 × 10,58 = 253,9` → no trunca, se ingresan **212,7 🪙**. Con Silo de 12 h, `cap = 127,0` → el silo se llena a las ≈ 14,3 h y se ingresan **127,0 🪙**.
+Sin tope: 212,7 🪙 (con las tasas redondeadas a dos decimales; con las exactas de 4.3 sale 212,9). Con Silo de 24 h, `cap = 24 × 10,58 = 253,9` → no trunca, se ingresan **212,7 🪙**. Con Silo de 12 h, `cap = 127,0` → el silo se llena a las ≈ 14,3 h y se ingresan **127,0 🪙**.
 
 Casos límite a cubrir con pruebas: reloj del sistema retrocedido (delta = 0), planta que madura y se marchita dentro de la misma ausencia, Silo ya lleno, ausencia de meses.
 
@@ -402,6 +404,7 @@ Pomodoros completados por semana, horas de foco por mes y si sigues abriendo la 
 6. Animales: desbloqueo con 💧, compra con 🪙 (4.7), para reconciliar dos frases del GDD original que se contradecían.
 7. Perro Pastor = +12 h de Silo (el original solo decía "extiende la capacidad").
 8. Retirar una planta madura exige haberla cosechado antes (el 💧 nunca se pierde) y una confirmación en dos pasos; una marchita se retira gratis (3.1).
+9. Cobro de 🪙 manual: la producción va al Silo y se recoge con un toque; si se llena, la granja deja de producir hasta vaciarlo (3.4). El Perro Pastor lo recoge automáticamente (4.7), lo que le da una función además de las +12 h.
 
 **Limitaciones de la simulación:** modelo agregado (no coloca plantas en el mapa), bonos de sinergia como medias supuestas, visitas frecuentes al día, sin multiplicador de prestigio, y ritmo de compra "voraz". Sirve para dimensionar precios, no para predecir jugadores reales. **Hace falta una semana de juego propio para recalibrar** antes de dar los precios por buenos.
 

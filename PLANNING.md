@@ -103,12 +103,12 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
 
 ## Fase 2 — Economía y granja
 
-- [~] **P2-01** Resolución offline de monedas — agente: `backend-go` — dep: P1-03
+- [x] **P2-01** Resolución offline de monedas — agente: `backend-go` — dep: P1-03
   - [x] P2-01a Algoritmo por tramos con eventos madura/marchita y tope de Silo (GDD §6.2), 🪙 en milésimas
   - [x] P2-01b Tests: ejemplo 6.2 (212,7 y 127,0), Silo lleno, ausencia 90 días, madura+marchita en la misma ausencia, reloj retrocedido
   - [x] P2-01c Integrar al conectar y heartbeat de `last_seen_at`
   - [x] P2-01d (decisión) Cobro manual con el Silo: las 🪙 van al Silo y se recogen con un toque; el Perro lo hará solo. Migración 0002 (`silo_micro`, `silo_peak_micro_h`), `POST /api/silo/collect`, `silo` en el estado
-  - [ ] P2-01e UI mínima: saldo de 🪙, barra del Silo y botón Recoger (el resto de la granja 3D llega en P2-07)
+  - [x] P2-01e UI mínima: saldo de 🪙, barra del Silo y botón Recoger (el resto de la granja 3D llega en P2-07)
   - **Hecho:** todos los casos del GDD §6.2 pasan.
 
 - [ ] **P2-02** Vida útil y marchitamiento — agente: `backend-go` — dep: P2-01

@@ -108,9 +108,9 @@ function ClearDock() {
   const confirm = useConfirm(() => id !== null && void clearPlot(id, true))
   return (
     <div className="dock dock--clear">
-      <p className="dock__msg">Cosechada. Retírala para sembrar de nuevo.</p>
+      <p className="dock__msg">Cosechada y produciendo 🪙. Retírala para sembrar de nuevo.</p>
       <button type="button" className={`btn ${confirm.armed ? 'btn--danger' : 'btn--primary'}`} data-testid="clear" onClick={confirm.press}>
-        {confirm.armed ? '¿Seguro? Se quita la planta' : 'Retirar planta'}
+        {confirm.armed ? '¿Seguro? Deja de producir' : 'Retirar planta'}
       </button>
     </div>
   )

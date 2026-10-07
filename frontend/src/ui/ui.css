@@ -55,6 +55,19 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 .check input { width: 20px; height: 20px; accent-color: var(--leaf); }
 .panelbox .hint { margin: 0; }
 
+/* ---------- silo ---------- */
+.silo { position: fixed; top: 12px; right: 12px; width: 216px; box-sizing: border-box; padding: 10px 12px 12px; border-radius: 18px;
+  background: var(--panel); backdrop-filter: blur(8px); box-shadow: 0 6px 24px #3b2a1f26; display: grid; gap: 6px; }
+.silo__head { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 18px; font-variant-numeric: tabular-nums; }
+.silo__amount small { font-size: 13px; font-weight: 500; color: var(--ink-soft); }
+.silo__bar { height: 10px; border-radius: 999px; background: #3b2a1f1f; overflow: hidden; }
+.silo__bar span { display: block; height: 100%; border-radius: 999px; background: var(--leaf); transition: width 0.9s linear; }
+.silo--full .silo__bar span { background: var(--sun); }
+.silo__note { margin: 0; font-size: 13px; color: var(--ink-soft); }
+.silo--full .silo__note { color: var(--ink); font-weight: 600; }
+.silo .btn { min-height: 44px; }
+.toast--coin { background: var(--sun); color: var(--ink); font-size: 22px; font-weight: 600; padding: 8px 20px; border-radius: 999px; animation: reward-pop 0.5s cubic-bezier(0.3, 1.5, 0.5, 1); }
+
 /* ---------- dock ---------- */
 .dockwrap {
   position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%);
@@ -138,6 +151,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 
 /* ---------- small screens ---------- */
 @media (max-width: 640px) {
+  .silo { top: 58px; left: 12px; right: 12px; width: auto; grid-template-columns: 1fr auto; align-items: center; column-gap: 12px; padding: 8px 12px; }
+  .silo__bar, .silo__note { grid-column: 1; }
+  .silo .btn { grid-column: 2; grid-row: 1 / span 3; }
   .dock--idle { flex-direction: column; align-items: stretch; }
   .plant { min-width: 0; grid-template-columns: 1fr auto; }
   .plant .hint { grid-column: 1 / -1; }

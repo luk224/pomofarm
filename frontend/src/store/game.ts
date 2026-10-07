@@ -14,6 +14,8 @@ interface GameStore {
   resume: () => Promise<void>
   cancel: () => Promise<void>
   harvest: (plotId: number) => Promise<number>
+  /** Empties the Silo into the balance; resolves with the thousandths collected (0 if it failed). */
+  collectSilo: () => Promise<number>
   unlockSeed: (key: string) => Promise<void>
   clearPlot: (plotId: number, confirm: boolean) => Promise<void>
   setSetting: (key: string, value: string) => Promise<void>
@@ -74,6 +76,19 @@ export const useGame = create<GameStore>((set) => {
     unlockSeed: (key) => act(() => api.unlockSeed(key)),
     clearPlot: (plotId, confirm) => act(() => api.clearPlot(plotId, confirm)),
     setSetting: (key, value) => act(() => api.setSetting(key, value)),
+    collectSilo: async () => {
+      let got = 0
+      await exclusive(async () => {
+        try {
+          const r = await api.collectSilo()
+          apply(r.state)
+          got = r.collected_milli
+        } catch (e) {
+          fail(e)
+        }
+      })
+      return got
+    },
     harvest: async (plotId) => {
       let reward = 0
       await exclusive(async () => {

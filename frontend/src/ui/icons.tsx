@@ -60,6 +60,26 @@ export function SeedArt({ kind, size = 44 }: { kind: string; size?: number }) {
   )
 }
 
+export function CoinIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <circle cx="8" cy="8" r="7" fill="#e6a700" />
+      <circle cx="8" cy="8" r="5.4" fill="#ffc400" />
+      <path d="M8 4.6v6.8M6 6.4h3a1 1 0 0 1 0 2H7a1 1 0 0 0 0 2h3" stroke="#a87400" strokeWidth="1.1" strokeLinecap="round" fill="none" />
+    </svg>
+  )
+}
+
+export function SiloIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+      <path d="M4 8.5C4 5 6.5 3 10 3s6 2 6 5.5V17H4z" fill="#d9bd85" stroke="#a8874a" strokeWidth="1.2" />
+      <path d="M4 10h12M4 13.5h12" stroke="#a8874a" strokeWidth="1" />
+      <rect x="8" y="14" width="4" height="3" rx="0.6" fill="#7a4a2a" />
+    </svg>
+  )
+}
+
 export function DropIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden="true" focusable="false">

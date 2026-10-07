@@ -43,12 +43,22 @@ export interface PomodoroState {
   tag: string | null
 }
 
+export interface SiloState {
+  content_milli: number
+  capacity_milli: number
+  capacity_hours: number
+  /** What the farm produces right now, in thousandths of a coin per hour. */
+  rate_milli_per_h: number
+  full: boolean
+}
+
 export interface GameState {
   server_time: string
   player: PlayerState
   plots: PlotState[]
   seeds: SeedState[]
   pomodoro: PomodoroState | null
+  silo: SiloState
   recent_tags: string[]
   settings: Record<string, string>
 }

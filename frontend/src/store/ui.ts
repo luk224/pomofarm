@@ -3,7 +3,7 @@ import { create } from 'zustand'
 export interface Toast {
   id: number
   text: string
-  kind: 'info' | 'reward' | 'error'
+  kind: 'info' | 'reward' | 'coin' | 'error'
 }
 
 interface UiStore {

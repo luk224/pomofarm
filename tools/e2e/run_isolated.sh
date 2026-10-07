@@ -15,12 +15,16 @@ for port in $API_PORT $WEB_PORT; do
   fi
 done
 D=$(mktemp -d /tmp/pomofarm-qa.XXXXXX)
-cleanup() { [ -n "${WEB_PID:-}" ] && kill -- "-$WEB_PID" 2>/dev/null; kill "${API_PID:-}" 2>/dev/null; rm -rf "$D"; }
+cleanup() { [ -n "${WEB_PID:-}" ] && kill -- "-$WEB_PID" 2>/dev/null; [ -n "${API_PID:-}" ] && kill -- "-$API_PID" 2>/dev/null; rm -rf "$D"; }
 trap cleanup EXIT
 
 (cd backend && go build -o "$D/pomofarm" ./cmd/pomofarm) || exit 1
-POMOFARM_DB="$D/data/pomofarm.db" POMOFARM_BACKUPS="$D/backups" POMOFARM_ADDR="127.0.0.1:$API_PORT" "$D/pomofarm" >"$D/api.log" 2>&1 &
-API_PID=$!
+# El backend vive bajo un supervisor que lo relanza si se cae (como `restart: unless-stopped` en Docker):
+# así un test puede matar el servidor para probar el reinicio y los siguientes siguen funcionando.
+export POMOFARM_DB="$D/data/pomofarm.db" POMOFARM_BACKUPS="$D/backups" POMOFARM_ADDR="127.0.0.1:$API_PORT"
+# Mientras exista $D/hold el supervisor no lo relanza (para probar "servidor caído" sin carreras).
+setsid bash -c 'while true; do while [ -e "$2" ]; do sleep 0.1; done; "$0" >>"$1" 2>&1; sleep 0.3; done' "$D/pomofarm" "$D/api.log" "$D/hold" &
+API_PID=$!   # = id del grupo de procesos (supervisor + servidor)
 # setsid: Vite y sus hijos forman un grupo de procesos propio, que se mata entero al terminar.
 setsid bash -c "cd frontend && POMOFARM_API=http://127.0.0.1:$API_PORT exec npx vite --port $WEB_PORT --strictPort --host 127.0.0.1" >"$D/web.log" 2>&1 &
 WEB_PID=$!
@@ -32,8 +36,8 @@ done
 curl -fs "http://127.0.0.1:$WEB_PORT/api/health" >/dev/null || { echo "el entorno aislado no arrancó"; tail "$D"/*.log; exit 1; }
 
 export POMOFARM_URL="http://127.0.0.1:$WEB_PORT" POMOFARM_DB="$D/data/pomofarm.db"
-# Para los tests que reinician el backend (persistencia, recuperación sin conexión):
-export POMOFARM_BIN="$D/pomofarm" POMOFARM_BACKUPS="$D/backups" POMOFARM_ADDR="127.0.0.1:$API_PORT" POMOFARM_API_PID="$API_PID"
+# Para los tests que matan el servidor (persistencia, recuperación sin conexión): PID del supervisor.
+export POMOFARM_SUPERVISOR_PID="$API_PID" POMOFARM_HOLD_FILE="$D/hold"
 rc=0
 for s in "$@"; do
   echo "=== $s"

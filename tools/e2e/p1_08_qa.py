@@ -115,13 +115,14 @@ with sync_playwright() as p:
 
     # persistencia ante reinicio del servidor y recuperación sin conexión
     pg2.reload(); pg2.wait_for_selector(".packet"); plant_ui(pg2, "reinicio"); before = secs(pg2.inner_text("[data-testid=timer]"))
-    os.kill(int(os.environ["POMOFARM_API_PID"]), signal.SIGTERM); time.sleep(1.5)
+    # matar SOLO el servidor de este entorno (hijo del supervisor), nunca por nombre: podría ser la partida de desarrollo
+    pid = subprocess.run(["pgrep", "-P", os.environ["POMOFARM_SUPERVISOR_PID"], "-x", "pomofarm"], capture_output=True, text=True).stdout.split()[0]
+    hold = os.environ["POMOFARM_HOLD_FILE"]; open(hold, "w").close()   # el supervisor no lo relanza mientras exista
+    os.kill(int(pid), signal.SIGTERM); time.sleep(0.5)
     btn(pg2, "Pausar").click(); pg2.wait_for_selector(".toast--error", timeout=8000); msg = pg2.inner_text(".toast--error")
     check("sin servidor: aviso claro de conexión, sin romper la pantalla", "conexión" in msg and pg2.locator("[data-testid=timer]").count() == 1, msg)
-    env = dict(os.environ, POMOFARM_DB=DB, POMOFARM_ADDR=os.environ["POMOFARM_ADDR"], POMOFARM_BACKUPS=os.environ["POMOFARM_BACKUPS"])
-    proc = subprocess.Popen([os.environ["POMOFARM_BIN"]], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    import atexit; atexit.register(lambda: proc.poll() is None and proc.terminate())  # el runner solo conoce el PID original
-    for _ in range(40):
+    os.remove(hold)   # ahora sí: el supervisor lo relanza (como restart: unless-stopped)
+    for _ in range(60):
         try: urllib.request.urlopen(BASE + "/api/health"); break
         except Exception: time.sleep(0.25)
     pg2.evaluate("window.dispatchEvent(new Event('focus'))"); pg2.wait_for_timeout(1500); after = secs(pg2.inner_text("[data-testid=timer]"))

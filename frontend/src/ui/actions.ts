@@ -1,5 +1,6 @@
 import { prepareAlerts } from '../alerts/announce'
 import { useGame } from '../store/game'
+import { formatCoins } from '../store/economy'
 import { useUi } from '../store/ui'
 import { SEED_NAMES } from './names'
 
@@ -46,4 +47,10 @@ export function harvestableId(): number | null {
 export function clearableId(): number | null {
   const plot = useGame.getState().state?.plots.find((p) => (p.state === 'mature' && p.harvested) || p.state === 'withered')
   return plot ? plot.id : null
+}
+
+/** Empties the Silo into the balance and says how much arrived. */
+export async function collectSilo() {
+  const got = await useGame.getState().collectSilo()
+  if (got > 0) useUi.getState().toast(`+${formatCoins(got)} 🪙`, 'coin')
 }

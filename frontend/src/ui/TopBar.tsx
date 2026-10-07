@@ -2,7 +2,8 @@ import { useEffect } from 'react'
 import { useGame } from '../store/game'
 import { useRemainingMs } from '../store/hooks'
 import { tabTitle } from '../store/time'
-import { DropIcon } from './icons'
+import { formatCoins } from '../store/economy'
+import { CoinIcon, DropIcon } from './icons'
 import { Settings } from './Settings'
 
 export function TopBar() {
@@ -22,6 +23,12 @@ export function TopBar() {
         <DropIcon size={18} />
         <span>{state.player.focus_points}</span>
       </div>
+      {(state.player.coins_milli > 0 || state.silo.rate_milli_per_h > 0 || state.silo.content_milli > 0) && (
+        <div className="chip" data-testid="coins" role="status" aria-label={`${formatCoins(state.player.coins_milli)} monedas`}>
+          <CoinIcon size={18} />
+          <span>{formatCoins(state.player.coins_milli)}</span>
+        </div>
+      )}
       <Settings />
     </div>
   )
