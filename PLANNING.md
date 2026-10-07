@@ -8,11 +8,12 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
 
 ## Fase 0 — Preparación
 
-- [ ] **P0-01** Instalar toolchain (Go, plugin `docker compose`) — agente: `devops` — dep: —
-  - [ ] P0-01a Instalar Go ≥ 1.23 (el usuario ejecuta la instalación con `sudo`)
-  - [ ] P0-01b Verificar `docker compose version` (instalar plugin v2 si falta)
-  - [ ] P0-01c Documentar versiones en `README.md`
-  - **Hecho:** `go version`, `docker compose version`, `node -v` responden.
+- [~] **P0-01** Toolchain y acceso a `wyse` — agente: `devops` — dep: —
+  - [x] P0-01a Go instalado (1.26.0)
+  - [x] P0-01b `docker compose` v5.1.4 en local
+  - [ ] P0-01c Comprobar en `wyse` (con confirmación): arquitectura, Docker + Compose, espacio en disco, acceso SSH por Tailscale
+  - [ ] P0-01d Documentar versiones y datos de `wyse` en `README.md`
+  - **Hecho:** `go version`, `docker compose version`, `node -v` responden y `wyse` es alcanzable con Docker funcionando.
 
 - [ ] **P0-02** Estructura del proyecto y esqueletos — agente: `backend-go`, `frontend-3d` — dep: P0-01
   - [ ] P0-02a `backend/`: `go mod init`, Fiber, endpoint `GET /api/health`
@@ -32,16 +33,19 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [ ] P0-04c Test que compara e(d), costes de parcela y totales (1.167 💧 / 605 💧 / 62.500 🪙) con el GDD
   - **Hecho:** el test de coherencia pasa.
 
-- [ ] **P0-05** Docker Compose y backups — agente: `devops` — dep: P0-02, P0-03
-  - [ ] P0-05a Dockerfile multi-stage backend y frontend; `docker-compose.yml` (Nginx + app) con volúmenes `/data`, `/backups`
+- [ ] **P0-05** Docker Compose, backups y despliegue en `wyse` — agente: `devops` — dep: P0-01, P0-02, P0-03
+  - [ ] P0-05a Dockerfile multi-stage backend y frontend; `docker-compose.yml` (Nginx + app) con volúmenes `/data`, `/backups`; imagen para la arquitectura de `wyse`
+  - [ ] P0-05d Script `deploy/deploy.sh` (build → copiar/pull → `docker compose up -d` en `wyse`), con confirmación previa
+  - [ ] P0-05e Primer despliegue "hola mundo" en `wyse` accesible desde la tailnet (`/api/health`)
   - [ ] P0-05b Backup diario con `VACUUM INTO`, retención de 14
   - [ ] P0-05c Script de restauración y prueba en instalación limpia
-  - **Hecho:** `docker compose up -d --build` sirve la app; backup y restore verificados.
+  - **Hecho:** `docker compose up -d --build` sirve la app en local y en `wyse`; backup y restore verificados.
 
 - [ ] **P0-06** Validar el balance con foco real del usuario — agente: `game-designer` — dep: —
   - [ ] P0-06a Pedir al usuario sus horas de foco reales y rellenar hoja `Rendimiento`
-  - [ ] P0-06b Decidir si se recrea `sim.py` en `tools/` (no está en el repo)
-  - **Hecho:** el usuario confirma los perfiles; decisión sobre `sim.py` registrada.
+  - [x] P0-06b `sim.py` ya está en la raíz del repo (v2)
+  - [ ] P0-06c Ejecutar `python3 sim.py` y comprobar que coincide con el GDD §4.10 y el xlsx
+  - **Hecho:** el usuario confirma los perfiles; `sim.py` reproduce los hitos del GDD.
 
 ---
 
@@ -185,8 +189,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
 - [ ] **P5-02** Notificación "tu granja necesita atención" — agente: `backend-go`, `frontend-3d` — dep: P2-02
 - [ ] **P5-03** Suite de pruebas de tiempo completa — agente: `qa-tester` — dep: P2-01
 - [ ] **P5-04** Revisión de backups y restauración — agente: `devops` — dep: P0-05
-- [ ] **P5-05** Acceso por Tailscale y cierre — agente: `devops` — dep: P5-04
-  - **Hecho:** la app responde desde otro dispositivo de la tailnet; README de despliegue.
+- [ ] **P5-05** Despliegue final en `wyse` y cierre — agente: `devops` — dep: P5-04
+  - [ ] P5-05a Despliegue estable con reinicio automático tras reiniciar `wyse`
+  - [ ] P5-05b Backups corriendo en `wyse` y restauración probada allí
+  - **Hecho:** la app responde desde otro dispositivo de la tailnet (iPhone incluido); README de despliegue.
 
 ---
 

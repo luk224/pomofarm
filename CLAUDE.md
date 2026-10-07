@@ -15,7 +15,7 @@ Si el código contradice al GDD, gana el GDD, salvo que el usuario diga lo contr
 - Backend: Go + Fiber, SQLite en modo WAL (driver `modernc.org/sqlite`, sin CGO), migraciones SQL numeradas.
 - Frontend: React + Vite + Zustand (TypeScript).
 - 3D: React Three Fiber + Three.js (cámara ortográfica isométrica, low-poly, `InstancedMesh`).
-- Despliegue: Docker Compose (Nginx + app Go), volúmenes `/data` y `/backups`.
+- Despliegue: **todo corre en Docker** (también en desarrollo cuando sea práctico). Destino: el minipc **`wyse`** (Linux, Tailscale `100.102.106.119`), accesible solo por la tailnet. Docker Compose (Nginx + app Go), volúmenes `/data` y `/backups`.
 
 ## Estructura prevista
 
@@ -23,7 +23,7 @@ Si el código contradice al GDD, gana el GDD, salvo que el usuario diga lo contr
 backend/    Go: cmd/, internal/{game,timer,store,api}, migrations/
 frontend/   React: src/{scene,ui,store,audio}
 deploy/     docker-compose.yml, nginx.conf
-tools/      scripts (sim, validación del xlsx)
+tools/      scripts (validación del xlsx; sim.py vive en la raíz)
 .claude/    agents/ y commands/
 ```
 
@@ -59,11 +59,17 @@ El ejemplo de GDD 6.2 (Silo 24 h → 212,7 🪙; Silo 12 h → 127,0 🪙), relo
 | `backend-go` | API Fiber, SQLite, migraciones, temporizador, resolución offline |
 | `frontend-3d` | React, Zustand, escena R3F, UI, audio |
 | `qa-tester` | Tests de tiempo/economía, criterios de aceptación, verificación en navegador |
-| `devops` | Docker Compose, Nginx, backups, Tailscale |
+| `devops` | Docker Compose, Nginx, backups, despliegue en `wyse` por Tailscale |
 | `planner` | Mantener `PLANNING.md`, desglosar tareas, detectar dependencias |
 
 Comando: `/next-task [ID]` ejecuta la siguiente tarea pendiente (o la indicada).
 
-## Estado de los archivos externos
+## Despliegue (wyse)
 
-`sim.py` se cita en el GDD pero **no está en el repo**. La hoja `Simulacion` del xlsx tiene los resultados. Si hace falta, se recrea en `tools/`.
+- Las imágenes se construyen para la arquitectura de `wyse` (comprobar con `uname -m` allí; probablemente `amd64`).
+- Nunca expongas puertos a internet; solo la tailnet. Datos persistentes en volúmenes (`/data`, `/backups`), nunca dentro de la imagen.
+- **Conectarse o desplegar en `wyse` (ssh, `docker context`, `docker compose` remoto) es una acción sobre otra máquina: pide confirmación la primera vez de cada sesión** y dime qué vas a ejecutar.
+
+## `sim.py`
+
+Está en la raíz. Es la simulación de referencia del GDD (`python3 sim.py` / `python3 sim.py json`). Si cambia un parámetro de balance, cambia a la vez `sim.py`, el xlsx y `internal/game/config.go`.
