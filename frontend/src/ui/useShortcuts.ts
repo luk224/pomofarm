@@ -1,10 +1,13 @@
 import { useEffect } from 'react'
+import { canCollect } from '../store/economy'
 import { useGame } from '../store/game'
+import { useUi } from '../store/ui'
 import { collectSilo, harvestableId, harvestPlot, plantSelected, togglePause } from './actions'
+import { stepPlot } from './selection'
 
 const TYPING = new Set(['INPUT', 'TEXTAREA', 'SELECT'])
 
-/** Space pauses/resumes, Enter plants the chosen seed, H harvests, C empties the Silo (GDD §2.4). Never fires while typing. */
+/** Space pauses/resumes, Enter plants the chosen seed, H harvests, C empties the Silo, arrows pick a plot (GDD §2.4). Never fires while typing. */
 export function useShortcuts() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -16,8 +19,16 @@ export function useShortcuts() {
         void togglePause()
       } else if (e.key === 'Enter' && !onButton) {
         void plantSelected()
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        // Choose which plot the dock talks about, without a mouse. Left/up go back, right/down go forward.
+        const plots = useGame.getState().state?.plots ?? []
+        const id = stepPlot(plots, useUi.getState().selectedPlotId, e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1)
+        if (id !== null && plots.length > 1) {
+          e.preventDefault()
+          useUi.getState().selectPlot(id)
+        }
       } else if (e.key.toLowerCase() === 'c') {
-        if ((useGame.getState().state?.silo.content_milli ?? 0) >= 1) void collectSilo()
+        if (canCollect(useGame.getState().state?.silo.content_milli ?? 0)) void collectSilo()
       } else if (e.key.toLowerCase() === 'h') {
         const id = harvestableId()
         if (id !== null) void harvestPlot(id)

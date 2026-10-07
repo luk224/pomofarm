@@ -1,7 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
 import { BufferGeometry, Group, MeshStandardMaterial } from 'three'
-import { siloFill } from '../store/economy'
+import { canCollect, siloFill } from '../store/economy'
 import { useGame } from '../store/game'
 import { useSiloAmount } from '../store/hooks'
 import { useUi } from '../store/ui'
@@ -55,7 +55,7 @@ export function Silo3D() {
   const geometry = useMemo(() => siloGeometry(level), [level])
   const h = 0.7 + 0.16 * level
   const fill = silo ? siloFill(amount, silo.capacity_milli) : 0
-  const ready = Math.floor(amount) >= 1
+  const ready = canCollect(amount)
   const full = !!silo?.full
 
   useFrame((state) => {

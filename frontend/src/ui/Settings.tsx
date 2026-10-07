@@ -101,6 +101,16 @@ export function Settings() {
           {blocked && <p className="hint">Las notificaciones están bloqueadas en el navegador. Actívalas en los permisos del sitio.</p>}
           {!sound && <p className="hint">Sin sonido, verás el aviso en la pestaña.</p>}
           <RestSettings />
+          <fieldset className="restset" data-testid="shortcuts">
+            <legend>Atajos</legend>
+            <dl className="keys">
+              <dt>Espacio</dt><dd>Pausar o reanudar</dd>
+              <dt>Intro</dt><dd>Plantar la semilla elegida</dd>
+              <dt>H</dt><dd>Cosechar</dd>
+              <dt>C</dt><dd>Recoger el Silo</dd>
+              <dt>← →</dt><dd>Cambiar de parcela</dd>
+            </dl>
+          </fieldset>
         </div>
       )}
     </div>

@@ -16,7 +16,7 @@ if docker ps -a --format '{{.Names}}' | grep -q "^$P-"; then echo "ya existe un 
 POMOFARM_DB="$D/src.db" POMOFARM_BACKUPS="$D/none" POMOFARM_ADDR=127.0.0.1:8192 "$D/pomofarm" >/dev/null 2>&1 & SRC=$!
 for _ in $(seq 1 40); do curl -fs 127.0.0.1:8192/api/health >/dev/null 2>&1 && break; sleep 0.25; done
 kill $SRC; wait $SRC 2>/dev/null
-sqlite3 "$D/src.db" "UPDATE players SET name='Restaurado', focus_points=42, lifetime_focus=57; INSERT OR IGNORE INTO unlocks (player_id,kind,key,at) VALUES (1,'seed','tomato','t'); UPDATE plots SET state='mature',plant_type='daisy',harvested=1,matured_at='2026-10-01T00:00:00Z',wilts_at='2026-10-02T00:00:00Z'; INSERT INTO tags (player_id,name) VALUES (1,'etiqueta-guardada');"
+sqlite3 "$D/src.db" "UPDATE players SET name='Restaurado', focus_points=42, lifetime_focus=57; INSERT OR IGNORE INTO unlocks (player_id,kind,key,at) VALUES (1,'seed','tomato','t'); UPDATE plots SET state='mature',plant_type='daisy',harvested=1,grow_s=600,life_s=86400,matured_at='2026-10-01T00:00:00Z',wilts_at='2099-01-01T00:00:00Z',collected_to='2026-10-01T00:00:00Z'; INSERT INTO tags (player_id,name) VALUES (1,'etiqueta-guardada');"
 POMOFARM_DB="$D/src.db" POMOFARM_BACKUPS="$D/bk" "$D/pomofarm" backup >/dev/null; BK=$(basename "$(ls "$D"/bk/*.db | tail -1)")
 ok "copia de seguridad creada ($BK)"
 
@@ -35,6 +35,7 @@ S=$(curl -s 127.0.0.1:$PORT/api/state)
 echo "$S" | python3 -c "
 import sys,json; d=json.load(sys.stdin); u=[s['key'] for s in d['seeds'] if s['unlocked']]
 ok = d['player']['name']=='Restaurado' and d['player']['focus_points']==42 and d['player']['lifetime_focus']==57 and sorted(u)==['daisy','tomato'] and d['plots'][0]['state']=='mature' and 'etiqueta-guardada' not in d['recent_tags']
+print(('PASS' if 9900 <= d['silo']['content_milli'] <= 10000 else 'FAIL'), 'la copia antigua se pone al día: el Silo (12 h) se llenó con lo producido desde que se hizo:', d['silo']['content_milli']/1000, '🪙'); ok = ok and 9900 <= d['silo']['content_milli'] <= 10000
 print(('PASS' if ok else 'FAIL'), 'datos restaurados:', d['player']['name'], d['player']['focus_points'], d['player']['lifetime_focus'], u, d['plots'][0]['state']); sys.exit(0 if ok else 1)" || fail=1
 
 # 4) jugable: retirar, plantar, completar el ciclo de API

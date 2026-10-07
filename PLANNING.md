@@ -145,9 +145,11 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [ ] P2-07c Comprar con 🪙 (colmenas, Perro, decoración): no hay nada que comprar con 🪙 hasta la Fase 3 (P3-01/P3-02)
   - **Hecho:** granja de 16 parcelas fluida en el navegador.
 
-- [ ] **P2-08** Verificación de Fase 2 — agente: `qa-tester` — dep: P2-01..P2-07
-  - [ ] P2-08a Reproducir criterios económicos y comparar con xlsx (Normal: 1.798,7 🪙/día)
-  - **Hecho:** informe de QA.
+- [x] **P2-08** Verificación de Fase 2 — agente: `qa-tester` — dep: P2-01..P2-07
+  - [x] P2-08a Reproducir criterios económicos y comparar con xlsx: ingreso estable 1.199,1 🪙/día = fórmula del GDD; sim.py = xlsx = 1.798,7
+  - [x] P2-08b Tests de actualización desde el esquema 1, jugadas aleatorias con invariantes, entrada basura, teclado/lectores de pantalla, tres navegadores (ver `docs/qa/fase-2.md`)
+  - [x] P2-08c Hallazgos corregidos: elegir parcela con el teclado (flechas + anuncio), mínimo de 0,1 🪙 para recoger
+  - **Hecho:** informe de QA en `docs/qa/fase-2.md`.
 
 ---
 

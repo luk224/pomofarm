@@ -18,3 +18,27 @@ export function effectivePlot(plots: PlotState[], selectedId: number | null): Pl
     plots[0]
   )
 }
+
+/** The id of the plot `step` places away from the one in view, wrapping around (for keyboard navigation). */
+export function stepPlot(plots: PlotState[], selectedId: number | null, step: number): number | null {
+  if (plots.length === 0) return null
+  const ordered = [...plots].sort((a, b) => a.id - b.id)
+  const current = effectivePlot(plots, selectedId)
+  const at = Math.max(0, ordered.findIndex((p) => p.id === current?.id))
+  return ordered[(at + step + ordered.length * 4) % ordered.length].id
+}
+
+/** What a screen reader hears when the plot in view changes. */
+export function describePlot(plots: PlotState[], plot: PlotState | undefined): string {
+  if (!plot) return ''
+  const ordered = [...plots].sort((a, b) => a.id - b.id)
+  const n = ordered.findIndex((p) => p.id === plot.id) + 1
+  const what =
+    plot.state === 'empty' ? 'libre'
+    : plot.state === 'growing' ? 'creciendo'
+    : needsHarvest(plot) ? (plot.state === 'withered' ? 'marchita, aún se puede cosechar' : 'lista para cosechar')
+    : plot.state === 'withered' ? 'marchita'
+    : 'cosechada y produciendo'
+  const bonus = plot.bonus && plot.bonus.multiplier > 1 ? `, bono de ${Math.round((plot.bonus.multiplier - 1) * 100)} por ciento` : ''
+  return `Parcela ${n} de ${ordered.length}: ${what}${bonus}`
+}

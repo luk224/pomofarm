@@ -27,3 +27,13 @@ export function siloNow(s: SiloState, fetchedAtMono: number, nowMono: number): n
 export function siloFill(content: number, capacity: number): number {
   return capacity <= 0 ? 0 : Math.min(1, Math.max(0, content / capacity))
 }
+
+/**
+ * The smallest amount worth collecting: 0.1 🪙, the finest step the interface shows. Collecting a crumb of a
+ * thousandth would only produce a "+0 🪙" message. The server still accepts any amount.
+ */
+export const MIN_COLLECT_MILLI = 100
+
+export function canCollect(amountMilli: number): boolean {
+  return amountMilli >= MIN_COLLECT_MILLI
+}

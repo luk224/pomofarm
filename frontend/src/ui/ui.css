@@ -107,6 +107,12 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 .field::placeholder { color: #75665a; }
 .hint { margin: 0; font-size: 13px; color: var(--ink-soft); }
 
+/* ---------- accessibility helpers ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.keys { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; font-size: 13px; }
+.keys dt { font-weight: 600; color: var(--ink); }
+.keys dd { margin: 0; color: var(--ink-soft); }
+
 /* ---------- rest ---------- */
 .rest { width: min(460px, 100%); box-sizing: border-box; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 12px;
   padding: 8px 8px 10px 14px; border-radius: 18px; background: var(--panel); backdrop-filter: blur(8px); box-shadow: 0 6px 24px #3b2a1f26; }

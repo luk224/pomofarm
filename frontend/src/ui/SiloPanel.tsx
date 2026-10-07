@@ -1,5 +1,5 @@
 import { useGame } from '../store/game'
-import { formatCoins, siloFill } from '../store/economy'
+import { canCollect, formatCoins, siloFill } from '../store/economy'
 import { useSiloAmount } from '../store/hooks'
 import { collectSilo } from './actions'
 import { CoinIcon, SiloIcon } from './icons'
@@ -10,7 +10,7 @@ export function SiloPanel() {
   const amount = useSiloAmount()
   if (!silo || (silo.rate_milli_per_h <= 0 && silo.content_milli <= 0)) return null
   const fill = siloFill(amount, silo.capacity_milli)
-  const collectable = Math.floor(amount) >= 1
+  const collectable = canCollect(amount)
   return (
     <section className={`silo${silo.full ? ' silo--full' : ''}`} aria-label="Silo" data-testid="silo">
       <div className="silo__head">

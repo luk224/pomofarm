@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { SiloState } from '../api/types'
-import { formatCoins, siloFill, siloNow } from './economy'
+import { canCollect, formatCoins, MIN_COLLECT_MILLI, siloFill, siloNow } from './economy'
 
 const silo = (over: Partial<SiloState> = {}): SiloState => ({
   content_milli: 2000, capacity_milli: 10_000, capacity_hours: 12, rate_milli_per_h: 3_600_000, full: false, ...over,
@@ -37,5 +37,17 @@ describe('siloFill', () => {
     expect(siloFill(5, 10)).toBe(0.5)
     expect(siloFill(50, 10)).toBe(1)
     expect(siloFill(5, 0)).toBe(0)
+  })
+})
+
+describe('canCollect', () => {
+  it('needs at least 0.1 🪙, the finest amount the interface shows', () => {
+    expect(MIN_COLLECT_MILLI).toBe(100)
+    expect(canCollect(99)).toBe(false)
+    expect(canCollect(100)).toBe(true)
+    expect(canCollect(0)).toBe(false)
+  })
+  it('never offers a collection that would be announced as "+0"', () => {
+    for (let milli = 0; milli < 2000; milli++) if (canCollect(milli)) expect(formatCoins(milli)).not.toBe('0')
   })
 })
