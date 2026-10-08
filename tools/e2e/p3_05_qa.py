@@ -132,7 +132,7 @@ with sync_playwright() as p:
     check("todos los controles del reproductor tienen nombre accesible", nameless == 0, str(nameless))
     check("el estado del reproductor es un 'status' para lectores de pantalla", pg.get_attribute("[data-testid=lofi-status]", "role") == "status")
     pg.get_by_test_id("lofi-stop").click()
-    pg.get_by_role("button", name="Ajustes de avisos").click(); pg.wait_for_selector("[data-testid=sound-settings]")
+    pg.get_by_test_id("music-button").click(); pg.wait_for_selector("[data-testid=sound-settings]")
     nameless = pg.evaluate("""() => [...document.querySelectorAll('[data-testid=sound-settings] input, [data-testid=sound-settings] select')]
       .filter(el => !(el.getAttribute('aria-label') || el.labels?.[0]?.innerText || '').trim()).length""")
     check("los controles de sonido tienen nombre accesible", nameless == 0, str(nameless)); pg.keyboard.press("Escape")

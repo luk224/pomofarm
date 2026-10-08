@@ -36,7 +36,8 @@ def set_slider(pg, layer, value):
     pg.evaluate("""([l, v]) => { const el = document.querySelector(`[data-testid=volume-${l}]`);
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, String(v)); el.dispatchEvent(new Event('input', { bubbles: true })) }""", [layer, value])
 def open_settings(pg):
-    if pg.locator("#settings-panel").count() == 0: pg.get_by_role("button", name="Ajustes de avisos").click()
+    """El mezclador de sonido vive en la ventana de música (chip «Música»)."""
+    if pg.locator("[data-testid=sound-settings]").count() == 0: pg.get_by_test_id("music-button").click()
     pg.wait_for_selector("[data-testid=sound-settings]")
 
 with sync_playwright() as p:
@@ -99,21 +100,21 @@ with sync_playwright() as p:
     pg.wait_for_function("window.__audioEngine && window.__audioEngine.ctx.state === 'running'", timeout=8000) if pg.evaluate("!!window.__audioEngine") else pg.mouse.click(5, 5)
     pg.wait_for_function("window.__audioEngine && window.__audioEngine.ctx.state === 'running'", timeout=8000); pg.evaluate(PROBE); pg.evaluate(RESET_MAX); pg.wait_for_timeout(2000)
     check("tras recargar y el primer gesto, vuelve a sonar el fuego", pg.evaluate(MAXES)["ambient"] > 0.005, str(pg.evaluate(MAXES)))
-    pg.select_option("[data-testid=ambient-kind]", "off"); pg.keyboard.press("Escape")
+    pg.select_option("[data-testid=ambient-kind]", "off"); pg.get_by_test_id("music-button").click() if pg.locator("[data-testid=lofi-player]").count() else None
 
     # 6) efectos: plantar suena en la capa de efectos y respeta su volumen
     pg.evaluate(RESET_MAX); pg.locator(".packet__body:not([disabled])").first.click(); pg.get_by_role("button", name="Plantar", exact=True).click()
     pg.wait_for_selector("[data-testid=timer][data-status=running]"); pg.wait_for_timeout(700); m = pg.evaluate(MAXES)
     check("plantar suena en la capa de efectos", m["effects"] > 0.01, str(m))
     call("POST", "/api/pomodoros/active/cancel"); pg.reload(); pg.wait_for_selector(".packet"); open_settings(pg)
-    set_slider(pg, "effects", 0); pg.wait_for_timeout(800); pg.keyboard.press("Escape")
+    set_slider(pg, "effects", 0); pg.wait_for_timeout(800); pg.get_by_test_id("music-button").click() if pg.locator("[data-testid=lofi-player]").count() else None
     pg.wait_for_function("window.__audioEngine && window.__audioEngine.ctx.state === 'running'", timeout=8000); pg.evaluate(PROBE); pg.evaluate(RESET_MAX)
     pg.locator(".packet__body:not([disabled])").first.click(); pg.get_by_role("button", name="Plantar", exact=True).click()
     pg.wait_for_selector("[data-testid=timer][data-status=running]"); pg.wait_for_timeout(700); m = pg.evaluate(MAXES)
     check("con efectos a 0, plantar no se oye", m["effects"] < 0.001, str(m))
 
     # 7) monedas: recoger el Silo suena (capa de efectos)
-    call("POST", "/api/pomodoros/active/cancel"); pg.reload(); pg.wait_for_selector(".packet"); open_settings(pg); set_slider(pg, "effects", 80); pg.keyboard.press("Escape")
+    call("POST", "/api/pomodoros/active/cancel"); pg.reload(); pg.wait_for_selector(".packet"); open_settings(pg); set_slider(pg, "effects", 80); pg.get_by_test_id("music-button").click() if pg.locator("[data-testid=lofi-player]").count() else None
     pg.wait_for_function("window.__audioEngine && window.__audioEngine.ctx.state === 'running'", timeout=8000); pg.wait_for_timeout(500); pg.evaluate(PROBE)
     from datetime import datetime, timedelta, timezone
     t = datetime.now(timezone.utc) - timedelta(hours=3); f = lambda d: d.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -123,7 +124,7 @@ with sync_playwright() as p:
     check("recoger monedas suena en efectos, no en alertas", pg.evaluate(MAXES)["effects"] > 0.01 and pg.evaluate(MAXES)["alerts"] < 0.0005, str(pg.evaluate(MAXES)))
 
     # 8) alertas: la campana (vista previa del deslizador) suena en SU capa
-    pg.get_by_role("button", name="Ajustes de avisos").click(); pg.wait_for_selector("[data-testid=sound-settings]")
+    open_settings(pg)
     set_slider(pg, "alerts", 80); pg.wait_for_timeout(500); pg.evaluate(RESET_MAX)
     pg.get_by_test_id("volume-alerts").focus(); pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(700); m = pg.evaluate(MAXES)
     check("la campana suena en la capa de alertas", m["alerts"] > 0.005, str(m))

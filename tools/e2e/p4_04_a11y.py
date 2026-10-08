@@ -123,7 +123,7 @@ with sync_playwright() as p:
     open_settings(pg); pg.get_by_test_id("a11y-motion").uncheck(); pg.keyboard.press("Escape")
 
     # 5) sin audio: silencia todas las capas y la música
-    open_settings(pg); pg.select_option("[data-testid=ambient-kind]", "rain"); pg.keyboard.press("Escape")
+    pg.get_by_test_id("music-button").click(); pg.select_option("[data-testid=ambient-kind]", "rain"); pg.get_by_test_id("music-button").click()
     loud = master_max(pg)
     check("antes de silenciar, el ambiente suena", loud > 0.01, f"{loud:.4f}")
     open_settings(pg); pg.get_by_test_id("a11y-muted").check(); pg.keyboard.press("Escape"); pg.wait_for_timeout(700)
@@ -141,7 +141,7 @@ with sync_playwright() as p:
     check("silenciar con la música sonando la detiene", st == "idle" and "destroy" in pg.evaluate("window.__yt.calls"), st)
     pg.keyboard.press("m"); pg.wait_for_timeout(400)
     pg.get_by_test_id("lofi-stop").click() if pg.locator("[data-testid=lofi-stop]").count() else None
-    open_settings(pg); pg.select_option("[data-testid=ambient-kind]", "off"); pg.keyboard.press("Escape")
+    pg.get_by_test_id("music-button").click(); pg.select_option("[data-testid=ambient-kind]", "off"); pg.get_by_test_id("music-button").click()
 
     # 6) aviso visual al terminar con el audio apagado
     call("POST", "/api/plots/1/clear", {"confirm": True}); pg.reload(); pg.wait_for_selector(".packet")

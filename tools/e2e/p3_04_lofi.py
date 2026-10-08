@@ -83,6 +83,20 @@ with sync_playwright() as p:
     check("el volumen propio llega al reproductor (80)", ["volume", 80] in calls(pg))
     check("y no toca las tres capas de audio local", pg.evaluate("Object.values(window.__audioEngine ? window.__audioEngine.volumes : {}).join()") in ("0.5,0.7,0.8", ""), pg.evaluate("JSON.stringify(window.__audioEngine && window.__audioEngine.volumes)"))
 
+    # 3b) REGRESIÓN: cerrar el panel con el vídeo sonando y volver a abrirlo (antes el vídeo desaparecía y no se podía reproducir)
+    pg.get_by_test_id("music-button").click(); pg.wait_for_timeout(400)
+    check("cerrar el panel no detiene la música: el reproductor y su iframe siguen vivos", pg.locator("iframe[data-mock-yt]").count() == 1 and "destroy" not in [c[0] if isinstance(c, list) else c for c in calls(pg)] and pg.evaluate("document.querySelector('[data-testid=music-button]').getAttribute('aria-expanded')") == "false")
+    check("con el panel cerrado el chip sigue avisando de que suena", "chip--attention" in (pg.get_attribute("[data-testid=music-button]", "class") or ""))
+    check("y el panel cerrado está fuera de pantalla e inerte (ni se ve, ni se tabula, ni lo leen los lectores de pantalla)", pg.evaluate("document.querySelector('[data-testid=lofi-player]').inert === true") and pg.get_by_test_id("lofi-player").bounding_box()["x"] < -1000)
+    pg.get_by_test_id("music-button").click(); pg.wait_for_selector("[data-testid=lofi-player]:visible")
+    check("al reabrirlo el vídeo se ve y el estado sigue siendo 'sonando'", pg.is_visible("[data-testid=lofi-video] iframe") and status(pg) == "playing" and pg.inner_text("[data-testid=lofi-play]") == "Pausa")
+    pg.get_by_test_id("lofi-play").click(); wait_status(pg, "paused"); pg.get_by_test_id("lofi-play").click(); wait_status(pg, "playing")
+    check("tras cerrar y reabrir, Pausa y Reanudar siguen funcionando", len(pg.evaluate("window.__yt.creations")) == 1)
+    for _ in range(3):  # varias veces seguidas, como al jugar de verdad
+        pg.get_by_test_id("music-button").click(); pg.get_by_test_id("music-button").click()
+    pg.wait_for_selector("[data-testid=lofi-player]:visible")
+    check("abrir y cerrar varias veces no pierde el vídeo ni crea reproductores nuevos", pg.is_visible("[data-testid=lofi-video] iframe") and len(pg.evaluate("window.__yt.creations")) == 1 and status(pg) == "playing")
+
     # 4) cambiar de emisión y enlace propio
     pg.select_option("[data-testid=lofi-station]", "4xDzrJKXOOY"); pg.wait_for_timeout(200)
     check("cambiar de emisión carga la nueva sin recrear el reproductor", ["load", "4xDzrJKXOOY"] in calls(pg) and len(pg.evaluate("window.__yt.creations")) == 1)
@@ -117,10 +131,10 @@ with sync_playwright() as p:
     check("Parar tras un fallo apaga el ambiente que puso el fallback", pg.evaluate("JSON.parse(localStorage.getItem('pomofarm.prefs')).ambient") == "off" and ambient_signal(pg, 1200) < 0.0005)
 
     # 8) si el jugador ya había elegido un ambiente, el fallback lo respeta
-    open_player(pg); pg.get_by_role("button", name="Ajustes de avisos").click(); pg.select_option("[data-testid=ambient-kind]", "fire"); pg.keyboard.press("Escape")
+    open_player(pg); pg.select_option("[data-testid=ambient-kind]", "fire")
     pg.get_by_test_id("lofi-play").click(); wait_status(pg, "playing"); pg.evaluate("window.__yt.fail(100)"); wait_status(pg, "fallback"); pg.get_by_test_id("lofi-stop").click(); pg.wait_for_timeout(500)
     check("un ambiente elegido por el jugador no se apaga al parar", pg.evaluate("JSON.parse(localStorage.getItem('pomofarm.prefs')).ambient") == "fire")
-    pg.get_by_role("button", name="Ajustes de avisos").click(); pg.select_option("[data-testid=ambient-kind]", "off"); pg.keyboard.press("Escape")
+    open_player(pg); pg.select_option("[data-testid=ambient-kind]", "off")
 
     # 9) la API no arranca a tiempo (el vídeo nunca avisa de estar listo)
     open_player(pg); pg.evaluate("window.__yt.silent = true"); pg.get_by_test_id("lofi-play").click(); wait_status(pg, "loading", 3000)
@@ -153,7 +167,14 @@ with sync_playwright() as p:
     try:
         r.wait_for_function("['playing','fallback'].includes(document.querySelector('[data-testid=lofi-status]').dataset.status)", timeout=20000)
         st = status(r)
-        if st == "playing": check("YouTube real: la emisión por defecto suena en un iframe", r.locator("iframe").count() == 1)
+        if st == "playing":
+            check("YouTube real: la emisión por defecto suena en un iframe", r.locator("iframe").count() == 1)
+            r.get_by_test_id("music-button").click(); r.wait_for_timeout(4000)
+            check("YouTube real: cerrar el panel no la pausa (sigue 'sonando' tras 4 s)", status(r) == "playing" and r.locator("iframe").count() == 1, status(r))
+            r.get_by_test_id("music-button").click(); r.wait_for_selector("[data-testid=lofi-player]:visible"); r.wait_for_timeout(500)
+            check("YouTube real: al reabrirlo el vídeo se ve y se puede pausar y reanudar", r.is_visible("[data-testid=lofi-video] iframe"))
+            r.get_by_test_id("lofi-play").click(); wait_status(r, "paused", 8000); r.get_by_test_id("lofi-play").click(); wait_status(r, "playing", 8000)
+            check("YouTube real: pausa y reanuda tras cerrar y reabrir", status(r) == "playing")
         else: print("INFO YouTube real:", st, "-", r.inner_text("[data-testid=lofi-status]"), "| iframes:", r.locator("iframe").count(), "(¿sin red o emisión retirada?)")
     except Exception as e:
         print("INFO YouTube real: sin resultado en 20 s", str(e)[:80])

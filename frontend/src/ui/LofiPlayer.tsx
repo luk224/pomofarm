@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { chooseStation, setHost, setMusicVolume, stopMusic, togglePauseMusic } from '../audio/lofi'
 import { stationsOf, useMusic, type MusicStatus } from '../store/music'
 import { usePrefs } from '../store/prefs'
+import { SoundMixer } from './SoundMixer'
 
 const STATUS_TEXT: Record<MusicStatus, string> = {
   idle: 'Elige una emisión y pulsa Reproducir.',
@@ -40,19 +41,17 @@ export function LofiChip() {
  */
 export function LofiPlayer() {
   const { open, status, failure, custom, selected, volume, setOpen, addCustom, removeCustom } = useMusic()
-  const hostRef = useRef<HTMLDivElement>(null)
   const muted = usePrefs((s) => s.muted)
   const [link, setLink] = useState('')
   const [linkError, setLinkError] = useState(false)
   const stations = stationsOf(custom)
   const showVideo = status === 'loading' || status === 'playing' || status === 'paused'
 
-  useEffect(() => {
-    setHost(hostRef.current)
-    return () => setHost(null)
-  }, [open])
-
-  if (!open) return null
+  // The video lives in this panel. Closing the panel must not destroy it, or the music would stop while the store still says
+  // "playing" and reopening would show an empty box: so while something is loading, playing or paused the panel stays mounted
+  // (out of sight when closed) and only goes away for good once the music is stopped.
+  const alive = status !== 'idle'
+  if (!open && !alive) return null
   const add = () => {
     const id = addCustom(link)
     setLinkError(id === null)
@@ -62,8 +61,8 @@ export function LofiPlayer() {
     }
   }
   return (
-    <section id="lofi-player" className="lofi" role="group" aria-label="Reproductor de música" data-testid="lofi-player">
-      <div className={`lofi__video${showVideo ? '' : ' lofi__video--hidden'}`} ref={hostRef} data-testid="lofi-video" />
+    <section id="lofi-player" className={`lofi${open ? '' : ' lofi--closed'}`} inert={!open} role="group" aria-label="Reproductor de música" data-testid="lofi-player">
+      <div className={`lofi__video${showVideo ? '' : ' lofi__video--hidden'}`} ref={(el) => setHost(el)} data-testid="lofi-video" />
       <p className="lofi__status" role="status" data-testid="lofi-status" data-status={status}>
         {status === 'fallback'
           ? failure === 'video'
@@ -99,6 +98,7 @@ export function LofiPlayer() {
         <button type="button" className="btn" data-testid="lofi-add" onClick={add} disabled={!link.trim()}>Añadir</button>
       </div>
       {linkError && <p className="hint lofi__error" role="alert">Eso no parece un enlace de vídeo de YouTube.</p>}
+      <SoundMixer />
       {custom.length > 0 && (
         <ul className="lofi__custom" aria-label="Tus enlaces">
           {custom.map((s) => (
