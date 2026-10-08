@@ -87,8 +87,14 @@ func (s *Service) Plant(ctx context.Context, req PlantRequest) error {
 			tagID = id
 		}
 		plannedS := int64(durMin) * 60
-		res, err := tx.ExecContext(ctx, `INSERT INTO pomodoros (player_id, plot_id, plant_type, tag_id, planned_s, started_at, status)
-			VALUES (?, ?, ?, ?, ?, ?, 'running')`, PlayerID, req.PlotID, crop.Key, tagID, plannedS, fmtTime(now))
+		var strictValue string
+		_ = tx.QueryRowContext(ctx, `SELECT value FROM settings WHERE player_id = ? AND key = 'strict_mode'`, PlayerID).Scan(&strictValue)
+		strict := 0
+		if strictValue == "1" { // chosen when the Pomodoro starts; changing it later does not rewrite history
+			strict = 1
+		}
+		res, err := tx.ExecContext(ctx, `INSERT INTO pomodoros (player_id, plot_id, plant_type, tag_id, planned_s, started_at, status, strict)
+			VALUES (?, ?, ?, ?, ?, ?, 'running', ?)`, PlayerID, req.PlotID, crop.Key, tagID, plannedS, fmtTime(now), strict)
 		if isUnique(err) {
 			return ErrPomodoroActive
 		}

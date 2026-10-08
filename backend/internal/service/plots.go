@@ -59,7 +59,7 @@ func (s *Service) ClearPlot(ctx context.Context, plotID int64, confirm bool) err
 }
 
 // settingKeys are the only per-player settings the client may write.
-var settingKeys = map[string]bool{"tutorial_done": true, "hints_seen": true, "rest_enabled": true, "rest_short_min": true, "rest_medium_min": true, "rest_long_min": true}
+var settingKeys = map[string]bool{"tutorial_done": true, "hints_seen": true, "rest_enabled": true, "strict_mode": true, "rest_short_min": true, "rest_medium_min": true, "rest_long_min": true}
 
 // SetSetting stores a small per-player setting (e.g. that the tutorial was dismissed).
 func (s *Service) SetSetting(ctx context.Context, key, value string) error {

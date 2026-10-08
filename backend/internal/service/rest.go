@@ -101,7 +101,7 @@ func (s *Service) SkipRest(ctx context.Context) error {
 // validSetting checks the value of a setting the client may write.
 func validSetting(key, value string) bool {
 	switch key {
-	case "rest_enabled":
+	case "rest_enabled", "strict_mode":
 		return value == "0" || value == "1"
 	case "rest_short_min", "rest_medium_min", "rest_long_min":
 		n, err := strconv.Atoi(value)

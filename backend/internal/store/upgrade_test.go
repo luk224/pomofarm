@@ -48,8 +48,8 @@ func TestUpgradingAnOldDatabaseKeepsEveryRow(t *testing.T) {
 		t.Fatalf("opening an old database: %v", err)
 	}
 	defer db.Close()
-	if v, _ := SchemaVersion(db); v != 5 {
-		t.Fatalf("schema version = %d, want 5", v)
+	if v, _ := SchemaVersion(db); v != 6 {
+		t.Fatalf("schema version = %d, want 6", v)
 	}
 
 	var name string
@@ -100,8 +100,8 @@ func TestMigrationsApplyOnceAndInOrderEvenFromHalfwayStates(t *testing.T) {
 		var n int
 		db.QueryRow(`SELECT COUNT(*) FROM schema_migrations`).Scan(&n)
 		db.Close()
-		if n != 5 {
-			t.Fatalf("open #%d: %d migrations recorded, want 5", i+1, n)
+		if n != 6 {
+			t.Fatalf("open #%d: %d migrations recorded, want 6", i+1, n)
 		}
 	}
 	if _, err := os.Stat(path); err != nil {
@@ -148,8 +148,8 @@ func TestUpgradingFromSchema4KeepsStructures(t *testing.T) {
 		t.Fatalf("opening a schema-4 database: %v", err)
 	}
 	defer db.Close()
-	if v, _ := SchemaVersion(db); v != 5 {
-		t.Fatalf("schema version = %d, want 5", v)
+	if v, _ := SchemaVersion(db); v != 6 {
+		t.Fatalf("schema version = %d, want 6", v)
 	}
 	var hives, dogs int
 	db.QueryRow(`SELECT COUNT(*) FROM structures WHERE kind='hive'`).Scan(&hives)

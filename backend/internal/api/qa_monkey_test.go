@@ -167,6 +167,18 @@ func (c *invariantChecker) check() {
 		c.fail("%d hats, state %+v, dog owned=%v", hats, st.Decor.Hat, st.Automation.Dog.Owned)
 	}
 
+	// personal numbers: clean ⊆ strict ⊆ total, the best streak never trails the current one, weeks add up to at most the total
+	_, ps := getStats(c.t, c.e, "?tz=UTC")
+	var inWeeks int
+	for _, w := range ps.Weeks {
+		inWeeks += w.Pomodoros
+	}
+	var completed int
+	c.e.db.QueryRow(`SELECT COUNT(*) FROM pomodoros WHERE status = 'completed'`).Scan(&completed)
+	if ps.Clean > ps.StrictTotal || ps.StrictTotal > ps.Total || ps.Total != completed || ps.CurrentStreak > ps.BestStreakDays || inWeeks > ps.Total || len(ps.Weeks) != 12 {
+		c.fail("stats %+v (completed %d, in weeks %d)", ps, completed, inWeeks)
+	}
+
 	// rest never longer than the longest configurable one
 	if st.Rest != nil && (st.Rest.RemainingMs < 0 || st.Rest.RemainingMs > 60*60*1000) {
 		c.fail("rest %+v", st.Rest)
@@ -284,7 +296,7 @@ func TestRandomPlayNeverBreaksTheInvariants(t *testing.T) {
 			case r < 90:
 				move("skip rest", "POST", "/api/rest/skip", nil)
 			case r < 93:
-				move("setting", "POST", "/api/settings", map[string]string{"key": []string{"rest_enabled", "rest_short_min"}[rnd.Intn(2)], "value": []string{"0", "1", "7", "99"}[rnd.Intn(4)]})
+				move("setting", "POST", "/api/settings", map[string]string{"key": []string{"rest_enabled", "rest_short_min", "strict_mode"}[rnd.Intn(3)], "value": []string{"0", "1", "7", "99"}[rnd.Intn(4)]})
 			case r < 96:
 				move("unlock", "POST", "/api/unlocks", map[string]string{"kind": "seed", "key": crops[rnd.Intn(5)]})
 			case r >= 100 && r < 103:

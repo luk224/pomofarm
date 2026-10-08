@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import type { PomodoroState } from '../api/types'
-import { formatClock, growthFraction, remainingMs, tabTitle } from './time'
+import { formatClock, growthFraction, pausedMs, remainingMs, strictProgress, tabTitle } from './time'
 
 const base: PomodoroState = {
   id: 1, plot_id: 1, plant_type: 'daisy', status: 'running', planned_s: 600,
-  remaining_ms: 600_000, started_at: 't', paused_at: null, tag: null,
+  remaining_ms: 600_000, started_at: 't', paused_at: null, tag: null, strict: false, pauses: 0, paused_ms: 0,
 }
 
 describe('remainingMs', () => {
@@ -71,5 +71,19 @@ describe('growthFraction', () => {
     expect(growthFraction(600, 700_000)).toBe(0)
     expect(growthFraction(600, -5)).toBe(1)
     expect(growthFraction(0, 0)).toBe(1)
+  })
+})
+
+describe('strict mode progress', () => {
+  const strictBase = { id: 1, plot_id: 1, plant_type: 'daisy', status: 'running' as const, planned_s: 600, remaining_ms: 1000, started_at: 't', paused_at: null, tag: null, strict: true, pauses: 1, paused_ms: 125_000 }
+  it('keeps the pause time frozen while running', () => expect(pausedMs(strictBase, 1000, 99_000)).toBe(125_000))
+  it('keeps counting while paused, on the monotonic clock', () => expect(pausedMs({ ...strictBase, status: 'paused' }, 1000, 4000)).toBe(128_000))
+  it('never goes backwards if the monotonic clock is odd', () => expect(pausedMs({ ...strictBase, status: 'paused' }, 5000, 1000)).toBe(125_000))
+  it('reads pauses and whole minutes', () => expect(strictProgress(strictBase, 125_000)).toEqual({ text: 'Modo estricto: 1 de 2 pausas · 2 de 10 min', clean: true }))
+  it('the limits are inclusive: 2 pauses and exactly 10 min are still clean', () => expect(strictProgress({ ...strictBase, pauses: 2 }, 600_000).clean).toBe(true))
+  it('a third pause or 10 min and a bit more ends the clean run, kindly', () => {
+    expect(strictProgress({ ...strictBase, pauses: 3 }, 0).clean).toBe(false)
+    expect(strictProgress(strictBase, 600_001).clean).toBe(false)
+    expect(strictProgress({ ...strictBase, pauses: 3 }, 0).text).toContain('ya no contará como limpio')
   })
 })

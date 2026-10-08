@@ -1,4 +1,4 @@
-import type { BookMonth, FlowRow, GameState, PlantRequest } from './types'
+import type { BookMonth, FlowRow, Stats, GameState, PlantRequest } from './types'
 
 /** Error body from the server is {"error": "<code>"}; code is stable, message is for humans. */
 export class ApiError extends Error {
@@ -43,6 +43,7 @@ export const bookExportUrl = (): string => `/api/book/export.csv?tz=${encodeURIC
 
 export const api = {
   book: (month: string) => request<BookMonth>('GET', `/api/book?month=${encodeURIComponent(month)}&tz=${encodeURIComponent(localTimeZone())}`),
+  stats: () => request<Stats>('GET', `/api/stats?tz=${encodeURIComponent(localTimeZone())}`),
   flow: () => request<FlowRow[]>('GET', '/api/flow'),
   state: () => request<GameState>('GET', '/api/state'),
   plant: (req: PlantRequest) => request<GameState>('POST', '/api/pomodoros', req),

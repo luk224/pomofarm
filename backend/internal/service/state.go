@@ -48,6 +48,11 @@ type PomodoroState struct {
 	StartedAt   string  `json:"started_at"`
 	PausedAt    *string `json:"paused_at"`
 	Tag         *string `json:"tag"`
+	// Strict mode (GDD §3.3): chosen when it started. Pauses so far and the time spent paused (including the pause in
+	// progress, as of this answer), so the client can show "1 of 2 pauses" without ever blocking anything.
+	Strict   bool  `json:"strict"`
+	Pauses   int   `json:"pauses"`
+	PausedMs int64 `json:"paused_ms"`
 }
 
 // SeedState lets the client list seeds and their prices without knowing the balance.
@@ -218,6 +223,14 @@ func (s *Service) State(ctx context.Context) (State, error) {
 			return err
 		}
 		ps.Tag = strPtr(tag)
+		if err := tx.QueryRowContext(ctx, `SELECT strict, (SELECT COUNT(*) FROM pomodoro_events WHERE pomodoro_id = ? AND kind = 'pause') FROM pomodoros WHERE id = ?`, a.ID, a.ID).
+			Scan(&ps.Strict, &ps.Pauses); err != nil {
+			return err
+		}
+		ps.PausedMs = a.P.PausedTotalS * 1000
+		if a.P.PausedAt != nil {
+			ps.PausedMs += now.Sub(*a.P.PausedAt).Milliseconds()
+		}
 		if a.P.PausedAt != nil {
 			t := fmtTime(*a.P.PausedAt)
 			ps.PausedAt = &t

@@ -54,6 +54,11 @@ export interface PomodoroState {
   started_at: string
   paused_at: string | null
   tag: string | null
+  /** Strict mode (chosen when it started): the player's own challenge, never a block. */
+  strict: boolean
+  pauses: number
+  /** Time spent paused so far, including a pause in progress, as of the answer. */
+  paused_ms: number
 }
 
 export interface SiloState {
@@ -140,6 +145,20 @@ export interface DecorState {
   max: number
   hat: { owned: boolean; available: boolean; cost: number }
   blocked: [number, number][]
+}
+
+/** Personal numbers (GDD §4.8): weekly Pomodoros, best streak and clean Pomodoros. */
+export interface Stats {
+  time_zone: string
+  weeks: { start: string; pomodoros: number; seconds: number }[]
+  this_week: number
+  total: number
+  best_streak_days: number
+  best_streak_end: string
+  current_streak_days: number
+  strict_total: number
+  clean: number
+  strict_on: boolean
 }
 
 /** One month of the Harvest Book (GDD §4.8). Days and weekdays are in the player's time zone. */

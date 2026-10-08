@@ -97,6 +97,25 @@ function SoundSettings() {
   )
 }
 
+/** Strict mode (GDD §3.3): a personal challenge. It never blocks a pause; it only decides what the Harvest Book counts as clean. */
+function StrictSetting() {
+  const on = useGame((s) => s.state?.settings.strict_mode === '1')
+  const setSetting = useGame((s) => s.setSetting)
+  const [wanted, setWanted] = useState<{ value: boolean; base: boolean } | null>(null)
+  const shown = wanted && wanted.base === on ? wanted.value : on
+  return (
+    <fieldset className="restset" data-testid="strict-setting">
+      <legend>Reto personal</legend>
+      <label className="check">
+        <input type="checkbox" checked={shown} data-testid="strict-mode"
+          onChange={(e) => { setWanted({ value: e.target.checked, base: on }); void setSetting('strict_mode', e.target.checked ? '1' : '0') }} />
+        <span>Modo estricto</span>
+      </label>
+      <p className="hint">Máximo 2 pausas y 10 minutos de pausa por Pomodoro. No cambia nada del juego: puedes pausar cuanto quieras. Los que cumplan se cuentan como limpios en el Libro.</p>
+    </fieldset>
+  )
+}
+
 export function Settings() {
   const [open, setOpen] = useState(false)
   const sound = usePrefs((s) => s.sound)
@@ -141,6 +160,7 @@ export function Settings() {
           {!sound && <p className="hint">Sin campana, verás el aviso en la pestaña.</p>}
           <SoundSettings />
           <RestSettings />
+          <StrictSetting />
           <fieldset className="restset" data-testid="shortcuts">
             <legend>Atajos</legend>
             <dl className="keys">

@@ -222,6 +222,20 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 .table th[scope=row], .table thead th:first-child { text-align: left; font-weight: 500; }
 .table thead th { font-size: 12px; color: var(--ink-soft); font-weight: 600; }
 
+/* ---------- personal numbers ---------- */
+.numbers h3 { margin: 0 0 6px; font-size: 15px; }
+.numbers__list { margin: 0; display: grid; gap: 4px; }
+.numbers__list > div { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
+.numbers__list dt { color: var(--ink-soft); }
+.numbers__list dd { margin: 0; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.weeks { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; height: 52px; margin-top: 8px; }
+.weeks__col { display: flex; }
+.weeks__bar { flex: 1; display: flex; align-items: flex-end; background: #3b2a1f14; border-radius: 5px; overflow: hidden; }
+.weeks__bar span { display: block; width: 100%; background: #7fae82; min-height: 0; border-radius: 5px 5px 0 0; }
+.weeks__bar .weeks__now { background: var(--leaf); }
+.readout__strict { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+.readout__strict[data-clean=false] { color: var(--ink); }
+
 /* ---------- Lofi player ---------- */
 .lofi { position: fixed; top: 58px; left: 12px; z-index: 24; width: min(264px, calc(100vw - 24px)); box-sizing: border-box; padding: 12px;
   border-radius: 18px; background: var(--panel); backdrop-filter: blur(8px); box-shadow: 0 6px 24px #3b2a1f40; display: grid; gap: 10px; }

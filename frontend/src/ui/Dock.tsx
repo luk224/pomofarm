@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../store/game'
-import { useRemainingMs } from '../store/hooks'
-import { formatClock } from '../store/time'
+import { usePausedMs, useRemainingMs } from '../store/hooks'
+import { formatClock, strictProgress } from '../store/time'
 import { formatMultiplier } from '../store/bonus'
 import { formatLife, lifeLeftMs } from '../store/life'
 import { useUi } from '../store/ui'
@@ -38,6 +38,7 @@ function RunningDock() {
   const pomodoro = useGame((s) => s.state?.pomodoro)
   const cancel = useGame((s) => s.cancel)
   const ms = useRemainingMs()
+  const pausedNow = usePausedMs()
   const confirm = useConfirm(() => void cancel())
   if (!pomodoro || ms === null) return null
   const paused = pomodoro.status === 'paused'
@@ -52,6 +53,11 @@ function RunningDock() {
           {pomodoro.tag ? ` · ${pomodoro.tag}` : ''}
           {paused ? ' · en pausa' : ''}
         </div>
+        {pomodoro.strict && pausedNow !== null && (
+          <div className="readout__strict" data-testid="strict-progress" data-clean={strictProgress(pomodoro, pausedNow).clean}>
+            {strictProgress(pomodoro, pausedNow).text}
+          </div>
+        )}
       </div>
       <button type="button" className="btn btn--primary" onClick={() => void togglePause()}>
         {paused ? 'Reanudar' : 'Pausar'}

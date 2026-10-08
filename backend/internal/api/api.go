@@ -185,6 +185,14 @@ func New(db *sql.DB, clock game.Clock) *fiber.App {
 		return c.JSON(book)
 	})
 
+	app.Get("/api/stats", func(c *fiber.Ctx) error {
+		st, err := svc.Stats(c.UserContext(), c.Query("tz"))
+		if err != nil {
+			return fail(c, err)
+		}
+		return c.JSON(st)
+	})
+
 	app.Get("/api/book/export.csv", func(c *fiber.Ctx) error {
 		data, err := svc.BookCSV(c.UserContext(), c.Query("tz"))
 		if err != nil {

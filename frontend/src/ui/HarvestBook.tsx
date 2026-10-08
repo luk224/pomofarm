@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { api, ApiError, bookExportUrl } from '../api/client'
-import type { BookMonth } from '../api/types'
+import type { BookMonth, Stats } from '../api/types'
 import {
   dayLabel, formatFocus, harvestOf, HARVEST_UNITS, isHarvestUnit, monthLabel, UNIT_NAMES, WEEKDAY_NAMES, type HarvestUnit,
 } from '../store/book'
@@ -98,6 +98,34 @@ function Tables({ book }: { book: BookMonth }) {
   )
 }
 
+/** Personal numbers: weekly Pomodoros, best streak and clean Pomodoros. Nothing here is a goal or a debt. */
+function PersonalNumbers({ stats }: { stats: Stats }) {
+  const max = Math.max(1, ...stats.weeks.map((w) => w.pomodoros))
+  const days = (n: number) => `${n} ${n === 1 ? 'día' : 'días'}`
+  return (
+    <section className="numbers" aria-label="Tus números" data-testid="personal-numbers">
+      <h3>Tus números</h3>
+      <dl className="numbers__list">
+        <div><dt>Esta semana</dt><dd data-testid="num-week">{stats.this_week} {stats.this_week === 1 ? 'Pomodoro' : 'Pomodoros'}</dd></div>
+        <div><dt>Mejor racha</dt><dd data-testid="num-best">{stats.best_streak_days === 0 ? 'Aún no' : `${days(stats.best_streak_days)} seguidos`}</dd></div>
+        <div><dt>Racha actual</dt><dd data-testid="num-current">{stats.current_streak_days === 0 ? 'Empieza cuando quieras' : days(stats.current_streak_days)}</dd></div>
+        {(stats.strict_total > 0 || stats.strict_on) && (
+          <div><dt>Pomodoros limpios</dt><dd data-testid="num-clean">{stats.clean} de {stats.strict_total} en modo estricto</dd></div>
+        )}
+      </dl>
+      <div className="weeks" role="img" data-testid="weeks-chart"
+        aria-label={`Pomodoros por semana, últimas 12: ${stats.weeks.map((w) => w.pomodoros).join(', ')}`}>
+        {stats.weeks.map((w, i) => (
+          <span key={w.start} className="weeks__col" title={`Semana del ${w.start}: ${w.pomodoros}`}>
+            <span className="weeks__bar"><span style={{ height: `${(w.pomodoros / max) * 100}%` }} className={i === stats.weeks.length - 1 ? 'weeks__now' : undefined} /></span>
+          </span>
+        ))}
+      </div>
+      <p className="hint">Pomodoros por semana (últimas 12, la actual a la derecha).</p>
+    </section>
+  )
+}
+
 /**
  * The Harvest Book (GDD §4.8): a month of focus as bales, silos or baskets, with a table view (by tag, weekday and day)
  * and a CSV export. Nothing here is a streak or a target: it only shows what you did.
@@ -107,6 +135,7 @@ export function HarvestBook() {
   /** The month asked for (null = the current one); what is shown is `book.month`, as the server resolved it. */
   const [requested, setRequested] = useState<string | null>(null)
   const [book, setBook] = useState<BookMonth | null>(null)
+  const [stats, setStats] = useState<Stats | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [table, setTable] = useState(false)
   const [unit, setUnit] = useState<HarvestUnit>(loadUnit)
@@ -127,6 +156,15 @@ export function HarvestBook() {
       live = false
     }
   }, [open, requested])
+
+  useEffect(() => {
+    if (!open) return
+    let live = true
+    api.stats().then((s) => live && setStats(s), () => undefined)
+    return () => {
+      live = false
+    }
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -186,6 +224,7 @@ export function HarvestBook() {
                   <Weekdays book={book} />
                 </>
               )}
+              {stats && <PersonalNumbers stats={stats} />}
               <a className="btn book__export" data-testid="book-export" href={bookExportUrl()} download="libro-de-cosechas.csv">Exportar todo a CSV</a>
             </>
           )}

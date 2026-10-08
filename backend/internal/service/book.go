@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/luk224/pomofarm/backend/internal/game"
 )
 
 // The Harvest Book (GDD §4.8): focus time per month, by tag and by weekday, and a CSV of every Pomodoro. Days and
@@ -51,6 +53,8 @@ type bookRow struct {
 	pausedS    int64
 	reward     int64
 	status     string
+	strict     bool
+	pauses     int
 }
 
 // location validates an IANA time-zone name; empty means UTC.
@@ -69,7 +73,8 @@ func location(name string) (*time.Location, error) {
 }
 
 func loadBookRows(ctx context.Context, tx *sql.Tx, statuses string) ([]bookRow, error) {
-	rows, err := tx.QueryContext(ctx, `SELECT p.id, p.started_at, p.ended_at, COALESCE(t.name, ''), p.plant_type, p.planned_s, p.paused_total_s, p.reward_focus, p.status
+	rows, err := tx.QueryContext(ctx, `SELECT p.id, p.started_at, p.ended_at, COALESCE(t.name, ''), p.plant_type, p.planned_s, p.paused_total_s, p.reward_focus, p.status, p.strict,
+		(SELECT COUNT(*) FROM pomodoro_events e WHERE e.pomodoro_id = p.id AND e.kind = 'pause')
 		FROM pomodoros p LEFT JOIN tags t ON t.id = p.tag_id
 		WHERE p.player_id = ? AND p.status IN (`+statuses+`) AND p.ended_at IS NOT NULL ORDER BY p.ended_at, p.id`, PlayerID)
 	if err != nil {
@@ -80,7 +85,7 @@ func loadBookRows(ctx context.Context, tx *sql.Tx, statuses string) ([]bookRow, 
 	for rows.Next() {
 		var r bookRow
 		var start, end string
-		if err := rows.Scan(&r.id, &start, &end, &r.tag, &r.plant, &r.plannedS, &r.pausedS, &r.reward, &r.status); err != nil {
+		if err := rows.Scan(&r.id, &start, &end, &r.tag, &r.plant, &r.plannedS, &r.pausedS, &r.reward, &r.status, &r.strict, &r.pauses); err != nil {
 			return nil, err
 		}
 		r.start, r.end = parseTime(start), parseTime(end)
@@ -192,13 +197,20 @@ func (s *Service) BookCSV(ctx context.Context, tz string) ([]byte, error) {
 	var b strings.Builder
 	b.WriteString("\uFEFF")
 	w := csv.NewWriter(&b)
-	_ = w.Write([]string{"id", "inicio", "fin", "etiqueta", "cultivo", "minutos", "pausa_minutos", "gotas", "estado"})
+	_ = w.Write([]string{"id", "inicio", "fin", "etiqueta", "cultivo", "minutos", "pausa_minutos", "gotas", "estado", "estricto", "limpio"})
 	for _, r := range rows {
 		_ = w.Write([]string{
 			fmt.Sprint(r.id), r.start.In(loc).Format("2006-01-02 15:04:05"), r.end.In(loc).Format("2006-01-02 15:04:05"),
-			csvSafe(r.tag), r.plant, fmt.Sprintf("%.1f", float64(r.plannedS)/60), fmt.Sprintf("%.1f", float64(r.pausedS)/60), fmt.Sprint(r.reward), r.status,
+			csvSafe(r.tag), r.plant, fmt.Sprintf("%.1f", float64(r.plannedS)/60), fmt.Sprintf("%.1f", float64(r.pausedS)/60), fmt.Sprint(r.reward), r.status, boolBit(r.strict), boolBit(r.status == "completed" && game.IsClean(r.strict, r.pauses, r.pausedS)),
 		})
 	}
 	w.Flush()
 	return []byte(b.String()), w.Error()
+}
+
+func boolBit(b bool) string {
+	if b {
+		return "1"
+	}
+	return "0"
 }

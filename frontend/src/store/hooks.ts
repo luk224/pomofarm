@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useGame } from './game'
 import { siloNow } from './economy'
 import { restRemainingMs } from './rest'
-import { remainingMs } from './time'
+import { pausedMs, remainingMs } from './time'
 
 const SYNC_EVERY_MS = 30_000
 
@@ -83,4 +83,17 @@ export function useSiloAmount(): number {
     return () => window.clearInterval(id)
   }, [filling])
   return silo ? siloNow(silo, fetchedAt, Math.max(now, fetchedAt)) : 0
+}
+
+/** Time spent paused in the active strict Pomodoro (null if there is none). Repaints every second while a pause is in progress. */
+export function usePausedMs(): number | null {
+  const pomodoro = useGame((s) => s.state?.pomodoro ?? null)
+  const fetchedAt = useGame((s) => s.fetchedAt)
+  const [now, setNow] = useState(() => performance.now())
+  useEffect(() => {
+    if (!pomodoro || pomodoro.status !== 'paused') return
+    const id = window.setInterval(() => setNow(performance.now()), 1000)
+    return () => window.clearInterval(id)
+  }, [pomodoro])
+  return pomodoro ? pausedMs(pomodoro, fetchedAt, Math.max(now, fetchedAt)) : null
 }

@@ -38,3 +38,24 @@ export function growthFraction(plannedS: number, remaining: number): number {
   if (plannedS <= 0) return 1
   return Math.min(1, Math.max(0, 1 - remaining / (plannedS * 1000)))
 }
+
+/** Strict mode limits (GDD §3.3); the server holds the same numbers and decides what counts as clean. */
+export const STRICT_MAX_PAUSES = 2
+export const STRICT_MAX_PAUSED_MIN = 10
+
+/**
+ * Time spent paused, in ms, kept live between server answers on the monotonic clock: while paused it keeps growing,
+ * and it never depends on the computer's date.
+ */
+export function pausedMs(p: PomodoroState, fetchedAtMono: number, nowMono: number): number {
+  if (p.status !== 'paused') return p.paused_ms
+  return p.paused_ms + Math.max(0, nowMono - fetchedAtMono)
+}
+
+/** "Modo estricto: 1 de 2 pausas · 3 de 10 min", with a note once a limit is passed (the session is no longer clean). */
+export function strictProgress(p: PomodoroState, pausedNowMs: number): { text: string; clean: boolean } {
+  const minutes = Math.floor(pausedNowMs / 60000)
+  const clean = p.pauses <= STRICT_MAX_PAUSES && pausedNowMs <= STRICT_MAX_PAUSED_MIN * 60000
+  const text = `Modo estricto: ${p.pauses} de ${STRICT_MAX_PAUSES} pausas · ${minutes} de ${STRICT_MAX_PAUSED_MIN} min`
+  return { text: clean ? text : `${text} · ya no contará como limpio`, clean }
+}

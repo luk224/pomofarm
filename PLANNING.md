@@ -191,8 +191,9 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P4-01b Visualización (fardos/silos/cestas) + vista tabla + export CSV
   - **Hecho:** CSV exportado coincide con los Pomodoros guardados (E2E `p4_01_book.py`, tests `book_test.go`, GDD decisión 17).
 
-- [ ] **P4-02** Métricas personales — agente: `backend-go` — dep: P4-01
-  - [ ] P4-02a Pomodoros/semana, mejor racha, "Pomodoros limpios" (modo estricto opcional)
+- [x] **P4-02** Métricas personales — agente: `backend-go` — dep: P4-01
+  - [x] P4-02a Pomodoros/semana, mejor racha, "Pomodoros limpios" (modo estricto opcional)
+  - **Hecho:** `GET /api/stats`, migración 6 (`strict`), tests `stats_test.go` y `stats_test.go` del juego, E2E `p4_02_stats.py`, GDD decisión 18. Tres mutaciones detectadas.
 
 - [ ] **P4-03** Prestigio por estaciones — agente: `backend-go` — dep: P3-01
   - [ ] P4-03a Requisitos, qué se reinicia/conserva, +10% 🪙 por estación (GDD §4.9)

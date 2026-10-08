@@ -191,7 +191,7 @@ func TestBookCSVMatchesTheStoredPomodoros(t *testing.T) {
 	if len(recs) != stored+1 || stored != 6 {
 		t.Fatalf("%d CSV rows for %d stored Pomodoros", len(recs)-1, stored)
 	}
-	if strings.Join(recs[0], ",") != "id,inicio,fin,etiqueta,cultivo,minutos,pausa_minutos,gotas,estado" {
+	if strings.Join(recs[0], ",") != "id,inicio,fin,etiqueta,cultivo,minutos,pausa_minutos,gotas,estado,estricto,limpio" {
 		t.Fatalf("header: %v", recs[0])
 	}
 	r1 := recs[1]
