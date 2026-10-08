@@ -173,3 +173,75 @@ func TestUpgradingFromSchema4KeepsStructures(t *testing.T) {
 		t.Fatal("a second hat must be refused by the database itself")
 	}
 }
+
+// Phase 4: a database at schema 5 (decoration in place, a finished Pomodoro history) must come through migration 6 with every
+// row intact, and the Pomodoros it already holds read as "not strict" (the mode did not exist when they were played).
+func TestUpgradingFromSchema5KeepsHistoryAndDefaultsStrictToOff(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "v5.db")
+	raw, err := sql.Open("sqlite", "file:"+path+"?_pragma=foreign_keys(1)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := raw.Exec(`CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)`); err != nil {
+		t.Fatal(err)
+	}
+	for v, name := range []string{"0001_init.sql", "0002_silo.sql", "0003_rest.sql", "0004_structures.sql", "0005_decor.sql"} {
+		body, err := migrationsFS.ReadFile("migrations/" + name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := raw.Exec(string(body)); err != nil {
+			t.Fatalf("applying %s: %v", name, err)
+		}
+		if _, err := raw.Exec(`INSERT INTO schema_migrations VALUES (?, '2026-10-07T12:00:00Z')`, v+1); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, q := range []string{
+		`INSERT INTO players (id,name,focus_points,lifetime_focus,coins_milli,silo_level,season,biome,created_at,last_seen_at,version)
+			VALUES (1,'Luk',5,300,14258000,4,1,'spring','2026-10-01T08:00:00Z','2026-10-08T11:00:00Z',12)`,
+		`INSERT INTO tags (id,player_id,name) VALUES (1,1,'tesis')`,
+		`INSERT INTO pomodoros (id,player_id,plot_id,plant_type,tag_id,planned_s,started_at,paused_total_s,ended_at,reward_focus,status)
+			VALUES (1,1,NULL,'apple',1,2700,'2026-10-06T08:00:00Z',60,'2026-10-06T08:46:00Z',15,'completed'),
+			       (2,1,NULL,'daisy',NULL,600,'2026-10-07T08:00:00Z',0,'2026-10-07T08:10:00Z',1,'completed'),
+			       (3,1,NULL,'daisy',NULL,600,'2026-10-07T09:00:00Z',0,'2026-10-07T09:05:00Z',0,'cancelled')`,
+		`INSERT INTO pomodoro_events (pomodoro_id,kind,at) VALUES (1,'start','2026-10-06T08:00:00Z'),(1,'pause','2026-10-06T08:10:00Z')`,
+		`INSERT INTO structures (player_id,kind,x,y) VALUES (1,'lantern',4,1),(1,'hat',0,0)`,
+		`INSERT INTO settings VALUES (1,'rest_enabled','0')`,
+	} {
+		if _, err := raw.Exec(q); err != nil {
+			t.Fatalf("setting up the v5 database: %v", err)
+		}
+	}
+	raw.Close()
+
+	db, err := Open(path)
+	if err != nil {
+		t.Fatalf("opening a schema-5 database: %v", err)
+	}
+	defer db.Close()
+	if v, _ := SchemaVersion(db); v != 6 {
+		t.Fatalf("schema version = %d, want 6", v)
+	}
+	var strict, count int
+	if err := db.QueryRow(`SELECT COUNT(*), COALESCE(SUM(strict), 0) FROM pomodoros`).Scan(&count, &strict); err != nil || count != 3 || strict != 0 {
+		t.Fatalf("%d Pomodoros, %d strict, err %v", count, strict, err)
+	}
+	var planned int
+	var status string
+	if err := db.QueryRow(`SELECT planned_s, status FROM pomodoros WHERE id = 1`).Scan(&planned, &status); err != nil || planned != 2700 || status != "completed" {
+		t.Fatalf("a Pomodoro changed: %d %s %v", planned, status, err)
+	}
+	var coins, events, structures, settings int64
+	db.QueryRow(`SELECT coins_milli FROM players WHERE id = 1`).Scan(&coins)
+	db.QueryRow(`SELECT COUNT(*) FROM pomodoro_events`).Scan(&events)
+	db.QueryRow(`SELECT COUNT(*) FROM structures`).Scan(&structures)
+	db.QueryRow(`SELECT COUNT(*) FROM settings`).Scan(&settings)
+	if coins != 14258000 || events != 2 || structures != 2 || settings != 1 {
+		t.Fatalf("rows changed: coins %d, events %d, structures %d, settings %d", coins, events, structures, settings)
+	}
+	// the new column accepts the flag, and rejects nothing that was valid before
+	if _, err := db.Exec(`INSERT INTO pomodoros (player_id,plot_id,plant_type,planned_s,started_at,status,strict) VALUES (1,NULL,'daisy',600,'2026-10-08T08:00:00Z','running',1)`); err != nil {
+		t.Fatal(err)
+	}
+}

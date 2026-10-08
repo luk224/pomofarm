@@ -206,7 +206,8 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
 
   - **Hecho:** E2E `p4_04_a11y.py`, tests de contraste y simulación de daltonismo con la hoja de estilos real, GDD decisión 20.
 
-- [ ] **P4-05** Verificación de Fase 4 — agente: `qa-tester` — dep: P4-01..P4-04
+- [x] **P4-05** Verificación de Fase 4 — agente: `qa-tester` — dep: P4-01..P4-04
+  - **Hecho:** informe en `docs/qa/fase-4.md`; tests `qa_phase4_test.go` (horario de verano, fronteras de mes, 8.760 Pomodoros, etiquetas raras), prestigio en las jugadas aleatorias, E2E `p4_05_qa.py`; 586 comprobaciones E2E.
 
 ---
 

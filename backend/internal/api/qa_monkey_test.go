@@ -258,7 +258,7 @@ func TestRandomPlayNeverBreaksTheInvariants(t *testing.T) {
 		for i := 0; i < 160; i++ {
 			ids := plotIDs()
 			pick := ids[rnd.Intn(len(ids))]
-			switch r := rnd.Intn(130); {
+			switch r := rnd.Intn(134); {
 			case r < 22:
 				req := service.PlantRequest{PlotID: pick, PlantType: crops[rnd.Intn(5)]}
 				if req.PlantType == "oak" && rnd.Intn(2) == 0 {
@@ -337,6 +337,26 @@ func TestRandomPlayNeverBreaksTheInvariants(t *testing.T) {
 			case r >= 126 && r < 128:
 				c.pendingCost = int64(game.HatCost) * 1000
 				move("buy hat", "POST", "/api/decor", map[string]any{"kind": "hat"})
+			case r >= 130 && r < 133:
+				// a finished farm, then a new season: whatever the game looked like, the rules must still hold afterwards
+				for x := 0; x < 4; x++ {
+					for y := 0; y < 4; y++ {
+						dbExec(t, e, `INSERT OR IGNORE INTO plots (player_id, x, y) VALUES (1, ?, ?)`, x, y)
+					}
+				}
+				dbExec(t, e, `UPDATE players SET silo_level = 4`)
+				dbExec(t, e, `INSERT OR IGNORE INTO unlocks (player_id,kind,key,at) VALUES (1,'animal','bees','t'),(1,'animal','dog','t')`)
+				dbExec(t, e, `DELETE FROM structures WHERE kind IN ('hive','dog')`)
+				dbExec(t, e, `INSERT INTO structures (player_id,kind,x,y) VALUES (1,'hive',1,1),(1,'hive',2,1),(1,'hive',1,2),(1,'hive',2,2),(1,'dog',0,0)`)
+				before := e.state()
+				c.allowedDrop = before.Player.CoinsMilli + before.Silo.ContentMilli // a new season starts the 🪙 over
+				code := move("prestige", "POST", "/api/prestige", map[string]bool{"confirm": true})
+				if code == 200 {
+					after := e.state()
+					if after.Player.Season != before.Player.Season+1 || after.Player.CoinsMilli != 0 || len(after.Plots) != 16 || len(after.Decor.Items) != 0 || len(after.Automation.Bees.Hives) != 0 {
+						c.fail("prestige went wrong: season %d -> %d, coins %d, plots %d", before.Player.Season, after.Player.Season, after.Player.CoinsMilli, len(after.Plots))
+					}
+				}
 			default:
 				dbExec(t, e, `UPDATE players SET season = ?`, 1+rnd.Intn(3)) // prestige seasons
 				move("season", "GET", "/api/state", nil)
