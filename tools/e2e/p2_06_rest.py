@@ -92,7 +92,7 @@ with sync_playwright() as p:
     osc0 = pg.evaluate("window.__audio.osc")
     pg.locator(".packet__body:not([disabled])").first.click(); btn(pg, "Plantar").click(); pg.wait_for_selector("[data-testid=timer]"); pg.wait_for_timeout(400)
     check("empezar otro Pomodoro termina el descanso", pg.locator("[data-testid=rest]").count() == 0 and call("GET", "/api/state")["rest"] is None)
-    pg.wait_for_timeout(500); check("terminarlo así no se anuncia como 'descanso terminado'", pg.evaluate("window.__audio.osc") == osc0 and pg.locator(".toast:has-text('Descanso terminado')").count() == 0)
+    pg.wait_for_timeout(500); check("terminarlo así no se anuncia como 'descanso terminado' (solo suena el efecto de plantar)", pg.evaluate("window.__audio.osc") == osc0 + 1 and pg.locator(".toast:has-text('Descanso terminado')").count() == 0)
     call("POST", "/api/pomodoros/active/cancel")
 
     # 5) duraciones por tramo: Girasol (35 min) -> 10; Roble 90 min -> 15

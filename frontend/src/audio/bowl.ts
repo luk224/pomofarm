@@ -1,3 +1,5 @@
+import { layerBus, runningContext, unlockAudio } from './engine'
+
 /**
  * A soft singing-bowl chime synthesised with Web Audio (no audio files, nothing to license).
  * A bowl is a few inharmonic partials that each fade at their own pace; two strikes make it a "ding… ding".
@@ -25,28 +27,18 @@ export const STRIKES = [
 /** Peak of the summed partials stays well below clipping. */
 export const MASTER_GAIN = 0.22
 
-let ctx: AudioContext | null = null
+/** Re-exported so callers that only need the chime keep one import. */
+export { unlockAudio }
 
-/**
- * Create/resume the audio context. Browsers keep it suspended until a user gesture, so this must be
- * called from a click or key handler (we call it when the player starts a Pomodoro).
- */
-export function unlockAudio(): void {
-  try {
-    ctx ??= new AudioContext()
-    if (ctx.state === 'suspended') void ctx.resume()
-  } catch {
-    ctx = null // no Web Audio: alerts stay visual
-  }
-}
-
-/** Plays the chime. Returns false if audio was never unlocked or is unavailable. */
+/** Plays the chime on the alerts layer. Returns false if audio was never unlocked or is unavailable. */
 export function playBowl(volume = 1): boolean {
-  if (!ctx || ctx.state !== 'running') return false
+  const ctx = runningContext()
+  const bus = layerBus('alerts')
+  if (!ctx || !bus) return false
   const t0 = ctx.currentTime + 0.05
   const master = ctx.createGain()
   master.gain.value = MASTER_GAIN * Math.min(1, Math.max(0, volume))
-  master.connect(ctx.destination)
+  master.connect(bus)
   for (const strike of STRIKES) {
     for (const p of BOWL_PARTIALS) {
       const osc = ctx.createOscillator()

@@ -49,7 +49,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 .settings { position: relative; }
 .chip--button { border: 0; cursor: pointer; padding: 6px 10px; color: var(--ink); height: 38px; box-sizing: border-box; }
 .chip--button:hover { background: #fff; }
-.panelbox { position: absolute; top: 46px; left: 0; width: 260px; display: grid; gap: 10px; padding: 14px; border-radius: 18px;
+.panelbox { max-height: calc(100vh - 70px); overflow-y: auto; position: absolute; top: 46px; left: 0; width: 260px; display: grid; gap: 10px; padding: 14px; border-radius: 18px;
   background: var(--panel); backdrop-filter: blur(8px); box-shadow: 0 6px 24px #3b2a1f26; z-index: 25; }
 .check { display: flex; align-items: center; gap: 10px; min-height: 36px; cursor: pointer; font-weight: 500; }
 .check input { width: 20px; height: 20px; accent-color: var(--leaf); }
@@ -192,6 +192,12 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 .toast--error { background: var(--danger); }
 @keyframes toast-in { from { opacity: 0; transform: translateY(-6px); } }
 @keyframes reward-pop { 0% { opacity: 0; transform: translateY(14px) scale(0.7); } 100% { opacity: 1; transform: none; } }
+
+/* ---------- sound sliders ---------- */
+.slider { display: grid; grid-template-columns: 76px 1fr 30px; align-items: center; gap: 8px; font-size: 14px; min-height: 36px; }
+.slider input[type=range] { width: 100%; accent-color: var(--leaf); min-height: 28px; }
+.slider output { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+.restfield select { font: inherit; padding: 6px 8px; border-radius: 10px; border: 1px solid #3b2a1f33; background: #fff; min-height: 36px; }
 
 /* ---------- hive placement ---------- */
 .placing { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 20; width: min(460px, calc(100vw - 32px));

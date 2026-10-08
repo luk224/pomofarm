@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../store/game'
+import { AMBIENT_KINDS, isAmbientKind } from '../audio/ambient'
+import { playBowl } from '../audio/bowl'
+import { playEffect } from '../audio/effects'
+import { unlockAudio, type Layer } from '../audio/engine'
 import { usePrefs } from '../store/prefs'
 
 const supported = typeof Notification !== 'undefined'
@@ -58,6 +62,41 @@ function RestSettings() {
   )
 }
 
+const AMBIENT_LABELS: Record<string, string> = { off: 'Sin ambiente', rain: 'Lluvia', forest: 'Bosque', fire: 'Fuego' }
+const LAYER_LABELS: Record<Layer, string> = { ambient: 'Ambiente', effects: 'Efectos', alerts: 'Alertas' }
+/** Plays a short sample of the layer, so the player hears what the slider just set. */
+const PREVIEWS: Partial<Record<Layer, () => void>> = { effects: () => playEffect('coin'), alerts: () => playBowl(0.5) }
+
+/** Three independent volumes (ambient, effects, alerts) and the local ambient sound (GDD §2, ASMR). Saved on this device. */
+function SoundSettings() {
+  const volumes = usePrefs((s) => s.volumes)
+  const ambient = usePrefs((s) => s.ambient)
+  const setVolume = usePrefs((s) => s.setVolume)
+  const setAmbient = usePrefs((s) => s.setAmbient)
+  return (
+    <fieldset className="restset" data-testid="sound-settings">
+      <legend>Sonido</legend>
+      <label className="restfield">
+        <span>Ambiente</span>
+        <select value={ambient} data-testid="ambient-kind"
+          onChange={(e) => { unlockAudio(); if (isAmbientKind(e.target.value)) setAmbient(e.target.value) }}>
+          {AMBIENT_KINDS.map((k) => <option key={k} value={k}>{AMBIENT_LABELS[k]}</option>)}
+        </select>
+      </label>
+      {(Object.keys(LAYER_LABELS) as Layer[]).map((l) => (
+        <label key={l} className="slider">
+          <span>{LAYER_LABELS[l]}</span>
+          <input type="range" min={0} max={100} step={1} value={Math.round(volumes[l] * 100)} data-testid={`volume-${l}`}
+            aria-label={`Volumen de ${LAYER_LABELS[l].toLowerCase()}`} aria-valuetext={`${Math.round(volumes[l] * 100)} por ciento`}
+            onChange={(e) => { unlockAudio(); setVolume(l, Number(e.target.value) / 100) }}
+            onPointerUp={() => PREVIEWS[l]?.()} onKeyUp={() => PREVIEWS[l]?.()} />
+          <output>{Math.round(volumes[l] * 100)}</output>
+        </label>
+      ))}
+    </fieldset>
+  )
+}
+
 export function Settings() {
   const [open, setOpen] = useState(false)
   const sound = usePrefs((s) => s.sound)
@@ -91,7 +130,7 @@ export function Settings() {
         <div id="settings-panel" className="panelbox" role="group" aria-label="Avisos al terminar">
           <label className="check">
             <input type="checkbox" checked={sound} onChange={(e) => setSound(e.target.checked)} />
-            <span>Sonido al terminar</span>
+            <span>Campana al terminar</span>
           </label>
           <label className="check">
             <input type="checkbox" checked={notify && !blocked} disabled={!supported || blocked} onChange={(e) => setNotify(e.target.checked)} />
@@ -99,7 +138,8 @@ export function Settings() {
           </label>
           {!supported && <p className="hint">Este navegador no admite notificaciones.</p>}
           {blocked && <p className="hint">Las notificaciones están bloqueadas en el navegador. Actívalas en los permisos del sitio.</p>}
-          {!sound && <p className="hint">Sin sonido, verás el aviso en la pestaña.</p>}
+          {!sound && <p className="hint">Sin campana, verás el aviso en la pestaña.</p>}
+          <SoundSettings />
           <RestSettings />
           <fieldset className="restset" data-testid="shortcuts">
             <legend>Atajos</legend>

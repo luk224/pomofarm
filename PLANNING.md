@@ -169,9 +169,9 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P3-02a Caminos, vallas, farolillos, sombrero del Perro; colocación en el terreno de alrededor (cuadrícula 8×8), mover/quitar gratis
   - **Hecho:** se compran y colocan; no afectan a requisitos de prestigio. Tests `decor_test.go`, E2E `p3_02_decor.py`, GDD decisión 14.
 
-- [ ] **P3-03** Audio ASMR por capas — agente: `frontend-3d` — dep: P1-06
-  - [ ] P3-03a Efectos de interacción, volumen independiente por capa
-  - **Hecho:** tres controles de volumen funcionan.
+- [x] **P3-03** Audio ASMR por capas — agente: `frontend-3d` — dep: P1-06
+  - [x] P3-03a Efectos de interacción (plantar, cosechar, monedas, comprar, colocar), ambiente local (lluvia/bosque/fuego), volumen independiente por capa
+  - **Hecho:** tres controles de volumen funcionan (medido con un analizador por capa). E2E `p3_03_audio.py`, GDD decisión 15.
 
 - [ ] **P3-04** Reproductor Lofi — agente: `frontend-3d` — dep: P3-03
   - [ ] P3-04a Iframe YouTube con IDs configurables, URL propia, fallback local de lluvia/bosque/fuego
