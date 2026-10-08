@@ -176,6 +176,25 @@ func New(db *sql.DB, clock game.Clock) *fiber.App {
 		return respondState(c, svc, fiber.StatusOK)
 	})
 
+	// The Harvest Book (GDD §4.8): a month of statistics and a CSV of every Pomodoro. `tz` is the browser's IANA zone.
+	app.Get("/api/book", func(c *fiber.Ctx) error {
+		book, err := svc.Book(c.UserContext(), c.Query("month"), c.Query("tz"))
+		if err != nil {
+			return fail(c, err)
+		}
+		return c.JSON(book)
+	})
+
+	app.Get("/api/book/export.csv", func(c *fiber.Ctx) error {
+		data, err := svc.BookCSV(c.UserContext(), c.Query("tz"))
+		if err != nil {
+			return fail(c, err)
+		}
+		c.Set("Content-Type", "text/csv; charset=utf-8")
+		c.Set("Content-Disposition", `attachment; filename="libro-de-cosechas.csv"`)
+		return c.Send(data)
+	})
+
 	app.Post("/api/plots/:id/clear", func(c *fiber.Ctx) error {
 		id, err := c.ParamsInt("id")
 		if err != nil {

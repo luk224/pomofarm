@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+	_ "time/tzdata" // IANA time zones inside the binary: the container image has no tz database
 
 	"github.com/luk224/pomofarm/backend/internal/api"
 	"github.com/luk224/pomofarm/backend/internal/game"

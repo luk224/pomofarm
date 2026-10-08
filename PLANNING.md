@@ -186,10 +186,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
 
 ## Fase 4 — Retención
 
-- [ ] **P4-01** Etiquetas y Libro de Cosechas — agente: `backend-go`, `frontend-3d` — dep: P1-06
-  - [ ] P4-01a Estadísticas por etiqueta y día de la semana
-  - [ ] P4-01b Visualización (fardos/silos/cestas) + vista tabla + export CSV
-  - **Hecho:** CSV exportado coincide con los Pomodoros guardados.
+- [x] **P4-01** Etiquetas y Libro de Cosechas — agente: `backend-go`, `frontend-3d` — dep: P1-06
+  - [x] P4-01a Estadísticas por etiqueta y día de la semana (`GET /api/book`, zona horaria del jugador)
+  - [x] P4-01b Visualización (fardos/silos/cestas) + vista tabla + export CSV
+  - **Hecho:** CSV exportado coincide con los Pomodoros guardados (E2E `p4_01_book.py`, tests `book_test.go`, GDD decisión 17).
 
 - [ ] **P4-02** Métricas personales — agente: `backend-go` — dep: P4-01
   - [ ] P4-02a Pomodoros/semana, mejor racha, "Pomodoros limpios" (modo estricto opcional)

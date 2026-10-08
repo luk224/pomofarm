@@ -142,6 +142,20 @@ export interface DecorState {
   blocked: [number, number][]
 }
 
+/** One month of the Harvest Book (GDD §4.8). Days and weekdays are in the player's time zone. */
+export interface BookMonth {
+  month: string
+  time_zone: string
+  pomodoros: number
+  seconds: number
+  days: { date: string; pomodoros: number; seconds: number }[]
+  /** Most time first; an empty name means "no tag". */
+  tags: { name: string; pomodoros: number; seconds: number }[]
+  /** Monday first (index 0) to Sunday (6). */
+  weekdays: { weekday: number; pomodoros: number; seconds: number }[]
+  months: string[]
+}
+
 export interface GameState {
   server_time: string
   player: PlayerState

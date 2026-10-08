@@ -4,6 +4,7 @@ import { useRemainingMs, useRestRemainingMs } from '../store/hooks'
 import { tabTitle } from '../store/time'
 import { formatCoins } from '../store/economy'
 import { CoinIcon, DropIcon } from './icons'
+import { HarvestBook } from './HarvestBook'
 import { LofiChip } from './LofiPlayer'
 import { Settings } from './Settings'
 import { Shop } from './Shop'
@@ -33,6 +34,7 @@ export function TopBar() {
         </div>
       )}
       <Shop />
+      <HarvestBook />
       <LofiChip />
       <Settings />
     </div>

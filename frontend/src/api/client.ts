@@ -1,4 +1,4 @@
-import type { FlowRow, GameState, PlantRequest } from './types'
+import type { BookMonth, FlowRow, GameState, PlantRequest } from './types'
 
 /** Error body from the server is {"error": "<code>"}; code is stable, message is for humans. */
 export class ApiError extends Error {
@@ -30,7 +30,19 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return data as T
 }
 
+/** The player's own time zone, so the server groups Pomodoros into the days they actually lived. */
+export const localTimeZone = (): string => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || ''
+  } catch {
+    return ''
+  }
+}
+
+export const bookExportUrl = (): string => `/api/book/export.csv?tz=${encodeURIComponent(localTimeZone())}`
+
 export const api = {
+  book: (month: string) => request<BookMonth>('GET', `/api/book?month=${encodeURIComponent(month)}&tz=${encodeURIComponent(localTimeZone())}`),
   flow: () => request<FlowRow[]>('GET', '/api/flow'),
   state: () => request<GameState>('GET', '/api/state'),
   plant: (req: PlantRequest) => request<GameState>('POST', '/api/pomodoros', req),
