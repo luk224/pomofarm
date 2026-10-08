@@ -116,13 +116,18 @@ func TestNoEndpointAnswersWithAServerErrorOnGarbage(t *testing.T) {
 		"", "{", "}", "[]", "null", "true", "0", `"x"`, `{"plot_id":"x"}`, `{"plot_id":-1}`, `{"plot_id":1e300}`, `{"plot_id":99999999999999999999999}`,
 		`{"plant_type":"` + strings.Repeat("a", 5000) + `"}`, `{"plot_id":1,"plant_type":"daisy","duration_min":"x"}`,
 		`{"plot_id":1,"plant_type":"daisy","tag":"` + strings.Repeat("é", 500) + `"}`, `{"kind":"seed","key":null}`, `{"key":"rest_short_min","value":null}`,
-		`{"confirm":"yes"}`, "\x00\x01\x02", `{"a":` + strings.Repeat("[", 200) + strings.Repeat("]", 200) + `}`, `{"plot_id":1,"plot_id":2}`,
+		`{"confirm":"yes"}`, `{"kind":"hive","plot_id":"x"}`, `{"kind":"dog","plot_id":-1}`, `{"kind":null}`, `{"kind":"path","x":"a","y":null}`,
+		`{"kind":"lantern","x":1e300,"y":-1e300}`, `{"kind":"path","x":99999999999999999999999,"y":1}`, `{"kind":"hat","x":3}`, `{"kind":"` + strings.Repeat("z", 3000) + `","x":4,"y":4}`,
+		`{"kind":"animal","key":"` + strings.Repeat("k", 3000) + `"}`, `{"kind":"animal","key":null}`, `{"x":-2147483649,"y":2147483648,"kind":"path"}`, "\x00\x01\x02", `{"a":` + strings.Repeat("[", 200) + strings.Repeat("]", 200) + `}`, `{"plot_id":1,"plot_id":2}`,
 	}
 	paths := []struct{ method, path string }{
 		{"POST", "/api/pomodoros"}, {"POST", "/api/pomodoros/active/pause"}, {"POST", "/api/pomodoros/active/resume"}, {"POST", "/api/pomodoros/active/cancel"},
 		{"POST", "/api/plots"}, {"POST", "/api/plots/1/harvest"}, {"POST", "/api/plots/1/clear"}, {"POST", "/api/plots/abc/harvest"}, {"POST", "/api/plots/-1/clear"},
 		{"POST", "/api/plots/99999999999999999999/harvest"}, {"POST", "/api/plots/0/harvest"}, {"POST", "/api/unlocks"}, {"POST", "/api/settings"},
 		{"POST", "/api/silo/collect"}, {"POST", "/api/silo/upgrade"}, {"POST", "/api/rest/skip"},
+		{"POST", "/api/structures"}, {"POST", "/api/structures/1/move"}, {"POST", "/api/structures/abc/move"}, {"POST", "/api/structures/-1/move"},
+		{"POST", "/api/structures/99999999999999999999/move"}, {"POST", "/api/decor"}, {"POST", "/api/decor/1/move"}, {"POST", "/api/decor/abc/move"},
+		{"DELETE", "/api/decor/1"}, {"DELETE", "/api/decor/abc"}, {"DELETE", "/api/decor/-5"}, {"DELETE", "/api/decor"}, {"GET", "/api/decor"},
 		{"GET", "/api/state"}, {"GET", "/api/flow"}, {"GET", "/api/health"}, {"GET", "/api/nope"}, {"PUT", "/api/state"}, {"DELETE", "/api/plots"}, {"PATCH", "/api/pomodoros"},
 		{"GET", "/api/plots/1/harvest"}, {"POST", "/api/state"}, {"GET", "/api/../etc/passwd"}, {"GET", "/api/state?x=%00%ff"},
 	}

@@ -108,3 +108,68 @@ func TestMigrationsApplyOnceAndInOrderEvenFromHalfwayStates(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// Phase 3: a database at schema 4 (hives and the Dog already bought) must come through migration 5 untouched, and the
+// new decoration rules must then hold on it.
+func TestUpgradingFromSchema4KeepsStructures(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "v4.db")
+	raw, err := sql.Open("sqlite", "file:"+path+"?_pragma=foreign_keys(1)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := raw.Exec(`CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)`); err != nil {
+		t.Fatal(err)
+	}
+	for v, name := range []string{"0001_init.sql", "0002_silo.sql", "0003_rest.sql", "0004_structures.sql"} {
+		body, err := migrationsFS.ReadFile("migrations/" + name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := raw.Exec(string(body)); err != nil {
+			t.Fatalf("applying %s: %v", name, err)
+		}
+		if _, err := raw.Exec(`INSERT INTO schema_migrations VALUES (?, '2026-10-07T12:00:00Z')`, v+1); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, q := range []string{
+		`INSERT INTO players (id,name,focus_points,lifetime_focus,coins_milli,silo_level,season,biome,created_at,last_seen_at,version)
+			VALUES (1,'Luk',500,900,12000000,3,2,'spring','2026-10-01T08:00:00Z','2026-10-07T11:00:00Z',7)`,
+		`INSERT INTO structures (id,player_id,kind,x,y) VALUES (1,1,'hive',1,1),(2,1,'hive',2,2),(3,1,'dog',0,0)`,
+	} {
+		if _, err := raw.Exec(q); err != nil {
+			t.Fatalf("setting up the v4 database: %v", err)
+		}
+	}
+	raw.Close()
+
+	db, err := Open(path)
+	if err != nil {
+		t.Fatalf("opening a schema-4 database: %v", err)
+	}
+	defer db.Close()
+	if v, _ := SchemaVersion(db); v != 5 {
+		t.Fatalf("schema version = %d, want 5", v)
+	}
+	var hives, dogs int
+	db.QueryRow(`SELECT COUNT(*) FROM structures WHERE kind='hive'`).Scan(&hives)
+	db.QueryRow(`SELECT COUNT(*) FROM structures WHERE kind='dog'`).Scan(&dogs)
+	var coins int64
+	db.QueryRow(`SELECT coins_milli FROM players WHERE id=1`).Scan(&coins)
+	if hives != 2 || dogs != 1 || coins != 12000000 {
+		t.Fatalf("after upgrade: %d hives, %d dogs, %d milli", hives, dogs, coins)
+	}
+	// the new rules hold even at the database level
+	if _, err := db.Exec(`INSERT INTO structures (player_id,kind,x,y) VALUES (1,'fence',6,6)`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(`INSERT INTO structures (player_id,kind,x,y) VALUES (1,'lantern',6,6)`); err == nil {
+		t.Fatal("two decorations on one cell must be refused by the database itself")
+	}
+	if _, err := db.Exec(`INSERT INTO structures (player_id,kind,x,y) VALUES (1,'hat',0,0)`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(`INSERT INTO structures (player_id,kind,x,y) VALUES (1,'hat',0,0)`); err == nil {
+		t.Fatal("a second hat must be refused by the database itself")
+	}
+}

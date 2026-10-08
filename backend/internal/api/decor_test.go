@@ -2,6 +2,7 @@ package api
 
 import (
 	"strconv"
+	"sync"
 	"testing"
 
 	"github.com/luk224/pomofarm/backend/internal/game"
@@ -136,4 +137,80 @@ func TestHatNeedsCoins(t *testing.T) {
 	unlockAnimals(t, e)
 	e.expect(201, "POST", "/api/structures", map[string]any{"kind": "dog"})
 	e.expect(409, "POST", "/api/decor", map[string]any{"kind": "hat"})
+}
+
+// Phase 3 QA: two requests racing for the same cell or the same last coins must not double-charge or double-place.
+func TestConcurrentDecorPurchases(t *testing.T) {
+	e := newEnv(t, 1)
+	giveCoins(t, e, 80) // exactly one lantern
+	var wg sync.WaitGroup
+	codes := make([]int, 8)
+	for i := range codes {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			codes[i], _ = e.do("POST", "/api/decor", map[string]any{"kind": "lantern", "x": i - 2, "y": -2}) // 8 different free cells
+		}(i)
+	}
+	wg.Wait()
+	created := 0
+	for _, c := range codes {
+		if c == 201 {
+			created++
+		}
+	}
+	if st := e.state(); created != 1 || len(st.Decor.Items) != 1 || st.Player.CoinsMilli != 0 {
+		t.Fatalf("codes %v: %d pieces, %d milli left", codes, len(st.Decor.Items), st.Player.CoinsMilli)
+	}
+}
+
+func TestConcurrentDecorOnTheSameCell(t *testing.T) {
+	e := newEnv(t, 1)
+	giveCoins(t, e, 1000)
+	var wg sync.WaitGroup
+	codes := make([]int, 8)
+	for i := range codes {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			codes[i], _ = e.do("POST", "/api/decor", map[string]any{"kind": "path", "x": 4, "y": 4})
+		}(i)
+	}
+	wg.Wait()
+	created := 0
+	for _, c := range codes {
+		if c == 201 {
+			created++
+		}
+	}
+	if st := e.state(); created != 1 || len(st.Decor.Items) != 1 || st.Player.CoinsMilli != 1000*1000-15*1000 {
+		t.Fatalf("codes %v: %d pieces, coins %d", codes, len(st.Decor.Items), st.Player.CoinsMilli)
+	}
+}
+
+func TestConcurrentHatPurchases(t *testing.T) {
+	e := newEnv(t, 1)
+	giveCoins(t, e, 100000)
+	unlockAnimals(t, e)
+	e.expect(201, "POST", "/api/structures", map[string]any{"kind": "dog"})
+	before := coinsOf(e)
+	var wg sync.WaitGroup
+	codes := make([]int, 6)
+	for i := range codes {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			codes[i], _ = e.do("POST", "/api/decor", map[string]any{"kind": "hat"})
+		}(i)
+	}
+	wg.Wait()
+	created := 0
+	for _, c := range codes {
+		if c == 201 {
+			created++
+		}
+	}
+	if created != 1 || before-coinsOf(e) != 600_000 {
+		t.Fatalf("codes %v: charged %d milli", codes, before-coinsOf(e))
+	}
 }

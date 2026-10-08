@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { canCollect } from '../store/economy'
 import { useGame } from '../store/game'
 import { useUi } from '../store/ui'
-import { collectSilo, harvestableId, harvestPlot, plantSelected, togglePause } from './actions'
+import { collectSilo, decorateAtCursor, harvestableId, harvestPlot, moveDecorCursor, plantSelected, togglePause } from './actions'
 import { stepPlot } from './selection'
 
 const TYPING = new Set(['INPUT', 'TEXTAREA', 'SELECT'])
@@ -14,6 +14,20 @@ export function useShortcuts() {
       const el = e.target as HTMLElement | null
       if (e.ctrlKey || e.metaKey || e.altKey || (el && (TYPING.has(el.tagName) || el.isContentEditable))) return
       const onButton = el?.tagName === 'BUTTON'
+      if (useUi.getState().decorMode) {
+        // While decorating, the arrows move a cursor over the free cells and Enter places there.
+        const arrows: Record<string, [number, number]> = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] }
+        if (arrows[e.key]) {
+          e.preventDefault()
+          moveDecorCursor(...arrows[e.key])
+          return
+        }
+        if (e.key === 'Enter' && !onButton) {
+          e.preventDefault()
+          void decorateAtCursor()
+          return
+        }
+      }
       if (e.code === 'Space' && !onButton && useGame.getState().state?.pomodoro) {
         e.preventDefault()
         void togglePause()

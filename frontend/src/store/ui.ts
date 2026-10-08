@@ -17,6 +17,8 @@ interface UiStore {
   placing: { hiveId: number | null } | null
   /** Decoration mode: `itemId` null places new pieces of `piece` one tap at a time; otherwise moves that piece. */
   decorMode: { piece: DecorKind; itemId: number | null } | null
+  /** Keyboard cursor while decorating: the cell Enter would place on. */
+  decorCursor: [number, number] | null
   tag: string
   toasts: Toast[]
   selectSeed: (key: string | null) => void
@@ -24,6 +26,7 @@ interface UiStore {
   setFlowMinutes: (m: number) => void
   setPlacing: (p: { hiveId: number | null } | null) => void
   setDecorMode: (m: { piece: DecorKind; itemId: number | null } | null) => void
+  setDecorCursor: (c: [number, number] | null) => void
   setTag: (tag: string) => void
   toast: (text: string, kind?: Toast['kind']) => void
   dismiss: (id: number) => void
@@ -37,13 +40,15 @@ export const useUi = create<UiStore>((set, get) => ({
   flowMinutes: 60,
   placing: null,
   decorMode: null,
+  decorCursor: null,
   tag: '',
   toasts: [],
   selectSeed: (key) => set({ selectedSeed: key }),
   selectPlot: (id) => set({ selectedPlotId: id }),
   setFlowMinutes: (m) => set({ flowMinutes: m }),
   setPlacing: (p) => set({ placing: p, decorMode: p ? null : get().decorMode }),
-  setDecorMode: (m) => set({ decorMode: m, placing: m ? null : get().placing }),
+  setDecorMode: (m) => set({ decorMode: m, placing: m ? null : get().placing, decorCursor: null }),
+  setDecorCursor: (c) => set({ decorCursor: c }),
   setTag: (tag) => set({ tag }),
   toast: (text, kind = 'info') => {
     if (get().toasts.some((t) => t.text === text)) return // never stack identical messages

@@ -177,7 +177,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P3-04a Iframe YouTube con IDs configurables, URL propia, fallback local de lluvia/bosque/fuego
   - **Hecho:** si el iframe falla, suena el audio local. E2E `p3_04_lofi.py` (API simulada + prueba contra YouTube real), GDD decisión 16.
 
-- [ ] **P3-05** Verificación de Fase 3 — agente: `qa-tester` — dep: P3-01..P3-04
+- [x] **P3-05** Verificación de Fase 3 — agente: `qa-tester` — dep: P3-01..P3-04
+  - **Hecho:** informe en `docs/qa/fase-3.md`; E2E `p3_05_qa.py` (teclado, rendimiento, dos dispositivos, servidor caído, WebKit y Firefox); 442 comprobaciones E2E, 3 mutaciones detectadas. Corregido: decorar con teclado, aviso de terreno lleno.
+  - [ ] P3-05b (pendiente de ti) Probar en iPhone real: audio, iframe de YouTube y rendimiento (P1-08d)
+  - [ ] P3-05c (decisión tuya) Sumidero de 🪙: la decoración solo absorbe ~3.680 🪙 (ver informe, observación 1)
 
 ---
 

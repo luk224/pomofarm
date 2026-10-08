@@ -6,6 +6,7 @@ import { useUi } from '../store/ui'
 import { SEED_NAMES } from './names'
 import { playEffect } from '../audio/effects'
 import type { DecorKind } from '../api/types'
+import { freeCells, startCursor, stepCursor } from '../store/decorCursor'
 
 /** Player actions as plain functions so buttons, keyboard shortcuts and 3D clicks behave identically. */
 
@@ -193,4 +194,21 @@ export async function buyHat() {
   await useGame.getState().buyHat()
   if (useGame.getState().state?.decor.hat.owned) playEffect('buy')
   if (useGame.getState().state?.decor.hat.owned) useUi.getState().toast('El Perro luce su sombrero de paja.')
+}
+
+/** Moves the decoration cursor with the arrow keys (x with left/right, y with up/down), creating it on first use. */
+export function moveDecorCursor(dx: number, dy: number) {
+  const { decorMode, decorCursor, setDecorCursor } = useUi.getState()
+  const decor = useGame.getState().state?.decor
+  if (!decorMode || !decor) return
+  const free = freeCells(decor, decorMode.itemId)
+  const start = decorCursor ?? startCursor(free)
+  if (!start) return
+  setDecorCursor(decorCursor ? stepCursor(free, decorCursor, dx, dy, decor.min, decor.max) : start)
+}
+
+/** Enter while decorating: places (or moves to) the cursor's cell. */
+export async function decorateAtCursor() {
+  const { decorCursor } = useUi.getState()
+  if (decorCursor) await decorateCell(decorCursor[0], decorCursor[1])
 }

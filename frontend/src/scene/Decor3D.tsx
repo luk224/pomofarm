@@ -1,6 +1,7 @@
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import { Matrix4, Quaternion, Vector3, type BufferGeometry, type InstancedMesh } from 'three'
 import type { DecorItem, DecorKind } from '../api/types'
+import { freeCells } from '../store/decorCursor'
 import { useGame } from '../store/game'
 import { useUi } from '../store/ui'
 import { decorateCell, startMovingDecor } from '../ui/actions'
@@ -80,19 +81,20 @@ function Pieces({ kind, items }: { kind: DecorKind; items: DecorItem[] }) {
 function FreeCells() {
   const ref = useRef<InstancedMesh>(null)
   const decor = useGame((s) => s.state?.decor)
-  const cells = useMemo(() => {
-    if (!decor) return []
-    const blocked = new Set(decor.blocked.map(([x, y]) => `${x},${y}`))
-    const taken = new Set(decor.items.map((i) => `${i.x},${i.y}`))
-    const out: [number, number][] = []
-    for (let x = decor.min; x <= decor.max; x++)
-      for (let y = decor.min; y <= decor.max; y++) if (!blocked.has(`${x},${y}`) && !taken.has(`${x},${y}`)) out.push([x, y])
-    return out
-  }, [decor])
+  const cursor = useUi((s) => s.decorCursor)
+  const movingId = useUi((s) => s.decorMode?.itemId ?? null)
+  const cells = useMemo(() => (decor ? freeCells(decor, movingId) : []), [decor, movingId])
   useLayoutEffect(() => {
     place(ref.current, cells.map(([x, y]) => [x, 0.012, y]))
   }, [cells])
   return (
+    <>
+    {cursor && (
+      <mesh name="decor-cursor" position={[cursor[0], 0.03, cursor[1]]} raycast={() => null}>
+        <boxGeometry args={[0.92, 0.04, 0.92]} />
+        <meshBasicMaterial color="#ffd45c" transparent opacity={0.85} depthWrite={false} />
+      </mesh>
+    )}
     <instancedMesh ref={ref} name="decor-free-cells" args={[undefined, undefined, MAX]}
       onClick={(e) => {
         e.stopPropagation()
@@ -104,6 +106,7 @@ function FreeCells() {
       <boxGeometry args={[0.86, 0.02, 0.86]} />
       <meshBasicMaterial color="#ffffff" transparent opacity={0.28} depthWrite={false} />
     </instancedMesh>
+    </>
   )
 }
 

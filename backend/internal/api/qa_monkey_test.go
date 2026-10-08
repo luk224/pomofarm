@@ -149,6 +149,24 @@ func (c *invariantChecker) check() {
 		c.fail("%d dogs, state says owned=%v", dogs, st.Automation.Dog.Owned)
 	}
 
+	// decoration: only on free background cells, one piece per cell, never on the field; the hat needs the dog
+	seen := map[[2]int]bool{}
+	for _, it := range st.Decor.Items {
+		pos := [2]int{it.X, it.Y}
+		if !game.DecorCellFree(it.X, it.Y) || seen[pos] {
+			c.fail("decoration %d (%s) at (%d,%d) is on a blocked or shared cell", it.ID, it.Kind, it.X, it.Y)
+		}
+		if _, ok := game.DecorCosts[it.Kind]; !ok {
+			c.fail("unknown decoration kind %q", it.Kind)
+		}
+		seen[pos] = true
+	}
+	var hats int
+	c.e.db.QueryRow(`SELECT COUNT(*) FROM structures WHERE kind = 'hat'`).Scan(&hats)
+	if hats > 1 || (hats == 1) != st.Decor.Hat.Owned || (hats == 1 && !st.Automation.Dog.Owned) || st.Decor.Hat.Available != (st.Automation.Dog.Owned && hats == 0) {
+		c.fail("%d hats, state %+v, dog owned=%v", hats, st.Decor.Hat, st.Automation.Dog.Owned)
+	}
+
 	// rest never longer than the longest configurable one
 	if st.Rest != nil && (st.Rest.RemainingMs < 0 || st.Rest.RemainingMs > 60*60*1000) {
 		c.fail("rest %+v", st.Rest)
@@ -228,7 +246,7 @@ func TestRandomPlayNeverBreaksTheInvariants(t *testing.T) {
 		for i := 0; i < 160; i++ {
 			ids := plotIDs()
 			pick := ids[rnd.Intn(len(ids))]
-			switch r := rnd.Intn(116); {
+			switch r := rnd.Intn(130); {
 			case r < 22:
 				req := service.PlantRequest{PlotID: pick, PlantType: crops[rnd.Intn(5)]}
 				if req.PlantType == "oak" && rnd.Intn(2) == 0 {
@@ -284,12 +302,29 @@ func TestRandomPlayNeverBreaksTheInvariants(t *testing.T) {
 			case r >= 110 && r < 112:
 				c.pendingCost = int64(game.DogCost) * 1000
 				move("buy dog", "POST", "/api/structures", map[string]any{"kind": "dog"})
-			case r >= 112:
+			case r >= 112 && r < 116:
 				if hs := e.state().Automation.Bees.Hives; len(hs) > 0 {
 					move("move hive", "POST", fmt.Sprintf("/api/structures/%d/move", hs[rnd.Intn(len(hs))].ID), map[string]any{"plot_id": pick})
 				} else {
 					move("move hive (none)", "POST", "/api/structures/1/move", map[string]any{"plot_id": pick})
 				}
+			case r >= 116 && r < 121:
+				kind := game.DecorKinds[rnd.Intn(len(game.DecorKinds))]
+				c.pendingCost = int64(game.DecorCosts[kind]) * 1000
+				move("buy decor", "POST", "/api/decor", map[string]any{"kind": kind, "x": rnd.Intn(11) - 3, "y": rnd.Intn(11) - 3}) // mostly valid, some outside or on the field
+			case r >= 121 && r < 124:
+				if items := e.state().Decor.Items; len(items) > 0 {
+					move("move decor", "POST", fmt.Sprintf("/api/decor/%d/move", items[rnd.Intn(len(items))].ID), map[string]any{"x": rnd.Intn(11) - 3, "y": rnd.Intn(11) - 3})
+				} else {
+					move("move decor (none)", "POST", "/api/decor/1/move", map[string]any{"x": 4, "y": 4})
+				}
+			case r >= 124 && r < 126:
+				if items := e.state().Decor.Items; len(items) > 0 {
+					move("remove decor", "DELETE", fmt.Sprintf("/api/decor/%d", items[rnd.Intn(len(items))].ID), nil)
+				}
+			case r >= 126 && r < 128:
+				c.pendingCost = int64(game.HatCost) * 1000
+				move("buy hat", "POST", "/api/decor", map[string]any{"kind": "hat"})
 			default:
 				dbExec(t, e, `UPDATE players SET season = ?`, 1+rnd.Intn(3)) // prestige seasons
 				move("season", "GET", "/api/state", nil)
