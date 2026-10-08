@@ -200,9 +200,11 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P4-03b Nuevo bioma (elegido: verano dorado; ciclo de estaciones)
   - **Hecho:** test de reinicio conserva exactamente lo que dice el GDD (`prestige_test.go`, 6 mutaciones detectadas), E2E `p4_03_prestige.py`, GDD decisión 19, `sim.py` simula la estación 2 (Normal: 41 días).
 
-- [ ] **P4-04** Accesibilidad y vista 2D — agente: `frontend-3d` — dep: P2-07
-  - [ ] P4-04a Reducir animaciones, modo sin audio, daltonismo, atajos
-  - [ ] P4-04b Vista 2D ligera
+- [x] **P4-04** Accesibilidad y vista 2D — agente: `frontend-3d` — dep: P2-07
+  - [x] P4-04a Reducir animaciones, modo sin audio (aviso visual), daltonismo, atajo M
+  - [-] P4-04b Vista 2D ligera — **descartada por el usuario** (2026-10-08)
+
+  - **Hecho:** E2E `p4_04_a11y.py`, tests de contraste y simulación de daltonismo con la hoja de estilos real, GDD decisión 20.
 
 - [ ] **P4-05** Verificación de Fase 4 — agente: `qa-tester` — dep: P4-01..P4-04
 

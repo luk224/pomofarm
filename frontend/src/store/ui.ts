@@ -19,6 +19,8 @@ interface UiStore {
   decorMode: { piece: DecorKind; itemId: number | null } | null
   /** Keyboard cursor while decorating: the cell Enter would place on. */
   decorCursor: [number, number] | null
+  /** A visual alert for when the sound is off: shown for a few seconds, then gone (works with reduced motion too). */
+  flash: { id: number; text: string } | null
   tag: string
   toasts: Toast[]
   selectSeed: (key: string | null) => void
@@ -28,6 +30,7 @@ interface UiStore {
   setDecorMode: (m: { piece: DecorKind; itemId: number | null } | null) => void
   setDecorCursor: (c: [number, number] | null) => void
   setTag: (tag: string) => void
+  showFlash: (text: string) => void
   toast: (text: string, kind?: Toast['kind']) => void
   dismiss: (id: number) => void
 }
@@ -38,6 +41,7 @@ export const useUi = create<UiStore>((set, get) => ({
   selectedSeed: null,
   selectedPlotId: null,
   flowMinutes: 60,
+  flash: null,
   placing: null,
   decorMode: null,
   decorCursor: null,
@@ -50,6 +54,11 @@ export const useUi = create<UiStore>((set, get) => ({
   setDecorMode: (m) => set({ decorMode: m, placing: m ? null : get().placing, decorCursor: null }),
   setDecorCursor: (c) => set({ decorCursor: c }),
   setTag: (tag) => set({ tag }),
+  showFlash: (text) => {
+    const id = nextId++
+    set({ flash: { id, text } })
+    setTimeout(() => get().flash?.id === id && set({ flash: null }), 3000)
+  },
   toast: (text, kind = 'info') => {
     if (get().toasts.some((t) => t.text === text)) return // never stack identical messages
     const id = nextId++

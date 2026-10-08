@@ -5,6 +5,7 @@ import { useGame } from '../store/game'
 import { useUi } from '../store/ui'
 import { effectivePlot } from '../ui/selection'
 import { startPlacing } from '../ui/actions'
+import { useAccents } from './accents'
 import { BODY_MAT } from './materials'
 import { mergeParts, type Part } from './plants/geometry'
 
@@ -60,6 +61,7 @@ function CoveragePreview() {
   const plots = useGame((s) => s.state?.plots)
   const selectedPlotId = useUi((s) => s.selectedPlotId)
   const placing = useUi((s) => s.placing)
+  const accents = useAccents()
   if (!placing || !plots) return null
   const target = effectivePlot(plots, selectedPlotId)
   if (!target) return null
@@ -68,7 +70,7 @@ function CoveragePreview() {
       {hiveArea(plots, target.x, target.y).map((p) => (
         <mesh key={p.id} position={[p.x, 0.16, p.y]} rotation-x={-Math.PI / 2} raycast={() => null}>
           <planeGeometry args={[0.9, 0.9]} />
-          <meshBasicMaterial color="#ff9f1c" transparent opacity={0.6} depthWrite={false} />
+          <meshBasicMaterial color={accents.coverage} transparent opacity={0.6} depthWrite={false} />
         </mesh>
       ))}
       <group position={[target.x + HIVE_OFFSET[0], 0.06, target.y + HIVE_OFFSET[2]]} raycast={() => null}>

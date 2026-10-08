@@ -4,11 +4,11 @@ import { DEFAULT_VOLUMES, parsePrefs } from './prefs'
 describe('parsePrefs', () => {
   it('gives sensible defaults for an empty or missing save', () => {
     for (const raw of [{}, null, undefined, 'x', 5]) {
-      expect(parsePrefs(raw)).toEqual({ sound: true, notify: true, volumes: DEFAULT_VOLUMES, ambient: 'off' })
+      expect(parsePrefs(raw)).toEqual({ sound: true, notify: true, volumes: DEFAULT_VOLUMES, ambient: 'off', reduceMotion: false, muted: false, palette: 'default' })
     }
   })
   it('keeps old saves (before volumes existed) working', () => {
-    expect(parsePrefs({ sound: false, notify: false })).toEqual({ sound: false, notify: false, volumes: DEFAULT_VOLUMES, ambient: 'off' })
+    expect(parsePrefs({ sound: false, notify: false })).toEqual({ sound: false, notify: false, volumes: DEFAULT_VOLUMES, ambient: 'off', reduceMotion: false, muted: false, palette: 'default' })
   })
   it('reads each layer on its own', () => {
     expect(parsePrefs({ volumes: { ambient: 0.1, effects: 0.2, alerts: 0.3 }, ambient: 'rain' }).volumes).toEqual({ ambient: 0.1, effects: 0.2, alerts: 0.3 })
@@ -18,5 +18,9 @@ describe('parsePrefs', () => {
     const p = parsePrefs({ volumes: { ambient: 9, effects: -1, alerts: 'loud' }, ambient: 'ocean' })
     expect(p.volumes).toEqual({ ambient: 1, effects: 0, alerts: DEFAULT_VOLUMES.alerts })
     expect(p.ambient).toBe('off')
+  })
+  it('reads the accessibility choices and ignores anything odd', () => {
+    expect(parsePrefs({ reduceMotion: true, muted: true, palette: 'cb' })).toMatchObject({ reduceMotion: true, muted: true, palette: 'cb' })
+    expect(parsePrefs({ reduceMotion: 'yes', muted: 1, palette: 'neon' })).toMatchObject({ reduceMotion: false, muted: false, palette: 'default' })
   })
 })

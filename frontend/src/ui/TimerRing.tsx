@@ -4,6 +4,7 @@ import { useGame } from '../store/game'
 import { useRemainingMs } from '../store/hooks'
 import { formatClock } from '../store/time'
 import { palette as P } from '../scene/palette'
+import { useAccents } from '../scene/accents'
 
 const R = 22
 const CIRC = 2 * Math.PI * R
@@ -16,6 +17,7 @@ const CIRC = 2 * Math.PI * R
 export function TimerRing() {
   const pomodoro = useGame((s) => s.state?.pomodoro ?? null)
   const ms = useRemainingMs()
+  const accents = useAccents()
   const el = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -37,7 +39,7 @@ export function TimerRing() {
       style={{ position: 'fixed', left: 0, top: 0, width: 56, height: 56, pointerEvents: 'none', visibility: 'hidden', willChange: 'transform' }}>
       <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
         <circle cx="28" cy="28" r={R} fill="#fffc" stroke={P.ringTrack} strokeWidth="5" />
-        <circle cx="28" cy="28" r={R} fill="none" stroke={paused ? P.ringPaused : P.ringRunning} strokeWidth="5"
+        <circle cx="28" cy="28" r={R} fill="none" stroke={paused ? accents.ringPaused : accents.ringRunning} strokeWidth="5"
           strokeLinecap="round" strokeDasharray={CIRC} strokeDashoffset={CIRC * (1 - left)} />
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', font: '700 12px system-ui',

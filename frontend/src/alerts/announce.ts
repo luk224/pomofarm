@@ -21,7 +21,8 @@ export function announceCompletion(c: Completion): void {
   useUi.getState().toast(`Tu ${name.toLowerCase()} está lista. Tócala para cosechar.`)
 
   const prefs = usePrefs.getState()
-  if (prefs.sound) playBowl()
+  if (prefs.sound && !prefs.muted) playBowl()
+  if (prefs.muted || !prefs.sound) useUi.getState().showFlash(`Tu ${name.toLowerCase()} está lista`) // no sound: a visual alert instead
 
   const away = document.hidden || !document.hasFocus()
   if (prefs.notify && away && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
@@ -45,7 +46,8 @@ export function announceCompletion(c: Completion): void {
 export function announceRestEnd(): void {
   useUi.getState().toast('Descanso terminado. Cuando quieras, siembra otro Pomodoro.')
   const prefs = usePrefs.getState()
-  if (prefs.sound) playBowl(0.7)
+  if (prefs.sound && !prefs.muted) playBowl(0.7)
+  if (prefs.muted || !prefs.sound) useUi.getState().showFlash('Descanso terminado')
   const away = document.hidden || !document.hasFocus()
   if (prefs.notify && away && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
     try {

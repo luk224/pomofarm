@@ -2,6 +2,7 @@ import { Canvas } from '@react-three/fiber'
 import { useEffect, useState } from 'react'
 import { unlockAudioOnFirstGesture } from './audio/bowl'
 import { startAudioSync } from './audio/sync'
+import { startA11ySync } from './ui/a11y'
 import { Farm } from './scene/Farm'
 import { Gallery } from './scene/Gallery'
 import { IsoCamera } from './scene/IsoCamera'
@@ -15,6 +16,7 @@ import { LofiPlayer } from './ui/LofiPlayer'
 import { PlacingBar } from './ui/PlacingBar'
 import { PlotAnnouncer } from './ui/PlotAnnouncer'
 import { SiloPanel } from './ui/SiloPanel'
+import { AlertFlash } from './ui/AlertFlash'
 import { Toasts } from './ui/Toasts'
 import { TopBar } from './ui/TopBar'
 import { TimerRing } from './ui/TimerRing'
@@ -26,6 +28,7 @@ export default function App() {
   useCompletionAlerts()
   useEffect(() => unlockAudioOnFirstGesture(), [])
   useEffect(() => startAudioSync(), [])
+  useEffect(() => startA11ySync(), [])
   // Fit the 4×4 farm and the Silo on narrow screens: roughly 8.4 world units across (the 4×4 field plus the Silo).
   const [fitZoom] = useState(() => Math.min(95, Math.max(34, window.innerWidth / 8.4)))
   const sky = biomePalette(useGame((s) => s.state?.player.biome)).sky
@@ -64,6 +67,7 @@ export default function App() {
       {!gallery && <DecorBar />}
       {!gallery && <LofiPlayer />}
       <Toasts />
+      <AlertFlash />
       <PlotAnnouncer />
     </>
   )

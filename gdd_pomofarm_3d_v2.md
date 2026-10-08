@@ -50,7 +50,7 @@ Notificación web y sonido al terminar un Pomodoro (permiso solicitado en el pri
 *   Modo sin audio con avisos visuales; paletas aptas para daltonismo; atajos de teclado (plantar, pausar, recolectar).
 *   **Reducir animaciones** (desactiva el squash & stretch continuo).
 *   **Modo Foco:** mientras corre un Pomodoro, el render baja a 15–30 FPS y reduce sombras; el render se pausa si la pestaña no está visible.
-*   Vista 2D ligera como alternativa en equipos modestos (Fase 4).
+*   ~~Vista 2D ligera como alternativa en equipos modestos~~ **Descartada por el usuario** (2026-10-08): no habrá vista 2D. El rendimiento en equipos modestos se vigila con el modo 3D (≈ 75 draw calls con la granja completa) y la opción de reducir animaciones.
 
 ---
 
@@ -369,7 +369,7 @@ Componente React aislado con `iframe` de YouTube, IDs configurables y posibilida
 **Fase 1 – MVP jugable.** 1 parcela, Margarita/Tomates/Girasol, temporizador con timestamps, cosecha manual, 💧, persistencia, cerrar y volver. Escena 3D mínima.
 **Fase 2 – Economía y granja.** Parcelas, 🪙 pasivas con vida útil, Silo, resolución offline, Manzano y Roble, sinergias.
 **Fase 3 – Automatización y estética.** Abejas, Perro, decoración, audio ASMR y Lofi.
-**Fase 4 – Retención.** Libro de Cosechas con etiquetas y CSV, Prestigio, accesibilidad, modo 2D.
+**Fase 4 – Retención.** Libro de Cosechas con etiquetas y CSV, Prestigio, accesibilidad (la vista 2D se descartó).
 **Fase 5 – Robustez.** Pruebas de tiempo, Modo Foco, notificaciones, revisión de copias de seguridad.
 
 ---
@@ -415,6 +415,7 @@ Pomodoros completados por semana, horas de foco por mes y si sigues abriendo la 
 17. Libro de Cosechas (4.8): cuenta solo Pomodoros completados, por el tiempo planificado (las pausas no son foco; los cancelados no cuentan). Los días y los días de la semana son los del jugador: el navegador envía su zona horaria IANA y el servidor sigue guardando en UTC. La cosecha se dibuja como fardos, silos o cestas (a elegir, se recuerda en el dispositivo), un icono por hora y agrupados (×5, ×10…) a partir de 40 h; la tabla desglosa por etiqueta, día de la semana y fecha. El CSV exporta todos los Pomodoros terminados (completados y cancelados, con columna de estado), con BOM UTF-8, y neutraliza etiquetas que empiecen por = + - @ para que una hoja de cálculo no las ejecute.
 18. Métricas personales y modo estricto (3.3, 4.8): el Libro muestra Pomodoros de esta semana y de las últimas 12 (semanas de lunes a domingo en la zona horaria del jugador), la mejor racha histórica y la racha actual (racha = días seguidos con al menos un Pomodoro completado; si hoy aún no hay, la de ayer sigue viva; romperla no cuesta nada y la mejor no se pierde). El modo estricto es un ajuste guardado en el servidor, desactivado por defecto; se fija al empezar cada Pomodoro (cambiarlo después no reescribe la sesión) y **nunca bloquea una pausa**. Un Pomodoro completado en modo estricto es "limpio" si tuvo como máximo 2 pausas y 10 minutos de pausa en total (límites inclusivos); sin modo estricto no hay Pomodoros limpios. Durante la sesión se muestra el progreso ("1 de 2 pausas · 3 de 10 min") y, si se supera un límite, un aviso amable. El CSV añade las columnas `estricto` y `limpio`.
 19. Prestigio (4.9): requisitos 16 parcelas, Silo nivel 4, 4 colmenas y Perro; no se puede con un Pomodoro en marcha y exige doble confirmación (dos toques). Se reinician plantas, colmenas, Perro, decoración, sombrero, 🪙 y contenido del Silo; se conservan 💧, semillas y animales desbloqueados, parcelas, nivel del Silo, el Libro de Cosechas y las métricas. Las plantas listas sin cosechar se cosechan solas antes de reiniciar (no se pierde ninguna 💧). El bono es +10% de 🪙 por estación completada, por encima del tope ×2,0. Biomas (decisión del usuario): primavera → verano dorado → otoño → invierno nevado → primavera…; la 2.ª estación es el verano dorado. Cada bioma repinta cielo y césped; plantas y tierra no cambian de color.
+20. Accesibilidad (2.4): tres ajustes por dispositivo en Ajustes → Accesibilidad. **Sin audio** silencia todo (ambiente, efectos, alertas) y detiene la música; al terminar un Pomodoro o un descanso con el sonido apagado se muestra un marco dorado y un aviso con texto (también si solo se desactiva la campana); atajo M. **Reducir animaciones** se suma a la preferencia del sistema (quita balanceo, saltos y transiciones). **Paleta para daltonismo** (Okabe-Ito): azul en lugar de verde, naranja en lugar de dorado/rojo, comprobada con simulación de protanopia, deuteranopia y tritanopia y con contraste AA. Una planta marchita ya no se distingue solo por el color: es más baja y está inclinada. Se descartó la vista 2D.
 
 **Limitaciones de la simulación:** modelo agregado (no coloca plantas en el mapa), bonos de sinergia como medias supuestas, visitas frecuentes al día, sin multiplicador de prestigio, y ritmo de compra "voraz". Sirve para dimensionar precios, no para predecir jugadores reales. **Hace falta una semana de juego propio para recalibrar** antes de dar los precios por buenos.
 

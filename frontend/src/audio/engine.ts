@@ -14,6 +14,8 @@ export function volumeToGain(v: number): number {
 
 let ctx: AudioContext | null = null
 const buses: Partial<Record<Layer, GainNode>> = {}
+let master: GainNode | null = null
+let muted = false
 const volumes: Record<Layer, number> = { ambient: 0.5, effects: 0.7, alerts: 0.8 }
 const unlockListeners = new Set<() => void>()
 
@@ -22,13 +24,16 @@ export function unlockAudio(): AudioContext | null {
   try {
     if (!ctx) {
       ctx = new AudioContext()
+      master = ctx.createGain() // one switch for everything: "Sin audio" (GDD §2.4)
+      master.gain.value = muted ? 0 : 1
+      master.connect(ctx.destination)
       for (const l of LAYERS) {
         const g = ctx.createGain()
         g.gain.value = volumeToGain(volumes[l])
-        g.connect(ctx.destination)
+        g.connect(master)
         buses[l] = g
       }
-      if (import.meta.env.DEV) (window as unknown as { __audioEngine?: unknown }).__audioEngine = { ctx, buses, volumes }
+      if (import.meta.env.DEV) (window as unknown as { __audioEngine?: unknown }).__audioEngine = { ctx, buses, volumes, get master() { return master } }
     }
     const notify = () => unlockListeners.forEach((f) => f())
     // resume() is asynchronous: listeners (e.g. starting the ambient sound) must run once it is really running
@@ -38,6 +43,12 @@ export function unlockAudio(): AudioContext | null {
     ctx = null // no Web Audio: everything stays visual
   }
   return ctx
+}
+
+/** Silences everything at once (all three layers), smoothly. Remembered for when audio is first unlocked. */
+export function setMasterMuted(on: boolean): void {
+  muted = on
+  if (master && ctx) master.gain.setTargetAtTime(on ? 0 : 1, ctx.currentTime, 0.02)
 }
 
 /** The context if audio is running (unlocked by a gesture), otherwise null. */

@@ -301,3 +301,18 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+/* "Reducir animaciones" in Ajustes does the same as the operating system's setting (GDD §2.4) */
+:root[data-reduce-motion=true] *, :root[data-reduce-motion=true] *::before, :root[data-reduce-motion=true] *::after { animation: none !important; transition: none !important; }
+
+/* Colour-blind-safe palette (Okabe-Ito): blue for "go", vermillion for "careful", orange for gold. Never the only signal. */
+:root[data-palette=cb] { --leaf: #0072b2; --leaf-hover: #005f94; --danger: #b34700; --sun: #f0b400; --water: #0072b2; --water-deep: #005f94; --focus: #d55e00; }
+:root[data-palette=cb] .silo__bar span, :root[data-palette=cb] .bars__bar span, :root[data-palette=cb] .weeks__bar span { background: #0072b2; }
+:root[data-palette=cb] .weeks__bar span { background: #7fb2d6; }
+:root[data-palette=cb] .weeks__bar .weeks__now { background: #0072b2; }
+:root[data-palette=cb] .btn--sun { background: #e69f00; }
+:root[data-palette=cb] .toast--coin { background: #e69f00; }
+
+/* Visual alert for when the sound is off (GDD §2.4) */
+.flash { position: fixed; inset: 0; z-index: 40; pointer-events: none; border: 8px solid var(--sun); box-sizing: border-box; border-radius: 6px; animation: flash-fade 1.6s ease-out forwards; }
+.flash__label { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 41; padding: 10px 18px; border-radius: 999px; background: var(--ink); color: #fff; font-weight: 600; pointer-events: none; animation: flash-fade 3s ease-out forwards; }
+@keyframes flash-fade { 0%, 60% { opacity: 1; } 100% { opacity: 0; } }

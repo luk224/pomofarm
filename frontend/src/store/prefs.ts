@@ -10,6 +10,10 @@ export interface PrefsData {
   /** 0..1 per sound layer. */
   volumes: Record<Layer, number>
   ambient: AmbientKind
+  /** Accessibility (GDD §2.4): fewer animations, no sound at all, and a colour-blind-safe palette. */
+  reduceMotion: boolean
+  muted: boolean
+  palette: 'default' | 'cb'
 }
 
 interface Prefs extends PrefsData {
@@ -17,6 +21,9 @@ interface Prefs extends PrefsData {
   setNotify: (on: boolean) => void
   setVolume: (layer: Layer, v: number) => void
   setAmbient: (kind: AmbientKind) => void
+  setReduceMotion: (on: boolean) => void
+  setMuted: (on: boolean) => void
+  setPalette: (p: 'default' | 'cb') => void
 }
 
 const KEY = 'pomofarm.prefs'
@@ -37,6 +44,9 @@ export function parsePrefs(raw: unknown): PrefsData {
       alerts: clamp01(v.alerts, DEFAULT_VOLUMES.alerts),
     },
     ambient: isAmbientKind(r.ambient) ? r.ambient : 'off',
+    reduceMotion: r.reduceMotion === true,
+    muted: r.muted === true,
+    palette: r.palette === 'cb' ? 'cb' : 'default',
   }
 }
 
@@ -56,7 +66,9 @@ function save(p: PrefsData) {
   }
 }
 
-const data = (s: Prefs): PrefsData => ({ sound: s.sound, notify: s.notify, volumes: s.volumes, ambient: s.ambient })
+const data = (s: Prefs): PrefsData => ({
+  sound: s.sound, notify: s.notify, volumes: s.volumes, ambient: s.ambient, reduceMotion: s.reduceMotion, muted: s.muted, palette: s.palette,
+})
 
 export const usePrefs = create<Prefs>((set, get) => {
   const update = (patch: Partial<PrefsData>) => {
@@ -69,5 +81,8 @@ export const usePrefs = create<Prefs>((set, get) => {
     setNotify: (notify) => update({ notify }),
     setVolume: (layer, v) => update({ volumes: { ...get().volumes, [layer]: clamp01(v, get().volumes[layer]) } }),
     setAmbient: (ambient) => update({ ambient }),
+    setReduceMotion: (reduceMotion) => update({ reduceMotion }),
+    setMuted: (muted) => update({ muted }),
+    setPalette: (palette) => update({ palette }),
   }
 })

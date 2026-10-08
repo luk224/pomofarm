@@ -97,6 +97,37 @@ function SoundSettings() {
   )
 }
 
+/** Accessibility (GDD §2.4): no sound with visual alerts, fewer animations, and a colour-blind-safe palette. Saved on this device. */
+function AccessibilitySettings() {
+  const muted = usePrefs((s) => s.muted)
+  const reduceMotion = usePrefs((s) => s.reduceMotion)
+  const palette = usePrefs((s) => s.palette)
+  const setMuted = usePrefs((s) => s.setMuted)
+  const setReduceMotion = usePrefs((s) => s.setReduceMotion)
+  const setPalette = usePrefs((s) => s.setPalette)
+  const osReduces = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+  return (
+    <fieldset className="restset" data-testid="a11y-settings">
+      <legend>Accesibilidad</legend>
+      <label className="check">
+        <input type="checkbox" checked={muted} data-testid="a11y-muted" onChange={(e) => setMuted(e.target.checked)} />
+        <span>Sin audio</span>
+      </label>
+      <p className="hint">Silencia todo (ambiente, efectos, alertas y música). Cuando algo termine verás un marco dorado y un aviso. Atajo: M.</p>
+      <label className="check">
+        <input type="checkbox" checked={reduceMotion || osReduces} disabled={osReduces} data-testid="a11y-motion" onChange={(e) => setReduceMotion(e.target.checked)} />
+        <span>Reducir animaciones</span>
+      </label>
+      <p className="hint">{osReduces ? 'Tu sistema ya lo pide, así que está activado.' : 'Quita el balanceo y los saltos de las plantas y los movimientos de la interfaz.'}</p>
+      <label className="check">
+        <input type="checkbox" checked={palette === 'cb'} data-testid="a11y-palette" onChange={(e) => setPalette(e.target.checked ? 'cb' : 'default')} />
+        <span>Paleta para daltonismo</span>
+      </label>
+      <p className="hint">Azul y naranja en lugar de verde y rojo. Los números y las formas ya acompañan siempre al color.</p>
+    </fieldset>
+  )
+}
+
 /** Strict mode (GDD §3.3): a personal challenge. It never blocks a pause; it only decides what the Harvest Book counts as clean. */
 function StrictSetting() {
   const on = useGame((s) => s.state?.settings.strict_mode === '1')
@@ -158,6 +189,7 @@ export function Settings() {
           {!supported && <p className="hint">Este navegador no admite notificaciones.</p>}
           {blocked && <p className="hint">Las notificaciones están bloqueadas en el navegador. Actívalas en los permisos del sitio.</p>}
           {!sound && <p className="hint">Sin campana, verás el aviso en la pestaña.</p>}
+          <AccessibilitySettings />
           <SoundSettings />
           <RestSettings />
           <StrictSetting />
@@ -168,6 +200,7 @@ export function Settings() {
               <dt>Intro</dt><dd>Plantar la semilla elegida</dd>
               <dt>H</dt><dd>Cosechar</dd>
               <dt>C</dt><dd>Recoger el Silo</dd>
+              <dt>M</dt><dd>Silenciar todo</dd>
               <dt>← →</dt><dd>Cambiar de parcela</dd>
             </dl>
           </fieldset>

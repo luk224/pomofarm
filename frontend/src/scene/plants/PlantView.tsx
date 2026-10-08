@@ -69,8 +69,10 @@ export function PlantView({ kind, growth, mature, withered = false, ready = fals
       sxz = p.xz
       if (popT.current > 0.8) popT.current = -1
     }
-    g.scale.set(size.current * sxz, size.current * sy, size.current * sxz)
-    g.rotation.z = reduce ? 0 : Math.sin(state.clock.elapsedTime * 1.3 + phase.current) * (kind === 'apple' || kind === 'oak' ? 0.012 : 0.04)
+    // A withered plant is not only a different colour: it is also shorter and leans over, so it reads without colour vision
+    const droop = withered ? 0.82 : 1
+    g.scale.set(size.current * sxz, size.current * sy * droop, size.current * sxz)
+    g.rotation.z = withered ? 0.22 : reduce ? 0 : Math.sin(state.clock.elapsedTime * 1.3 + phase.current) * (kind === 'apple' || kind === 'oak' ? 0.012 : 0.04)
     const s = sparkle.current
     if (s) {
       s.position.y = PLANT_HEIGHT[kind] + 0.25 + (reduce ? 0 : Math.sin(state.clock.elapsedTime * 3) * 0.06)

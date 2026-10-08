@@ -1,13 +1,14 @@
 import { useEffect } from 'react'
 import { canCollect } from '../store/economy'
 import { useGame } from '../store/game'
+import { usePrefs } from '../store/prefs'
 import { useUi } from '../store/ui'
 import { collectSilo, decorateAtCursor, harvestableId, harvestPlot, moveDecorCursor, plantSelected, togglePause } from './actions'
 import { stepPlot } from './selection'
 
 const TYPING = new Set(['INPUT', 'TEXTAREA', 'SELECT'])
 
-/** Space pauses/resumes, Enter plants the chosen seed, H harvests, C empties the Silo, arrows pick a plot (GDD §2.4). Never fires while typing. */
+/** Space pauses/resumes, Enter plants the chosen seed, H harvests, C empties the Silo, M mutes everything, arrows pick a plot (GDD §2.4). Never fires while typing. */
 export function useShortcuts() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -41,6 +42,10 @@ export function useShortcuts() {
           e.preventDefault()
           useUi.getState().selectPlot(id)
         }
+      } else if (e.key.toLowerCase() === 'm') {
+        const { muted, setMuted } = usePrefs.getState()
+        setMuted(!muted)
+        useUi.getState().toast(muted ? 'Audio activado.' : 'Sin audio. Te avisaré con un marco dorado.')
       } else if (e.key.toLowerCase() === 'c') {
         if (canCollect(useGame.getState().state?.silo.content_milli ?? 0)) void collectSilo()
       } else if (e.key.toLowerCase() === 'h') {

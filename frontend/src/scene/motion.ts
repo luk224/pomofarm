@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { usePrefs } from '../store/prefs'
 
 const QUERY = '(prefers-reduced-motion: reduce)'
 
-/** True when the user asked the OS for reduced motion; a settings toggle joins this in P4-04. */
+/** True when the OS asks for reduced motion or the player turned "Reducir animaciones" on in Ajustes (GDD §2.4). */
 export function useReducedMotion(): boolean {
-  const [reduce, setReduce] = useState(() => (typeof matchMedia === 'function' ? matchMedia(QUERY).matches : false))
+  const chosen = usePrefs((s) => s.reduceMotion)
+  const [os, setReduce] = useState(() => (typeof matchMedia === 'function' ? matchMedia(QUERY).matches : false))
   useEffect(() => {
     if (typeof matchMedia !== 'function') return
     const mq = matchMedia(QUERY)
@@ -12,7 +14,7 @@ export function useReducedMotion(): boolean {
     mq.addEventListener('change', on)
     return () => mq.removeEventListener('change', on)
   }, [])
-  return reduce
+  return os || chosen
 }
 
 /** Squash-and-stretch multiplier for a "pop" that started `t` seconds ago (1 at rest). Pure, for tests. */

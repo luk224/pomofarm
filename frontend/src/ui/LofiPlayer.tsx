@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { chooseStation, setHost, setMusicVolume, stopMusic, togglePauseMusic } from '../audio/lofi'
 import { stationsOf, useMusic, type MusicStatus } from '../store/music'
+import { usePrefs } from '../store/prefs'
 
 const STATUS_TEXT: Record<MusicStatus, string> = {
   idle: 'Elige una emisión y pulsa Reproducir.',
@@ -40,6 +41,7 @@ export function LofiChip() {
 export function LofiPlayer() {
   const { open, status, failure, custom, selected, volume, setOpen, addCustom, removeCustom } = useMusic()
   const hostRef = useRef<HTMLDivElement>(null)
+  const muted = usePrefs((s) => s.muted)
   const [link, setLink] = useState('')
   const [linkError, setLinkError] = useState(false)
   const stations = stationsOf(custom)
@@ -69,8 +71,9 @@ export function LofiPlayer() {
             : 'No se pudo conectar con YouTube. Suena el ambiente local.'
           : STATUS_TEXT[status]}
       </p>
+      {muted && <p className="hint" data-testid="lofi-muted">Sin audio activado: quítalo en Ajustes o con la tecla M para oír la música.</p>}
       <div className="lofi__row">
-        <button type="button" className="btn btn--primary" data-testid="lofi-play" onClick={togglePauseMusic}>
+        <button type="button" className="btn btn--primary" data-testid="lofi-play" disabled={muted} onClick={togglePauseMusic}>
           {status === 'playing' ? 'Pausa' : status === 'paused' ? 'Reanudar' : status === 'fallback' ? 'Reintentar' : 'Reproducir'}
         </button>
         <button type="button" className="btn" data-testid="lofi-stop" onClick={() => { stopMusic(); setOpen(false) }}>
