@@ -10,6 +10,7 @@ import { useCompletionAlerts } from './alerts/hooks'
 import { useGameSync } from './store/hooks'
 import { Dock } from './ui/Dock'
 import { DecorBar } from './ui/DecorBar'
+import { LofiPlayer } from './ui/LofiPlayer'
 import { PlacingBar } from './ui/PlacingBar'
 import { PlotAnnouncer } from './ui/PlotAnnouncer'
 import { SiloPanel } from './ui/SiloPanel'
@@ -59,6 +60,7 @@ export default function App() {
       {!gallery && <Dock />}
       {!gallery && <PlacingBar />}
       {!gallery && <DecorBar />}
+      {!gallery && <LofiPlayer />}
       <Toasts />
       <PlotAnnouncer />
     </>

@@ -173,9 +173,9 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P3-03a Efectos de interacción (plantar, cosechar, monedas, comprar, colocar), ambiente local (lluvia/bosque/fuego), volumen independiente por capa
   - **Hecho:** tres controles de volumen funcionan (medido con un analizador por capa). E2E `p3_03_audio.py`, GDD decisión 15.
 
-- [ ] **P3-04** Reproductor Lofi — agente: `frontend-3d` — dep: P3-03
-  - [ ] P3-04a Iframe YouTube con IDs configurables, URL propia, fallback local de lluvia/bosque/fuego
-  - **Hecho:** si el iframe falla, suena el audio local.
+- [x] **P3-04** Reproductor Lofi — agente: `frontend-3d` — dep: P3-03
+  - [x] P3-04a Iframe YouTube con IDs configurables, URL propia, fallback local de lluvia/bosque/fuego
+  - **Hecho:** si el iframe falla, suena el audio local. E2E `p3_04_lofi.py` (API simulada + prueba contra YouTube real), GDD decisión 16.
 
 - [ ] **P3-05** Verificación de Fase 3 — agente: `qa-tester` — dep: P3-01..P3-04
 
