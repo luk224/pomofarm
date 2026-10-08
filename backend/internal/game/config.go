@@ -90,6 +90,24 @@ const (
 	DogSiloBonus = 12    // hours added to the Silo
 )
 
+// Prestige, "Las Estaciones" (GDD §4.9): what the farm needs before a new season, and the biome of each season, which follow
+// the natural cycle (decision 19).
+const (
+	PrestigePlots = 16
+	PrestigeSilo  = 4 // Silo level
+	PrestigeHives = MaxHives
+)
+
+var biomes = []string{"spring", "summer", "autumn", "winter"}
+
+// BiomeForSeason is the palette of a season: spring, summer, autumn, winter, spring…
+func BiomeForSeason(season int) string {
+	if season < 1 {
+		season = 1
+	}
+	return biomes[(season-1)%len(biomes)]
+}
+
 // Decoration (GDD §4.7): pure aesthetics, bought with coins, free to move or remove, never a prestige requirement.
 // Pieces go on the background cells around the farm: x and y in [DecorMin, DecorMax], outside the 4×4 field
 // (so buying a plot never collides with one) and outside the cells the Silo and the Dog stand on.

@@ -5,8 +5,9 @@ import { startAudioSync } from './audio/sync'
 import { Farm } from './scene/Farm'
 import { Gallery } from './scene/Gallery'
 import { IsoCamera } from './scene/IsoCamera'
-import { palette } from './scene/palette'
+import { biomePalette } from './scene/biomes'
 import { useCompletionAlerts } from './alerts/hooks'
+import { useGame } from './store/game'
 import { useGameSync } from './store/hooks'
 import { Dock } from './ui/Dock'
 import { DecorBar } from './ui/DecorBar'
@@ -27,6 +28,7 @@ export default function App() {
   useEffect(() => startAudioSync(), [])
   // Fit the 4×4 farm and the Silo on narrow screens: roughly 8.4 world units across (the 4×4 field plus the Silo).
   const [fitZoom] = useState(() => Math.min(95, Math.max(34, window.innerWidth / 8.4)))
+  const sky = biomePalette(useGame((s) => s.state?.player.biome)).sky
   const gallery = import.meta.env.DEV && new URLSearchParams(location.search).get('lab') === 'plants'
   return (
     <>
@@ -37,7 +39,7 @@ export default function App() {
           if (import.meta.env.DEV) (window as unknown as { __three?: unknown }).__three = state
         }}
       >
-        <color attach="background" args={[palette.sky]} />
+        <color attach="background" args={[sky]} />
         <IsoCamera center={gallery ? [3.4, 2.55] : [1.5, 1.5]} initialZoom={gallery ? 62 : fitZoom} />
         <hemisphereLight args={['#ffffff', '#9ac27a', 0.9]} />
         <directionalLight

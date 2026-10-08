@@ -19,6 +19,7 @@ const MESSAGES: Record<string, string> = {
   cell_taken: 'Ese sitio ya está ocupado.',
   animal_locked: 'Primero desbloquéalo con 💧.',
   bad_cell: 'Ahí no se puede decorar: usa el terreno alrededor de las parcelas.',
+  not_ready: 'Aún falta algo en la granja para empezar otra estación.',
   maxed_out: 'Ya lo tienes todo en el máximo.',
   silo_empty: 'El Silo está vacío: aún no ha producido nada que recoger.',
   wrong_state: 'Eso ya está hecho.',

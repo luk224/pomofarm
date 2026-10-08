@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import { Color, Object3D, type InstancedMesh } from 'three'
-import { palette as P } from './palette'
+import { useGame } from '../store/game'
+import { biomePalette } from './biomes'
 
 const SIZE = 8 // tiles per side, centred on the 4×4 farm; the decoration area (server: DecorMin..DecorMax)
 const FROM = -2
@@ -8,12 +9,14 @@ const FROM = -2
 /** Checkerboard grass as ONE instanced mesh (one draw call). */
 export function Ground() {
   const ref = useRef<InstancedMesh>(null)
+  const biome = useGame((s) => s.state?.player.biome)
   useLayoutEffect(() => {
     const m = ref.current
     if (!m) return
     const o = new Object3D()
-    const a = new Color(P.grassA)
-    const b = new Color(P.grassB)
+    const palette = biomePalette(biome)
+    const a = new Color(palette.grassA)
+    const b = new Color(palette.grassB)
     for (let i = 0; i < SIZE * SIZE; i++) {
       const x = (i % SIZE) + FROM
       const z = Math.floor(i / SIZE) + FROM
@@ -24,7 +27,7 @@ export function Ground() {
     }
     m.instanceMatrix.needsUpdate = true
     if (m.instanceColor) m.instanceColor.needsUpdate = true
-  }, [])
+  }, [biome])
   return (
     <instancedMesh ref={ref} args={[undefined, undefined, SIZE * SIZE]} receiveShadow>
       <boxGeometry args={[1, 0.1, 1]} />

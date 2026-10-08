@@ -195,10 +195,10 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - [x] P4-02a Pomodoros/semana, mejor racha, "Pomodoros limpios" (modo estricto opcional)
   - **Hecho:** `GET /api/stats`, migración 6 (`strict`), tests `stats_test.go` y `stats_test.go` del juego, E2E `p4_02_stats.py`, GDD decisión 18. Tres mutaciones detectadas.
 
-- [ ] **P4-03** Prestigio por estaciones — agente: `backend-go` — dep: P3-01
-  - [ ] P4-03a Requisitos, qué se reinicia/conserva, +10% 🪙 por estación (GDD §4.9)
-  - [ ] P4-03b Nuevo bioma (pendiente: el usuario elige el de la 2.ª estación)
-  - **Hecho:** test de reinicio conserva exactamente lo que dice el GDD.
+- [x] **P4-03** Prestigio por estaciones — agente: `backend-go` — dep: P3-01
+  - [x] P4-03a Requisitos, qué se reinicia/conserva, +10% 🪙 por estación (GDD §4.9)
+  - [x] P4-03b Nuevo bioma (elegido: verano dorado; ciclo de estaciones)
+  - **Hecho:** test de reinicio conserva exactamente lo que dice el GDD (`prestige_test.go`, 6 mutaciones detectadas), E2E `p4_03_prestige.py`, GDD decisión 19, `sim.py` simula la estación 2 (Normal: 41 días).
 
 - [ ] **P4-04** Accesibilidad y vista 2D — agente: `frontend-3d` — dep: P2-07
   - [ ] P4-04a Reducir animaciones, modo sin audio, daltonismo, atajos

@@ -9,6 +9,8 @@ export interface PlayerState {
   coins_milli: number
   silo_level: number
   season: number
+  /** spring | summer | autumn | winter (GDD §4.9). */
+  biome: string
 }
 
 /** What a producing plant earns from its surroundings (GDD §4.6). */
@@ -175,6 +177,29 @@ export interface BookMonth {
   months: string[]
 }
 
+/** One thing the farm needs before a new season. */
+export interface PrestigeReq {
+  key: 'plots' | 'silo' | 'hives' | 'dog'
+  have: number
+  need: number
+  met: boolean
+}
+
+/** Las Estaciones (GDD §4.9). */
+export interface PrestigeState {
+  season: number
+  next_season: number
+  next_biome: string
+  bonus_pct: number
+  next_bonus_pct: number
+  requirements: PrestigeReq[]
+  ready: boolean
+  /** 🪙 that would start over (balance plus what waits in the Silo), in thousandths. */
+  would_lose_coins_milli: number
+  /** Ready plants not harvested yet: they are harvested for the player first. */
+  unharvested: number
+}
+
 export interface GameState {
   server_time: string
   player: PlayerState
@@ -186,6 +211,7 @@ export interface GameState {
   rest: RestState | null
   automation: AutomationState
   decor: DecorState
+  prestige: PrestigeState
   recent_tags: string[]
   settings: Record<string, string>
 }

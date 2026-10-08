@@ -164,56 +164,66 @@ func (s *Service) Cancel(ctx context.Context) error {
 	return s.mutateActive(ctx, "cancel", func(a *activeRow, now time.Time) error { return a.P.Cancel(now) })
 }
 
+// harvestPlot pays the 💧 reward of one mature (or withered) plant, once, inside the caller's transaction. It reports
+// when the plant matured and how long it grew, which the rest offer needs.
+func harvestPlot(ctx context.Context, tx *sql.Tx, plotID int64) (reward int, matured time.Time, growS int64, err error) {
+	var state, plant string
+	var harvested, version int64
+	var maturedAt sql.NullString
+	err = tx.QueryRowContext(ctx, `SELECT state, COALESCE(plant_type,''), harvested, version, COALESCE(grow_s, 0), matured_at FROM plots WHERE id = ? AND player_id = ?`,
+		plotID, PlayerID).Scan(&state, &plant, &harvested, &version, &growS, &maturedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, matured, growS, ErrNotFound
+	}
+	if err != nil {
+		return 0, matured, growS, err
+	}
+	if harvested == 1 {
+		return 0, matured, growS, ErrAlreadyHarvested
+	}
+	if state != "mature" && state != "withered" { // a withered plant can still be harvested
+		return 0, matured, growS, ErrNotMature
+	}
+	// The reward follows from what was planted, which the plot itself remembers (type and duration).
+	crop, ok := game.CropByKey(plant)
+	if !ok {
+		return 0, matured, growS, ErrInvalid
+	}
+	reward = crop.Reward
+	if plant == "oak" && int(growS/60) != crop.DurationMin && growS > 0 {
+		reward = game.FlowReward(int(growS / 60))
+	}
+	upd, err := tx.ExecContext(ctx, `UPDATE plots SET harvested = 1, version = version + 1 WHERE id = ? AND version = ?`, plotID, version)
+	if err != nil {
+		return 0, matured, growS, err
+	}
+	if n, _ := upd.RowsAffected(); n != 1 {
+		return 0, matured, growS, ErrConflict
+	}
+	if _, err := tx.ExecContext(ctx, `UPDATE pomodoros SET reward_focus = ? WHERE id = (SELECT id FROM pomodoros WHERE plot_id = ? AND status = 'completed' ORDER BY id DESC LIMIT 1)`, reward, plotID); err != nil {
+		return 0, matured, growS, err
+	}
+	if _, err := tx.ExecContext(ctx, `UPDATE players SET focus_points = focus_points + ?, lifetime_focus = lifetime_focus + ?,
+		version = version + 1 WHERE id = ?`, reward, reward, PlayerID); err != nil {
+		return 0, matured, growS, err
+	}
+	if maturedAt.Valid {
+		matured = parseTime(maturedAt.String)
+	}
+	return reward, matured, growS, nil
+}
+
 // Harvest collects the 💧 reward of a mature plant, once. The plant stays (GDD §3.2).
 func (s *Service) Harvest(ctx context.Context, plotID int64) (reward int, err error) {
 	err = s.withTx(ctx, func(tx *sql.Tx, now time.Time) error {
 		if err := s.settle(ctx, tx, now); err != nil {
 			return err
 		}
-		var state, plant string
-		var harvested, version, growS int64
-		var maturedAt sql.NullString
-		err := tx.QueryRowContext(ctx, `SELECT state, COALESCE(plant_type,''), harvested, version, COALESCE(grow_s, 0), matured_at FROM plots WHERE id = ? AND player_id = ?`,
-			plotID, PlayerID).Scan(&state, &plant, &harvested, &version, &growS, &maturedAt)
-		if errors.Is(err, sql.ErrNoRows) {
-			return ErrNotFound
-		}
+		r, matured, growS, err := harvestPlot(ctx, tx, plotID)
 		if err != nil {
 			return err
 		}
-		if harvested == 1 {
-			return ErrAlreadyHarvested
-		}
-		if state != "mature" && state != "withered" { // a withered plant can still be harvested
-			return ErrNotMature
-		}
-		// The reward follows from what was planted, which the plot itself remembers (type and duration).
-		crop, ok := game.CropByKey(plant)
-		if !ok {
-			return ErrInvalid
-		}
-		reward = crop.Reward
-		if plant == "oak" && int(growS/60) != crop.DurationMin && growS > 0 {
-			reward = game.FlowReward(int(growS / 60))
-		}
-		upd, err := tx.ExecContext(ctx, `UPDATE plots SET harvested = 1, version = version + 1 WHERE id = ? AND version = ?`, plotID, version)
-		if err != nil {
-			return err
-		}
-		if n, _ := upd.RowsAffected(); n != 1 {
-			return ErrConflict
-		}
-		if _, err := tx.ExecContext(ctx, `UPDATE pomodoros SET reward_focus = ? WHERE id = (SELECT id FROM pomodoros WHERE plot_id = ? AND status = 'completed' ORDER BY id DESC LIMIT 1)`, reward, plotID); err != nil {
-			return err
-		}
-		if _, err := tx.ExecContext(ctx, `UPDATE players SET focus_points = focus_points + ?, lifetime_focus = lifetime_focus + ?,
-			version = version + 1 WHERE id = ?`, reward, reward, PlayerID); err != nil {
-			return err
-		}
-		var matured time.Time
-		if maturedAt.Valid {
-			matured = parseTime(maturedAt.String)
-		}
+		reward = r
 		return startRest(ctx, tx, now, growS, matured)
 	})
 	return reward, err

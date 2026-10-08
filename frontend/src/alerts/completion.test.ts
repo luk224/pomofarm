@@ -7,11 +7,12 @@ const plot = (over: Partial<PlotState> = {}): PlotState => ({
 })
 const state = (plots: PlotState[], active: boolean): GameState => ({
   server_time: 't',
-  player: { name: 'x', focus_points: 0, lifetime_focus: 0, coins_milli: 0, silo_level: 0, season: 1 },
+  player: { name: 'x', focus_points: 0, lifetime_focus: 0, coins_milli: 0, silo_level: 0, season: 1, biome: 'spring' },
   plots, seeds: [], recent_tags: [], settings: {},
   silo: { content_milli: 0, capacity_milli: 0, capacity_hours: 12, rate_milli_per_h: 0, full: false },
   shop: { plots_owned: 1, plots_max: 16, next_plot: null, silo_upgrade: null },
   rest: null,
+  prestige: { season: 1, next_season: 2, next_biome: 'summer', bonus_pct: 0, next_bonus_pct: 10, requirements: [], ready: false, would_lose_coins_milli: 0, unharvested: 0 },
   decor: { items: [], catalog: [], min: -2, max: 5, hat: { owned: false, available: false, cost: 600 }, blocked: [] },
   automation: { bees: { unlocked: false, unlock_cost: 30, hives: [], max: 4, next_cost: 4000 }, dog: { unlocked: false, unlock_cost: 120, owned: false, cost: 30000, silo_bonus_hours: 12 } },
   pomodoro: active ? { id: 7, plot_id: 1, plant_type: 'daisy', status: 'running', planned_s: 600, remaining_ms: 1000, started_at: 't', paused_at: null, tag: null, strict: false, pauses: 0, paused_ms: 0 } : null,

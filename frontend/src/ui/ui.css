@@ -49,12 +49,12 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 .settings { position: relative; }
 .chip--button { border: 0; cursor: pointer; padding: 6px 10px; color: var(--ink); height: 38px; box-sizing: border-box; }
 .chip--button:hover { background: #fff; }
-.panelbox { max-height: calc(100vh - 70px); overflow-y: auto; position: absolute; top: 46px; left: 0; width: 260px; display: grid; gap: 10px; padding: 14px; border-radius: 18px;
+.panelbox { max-height: calc(100vh - 100px); overflow-y: auto; position: absolute; top: 46px; left: 0; width: 260px; display: grid; gap: 10px; padding: 14px; border-radius: 18px;
   background: var(--panel); backdrop-filter: blur(8px); box-shadow: 0 6px 24px #3b2a1f26; z-index: 25; }
 .check { display: flex; align-items: center; gap: 10px; min-height: 36px; cursor: pointer; font-weight: 500; }
 .check input { width: 20px; height: 20px; accent-color: var(--leaf); }
 .panelbox .hint { margin: 0; }
-.panelbox--wide { width: 320px; max-height: calc(100vh - 70px); overflow-y: auto; }
+.panelbox--wide { width: 320px; max-height: calc(100vh - 100px); overflow-y: auto; }
 .chip--button { gap: 8px; }
 .chip--attention { box-shadow: 0 0 0 3px var(--sun); }
 .offer { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 8px 4px; }
@@ -221,6 +221,19 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); out
 .table th, .table td { padding: 4px 6px; text-align: right; border-bottom: 1px solid #3b2a1f1a; }
 .table th[scope=row], .table thead th:first-child { text-align: left; font-weight: 500; }
 .table thead th { font-size: 12px; color: var(--ink-soft); font-weight: 600; }
+
+/* ---------- season (prestige) ---------- */
+.season { display: grid; gap: 6px; padding-top: 6px; border-top: 1px solid #3b2a1f1a; }
+.season p { margin: 0; }
+.season__reqs { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 14px; }
+.season__req { display: flex; gap: 8px; color: var(--ink-soft); }
+.season__req--met { color: var(--ink); font-weight: 600; }
+.season__details { font-size: 13px; color: var(--ink-soft); }
+.season__details summary { cursor: pointer; min-height: 28px; display: flex; align-items: center; list-style: none; }
+.season__details summary::before { content: '▸'; margin-right: 6px; }
+.season__details[open] summary::before { content: '▾'; }
+.season__details p { margin: 4px 0 0; }
+.season .btn { min-height: 44px; }
 
 /* ---------- personal numbers ---------- */
 .numbers h3 { margin: 0 0 6px; font-size: 15px; }

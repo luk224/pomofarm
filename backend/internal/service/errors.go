@@ -27,4 +27,5 @@ var (
 	ErrCellTaken         = errors.New("cell_taken")
 	ErrAnimalLocked      = errors.New("animal_locked")
 	ErrBadCell           = errors.New("bad_cell")
+	ErrNotReady          = errors.New("not_ready")
 )

@@ -68,5 +68,6 @@ export const api = {
   buyHat: () => request<GameState>('POST', '/api/decor', { kind: 'hat' }),
   moveDecor: (id: number, x: number, y: number) => request<GameState>('POST', `/api/decor/${id}/move`, { x, y }),
   removeDecor: (id: number) => request<GameState>('DELETE', `/api/decor/${id}`),
+  prestige: (confirm: boolean) => request<GameState>('POST', '/api/prestige', { confirm }),
   unlockSeed: (key: string) => request<GameState>('POST', '/api/unlocks', { kind: 'seed', key }),
 }

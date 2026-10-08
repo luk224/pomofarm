@@ -3,6 +3,7 @@ import { useGame } from '../store/game'
 import { formatPrice } from '../store/automation'
 import { buyDog, buyHat, buyPlot, DECOR_NAMES, startDecor, startPlacing, unlockAnimal, upgradeSilo } from './actions'
 import { CoinIcon, DropIcon, SiloIcon } from './icons'
+import { Season } from './Season'
 
 function PlotIcon() {
   return (
@@ -123,6 +124,7 @@ export function Shop() {
             <Offer testId="buy-hat" icon={<span>👒</span>} title="Sombrero del Perro" detail="Solo para presumir"
               cost={decor.hat.cost} funds={coins} currency="coin" onBuy={() => void buyHat()} />
           )}
+          <Season onDone={() => setOpen(false)} />
           <p className="hint offer__group">Decoración (no cuenta para el prestigio)</p>
           {decor.catalog.map((c) => (
             <Offer key={c.kind} testId={`decor-${c.kind}`} icon={<span>{c.kind === 'path' ? '🪨' : c.kind === 'fence' ? '🪵' : '🏮'}</span>}

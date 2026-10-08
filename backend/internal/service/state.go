@@ -16,6 +16,7 @@ type PlayerState struct {
 	CoinsMilli    int64  `json:"coins_milli"`
 	SiloLevel     int    `json:"silo_level"`
 	Season        int    `json:"season"`
+	Biome         string `json:"biome"`
 }
 
 type PlotState struct {
@@ -80,6 +81,7 @@ type State struct {
 	Rest       *RestState        `json:"rest"`
 	Automation AutomationState   `json:"automation"`
 	Decor      DecorState        `json:"decor"`
+	Prestige   PrestigeState     `json:"prestige"`
 	RecentTags []string          `json:"recent_tags"`
 	Settings   map[string]string `json:"settings"`
 }
@@ -91,8 +93,8 @@ func (s *Service) State(ctx context.Context) (State, error) {
 			return err
 		}
 		st.ServerTime = fmtTime(now)
-		err := tx.QueryRowContext(ctx, `SELECT name, focus_points, lifetime_focus, coins_milli, silo_level, season FROM players WHERE id = ?`, PlayerID).
-			Scan(&st.Player.Name, &st.Player.FocusPoints, &st.Player.LifetimeFocus, &st.Player.CoinsMilli, &st.Player.SiloLevel, &st.Player.Season)
+		err := tx.QueryRowContext(ctx, `SELECT name, focus_points, lifetime_focus, coins_milli, silo_level, season, biome FROM players WHERE id = ?`, PlayerID).
+			Scan(&st.Player.Name, &st.Player.FocusPoints, &st.Player.LifetimeFocus, &st.Player.CoinsMilli, &st.Player.SiloLevel, &st.Player.Season, &st.Player.Biome)
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrNoPlayer
 		}
@@ -207,6 +209,9 @@ func (s *Service) State(ctx context.Context) (State, error) {
 		}
 		st.Automation = automation
 		if st.Decor, err = decorView(ctx, tx); err != nil {
+			return err
+		}
+		if st.Prestige, err = prestigeView(ctx, tx, st.Player.Season, st.Player.SiloLevel, st.Player.CoinsMilli+st.Silo.ContentMilli); err != nil {
 			return err
 		}
 		a, err := loadActive(ctx, tx)

@@ -21,6 +21,7 @@ SILO = [(12, 0), (24, 25), (36, 70), (48, 160), (72, 350)]   # (horas de capacid
 ANIMAL_UNLOCK = {"Abejas": 30, "Perro": 120}                  # coste 💧 (desbloqueo único)
 HIVE_BASE, HIVE_GROWTH, DOG_COST = 4000, 1.5, 30000           # coste 🪙
 M_ADJ, M_HUERTO, M_BEES, M_CAP = 0.15, 0.10, 0.25, 2.0        # multiplicadores medios supuestos
+PRESTIGE_BONUS = 0.10                                         # +10% de 🪙 por estación completada, por encima del tope
 WEEK = (1, 1, 1, 1, 1, 0.3, 0.3)                              # fracción de foco L..D
 PROFILES = {"Ligero": (90, 25), "Normal": (180, 45), "Intenso": (300, 60),
             "Tú mín": (120, 45), "Tú máx": (240, 60)}  # (min foco/día, sesión máx min); los dos últimos = rango real del usuario (2–4 h)
@@ -33,10 +34,18 @@ def plot_cost(n): return math.ceil(PLOT_BASE * PLOT_GROWTH ** (n - 2))
 def hive_cost(i): return round(HIVE_BASE * HIVE_GROWTH ** i)
 
 
-def run(F, session_max, days=200):
-    unlocked = [0]
-    P, silo, hives, dog = 1, 0, 0, False
-    animals = set()
+def run(F, session_max, days=200, season=1):
+    """season=1: partida nueva. season>1: justo tras un Prestigio (GDD 4.9): se conservan semillas, animales (desbloqueos),
+    16 parcelas y Silo máximo; se reinician 🪙, colmenas, Perro y plantas; y cada 🪙 vale +10% por estación completada."""
+    prestige_mult = 1 + PRESTIGE_BONUS * (season - 1)
+    if season == 1:
+        unlocked = [0]
+        P, silo, hives, dog = 1, 0, 0, False
+        animals = set()
+    else:
+        unlocked = list(range(len(CROPS)))
+        P, silo, hives, dog = MAX_PLOTS, len(SILO) - 1, 0, False
+        animals = set(ANIMAL_UNLOCK)
     water = coins = C = 0.0
     hist, milestones, prestige_day = [], {}, None
     for day in range(1, days + 1):
@@ -52,7 +61,7 @@ def run(F, session_max, days=200):
         M = min(M_CAP, 1 + adj + huerto + bees)
         burn = min(C, 24 * P * g(crop))
         C -= burn
-        coins += burn * M
+        coins += burn * M * prestige_mult
         while True:   # compras: lo más barato asequible
             opts, nxt = [], len(unlocked)
             if nxt < len(CROPS): opts.append(("crop", CROPS[nxt][2], "w"))
@@ -97,6 +106,12 @@ if __name__ == "__main__":
         print(json.dumps({k: dict(hist=h, milestones=m, prestige=p) for k, (h, m, p) in res.items()}, ensure_ascii=False))
     else:
         print("colmenas", [hive_cost(i) for i in range(4)], "perro", DOG_COST)
+        print("\nEstación 2 (tras el Prestigio): días hasta volver a tener 4 colmenas y el Perro")
+        for k, (F, sm) in PROFILES.items():
+            _, _, d2 = run(F, sm, 400, season=2)
+            _, _, d3 = run(F, sm, 400, season=3)
+            print(f"   {k}: estación 2 -> {d2} días · estación 3 -> {d3} días")
+        print()
         for k, (h, m, p) in res.items():
             print(k, "-> prestigio disponible el día", p)
             for a, b in sorted(m.items(), key=lambda x: x[1]): print("   ", b, a)

@@ -185,6 +185,18 @@ func New(db *sql.DB, clock game.Clock) *fiber.App {
 		return c.JSON(book)
 	})
 
+	// A new season (GDD §4.9): irreversible, so the client must send {"confirm": true}.
+	app.Post("/api/prestige", func(c *fiber.Ctx) error {
+		var req struct {
+			Confirm bool `json:"confirm"`
+		}
+		_ = c.BodyParser(&req)
+		if err := svc.Prestige(c.UserContext(), req.Confirm); err != nil {
+			return fail(c, err)
+		}
+		return respondState(c, svc, fiber.StatusOK)
+	})
+
 	app.Get("/api/stats", func(c *fiber.Ctx) error {
 		st, err := svc.Stats(c.UserContext(), c.Query("tz"))
 		if err != nil {
@@ -314,6 +326,7 @@ var statusOf = map[error]int{
 	service.ErrCellTaken:         fiber.StatusConflict,
 	service.ErrAnimalLocked:      fiber.StatusForbidden,
 	service.ErrBadCell:           fiber.StatusBadRequest,
+	service.ErrNotReady:          fiber.StatusConflict,
 	service.ErrNeedsConfirmation: fiber.StatusConflict,
 }
 
