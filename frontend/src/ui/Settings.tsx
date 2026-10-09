@@ -89,6 +89,22 @@ function AccessibilitySettings() {
   )
 }
 
+/** Performance (GDD §2.4): Modo Foco draws the scene about 20 times a second while a Pomodoro runs, to spare the battery and the fans. */
+function PerformanceSetting() {
+  const focusMode = usePrefs((s) => s.focusMode)
+  const setFocusMode = usePrefs((s) => s.setFocusMode)
+  return (
+    <fieldset className="restset" data-testid="performance-settings">
+      <legend>Rendimiento</legend>
+      <label className="check">
+        <input type="checkbox" checked={focusMode} data-testid="focus-mode" onChange={(e) => setFocusMode(e.target.checked)} />
+        <span>Modo Foco durante el Pomodoro</span>
+      </label>
+      <p className="hint">Mientras corre un Pomodoro la granja se dibuja unas 20 veces por segundo en lugar de 60. Gasta menos batería y el ventilador no se oye. Si la pestaña no se ve, no se dibuja nada.</p>
+    </fieldset>
+  )
+}
+
 /** Strict mode (GDD §3.3): a personal challenge. It never blocks a pause; it only decides what the Harvest Book counts as clean. */
 function StrictSetting() {
   const on = useGame((s) => s.state?.settings.strict_mode === '1')
@@ -112,6 +128,8 @@ export function Settings() {
   const [open, setOpen] = useState(false)
   const sound = usePrefs((s) => s.sound)
   const notify = usePrefs((s) => s.notify)
+  const farmAttention = usePrefs((s) => s.farmAttention)
+  const setFarmAttention = usePrefs((s) => s.setFarmAttention)
   const setSound = usePrefs((s) => s.setSound)
   const setNotify = usePrefs((s) => s.setNotify)
   const root = useRef<HTMLDivElement>(null)
@@ -147,10 +165,15 @@ export function Settings() {
             <input type="checkbox" checked={notify && !blocked} disabled={!supported || blocked} onChange={(e) => setNotify(e.target.checked)} />
             <span>Notificación del navegador</span>
           </label>
+          <label className="check">
+            <input type="checkbox" checked={farmAttention} data-testid="farm-attention" onChange={(e) => setFarmAttention(e.target.checked)} />
+            <span>Avisar si varias plantas van a marchitarse</span>
+          </label>
           {!supported && <p className="hint">Este navegador no admite notificaciones.</p>}
           {blocked && <p className="hint">Las notificaciones están bloqueadas en el navegador. Actívalas en los permisos del sitio.</p>}
           {!sound && <p className="hint">Sin campana, verás el aviso en la pestaña.</p>}
           <AccessibilitySettings />
+          <PerformanceSetting />
           <RestSettings />
           <StrictSetting />
           <fieldset className="restset" data-testid="shortcuts">

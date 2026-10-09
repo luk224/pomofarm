@@ -14,6 +14,10 @@ export interface PrefsData {
   reduceMotion: boolean
   muted: boolean
   palette: 'default' | 'cb'
+  /** Modo Foco (GDD §2.4): draw the scene about 20 times a second while a Pomodoro runs. On by default. */
+  focusMode: boolean
+  /** A soft notice when several plants are about to wither (GDD §4). On by default. */
+  farmAttention: boolean
 }
 
 interface Prefs extends PrefsData {
@@ -24,6 +28,8 @@ interface Prefs extends PrefsData {
   setReduceMotion: (on: boolean) => void
   setMuted: (on: boolean) => void
   setPalette: (p: 'default' | 'cb') => void
+  setFocusMode: (on: boolean) => void
+  setFarmAttention: (on: boolean) => void
 }
 
 const KEY = 'pomofarm.prefs'
@@ -47,6 +53,8 @@ export function parsePrefs(raw: unknown): PrefsData {
     reduceMotion: r.reduceMotion === true,
     muted: r.muted === true,
     palette: r.palette === 'cb' ? 'cb' : 'default',
+    focusMode: r.focusMode !== false,
+    farmAttention: r.farmAttention !== false,
   }
 }
 
@@ -67,7 +75,7 @@ function save(p: PrefsData) {
 }
 
 const data = (s: Prefs): PrefsData => ({
-  sound: s.sound, notify: s.notify, volumes: s.volumes, ambient: s.ambient, reduceMotion: s.reduceMotion, muted: s.muted, palette: s.palette,
+  sound: s.sound, notify: s.notify, volumes: s.volumes, ambient: s.ambient, reduceMotion: s.reduceMotion, muted: s.muted, palette: s.palette, focusMode: s.focusMode, farmAttention: s.farmAttention,
 })
 
 export const usePrefs = create<Prefs>((set, get) => {
@@ -84,5 +92,7 @@ export const usePrefs = create<Prefs>((set, get) => {
     setReduceMotion: (reduceMotion) => update({ reduceMotion }),
     setMuted: (muted) => update({ muted }),
     setPalette: (palette) => update({ palette }),
+    setFocusMode: (focusMode) => update({ focusMode }),
+    setFarmAttention: (farmAttention) => update({ farmAttention }),
   }
 })
