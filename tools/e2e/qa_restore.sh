@@ -84,5 +84,18 @@ if [ -n "$OLD" ] && [ -f "$OLD/pomofarm.db" ]; then
 else
   echo "SKIP no hay una copia con el esquema 5 en ~/pomofarm-backups"
 fi
+
+# 9) arranque tras reiniciar el equipo: web y app arrancan a la vez y en cualquier orden; el servidor puede caerse y volver
+docker compose -p $P stop web app >/dev/null 2>&1
+docker start ${P}-web-1 >/dev/null 2>&1; sleep 3   # con el motor, como al arrancar el equipo (compose start arrancaría también la app)
+[ "$(docker inspect --format '{{.State.Status}}' ${P}-web-1)" = running ] && ok "web arranca aunque la app todavía no exista (no se queda en bucle de error)" || bad "web no arranca sin la app"
+c502=$(curl -s -o /dev/null -w '%{http_code}' 127.0.0.1:$PORT/api/health); [ "$c502" = 502 ] && ok "mientras la app no está, la web contesta 502 (no se cuelga)" || bad "web sin app contestó $c502"
+docker start ${P}-app-1 >/dev/null 2>&1
+for _ in $(seq 1 40); do curl -fs 127.0.0.1:$PORT/api/health >/dev/null 2>&1 && break; sleep 0.5; done
+curl -fs 127.0.0.1:$PORT/api/health >/dev/null 2>&1 && ok "en cuanto la app está sana, la web la encuentra sola (sin reiniciar la web)" || bad "la web no encontró la app tras arrancar"
+[ "$(docker inspect --format '{{.RestartCount}}' ${P}-web-1)" = 0 ] && ok "y la web no tuvo que reiniciarse" || bad "la web se reinició"
+docker exec ${P}-app-1 sh -c 'kill -TERM 1' >/dev/null 2>&1
+for _ in $(seq 1 30); do curl -fs 127.0.0.1:$PORT/api/health >/dev/null 2>&1 && [ "$(docker inspect --format '{{.RestartCount}}' ${P}-app-1)" -ge 1 ] && break; sleep 1; done
+curl -fs 127.0.0.1:$PORT/api/health >/dev/null 2>&1 && [ "$(docker inspect --format '{{.RestartCount}}' ${P}-app-1)" -ge 1 ] && ok "si el proceso del servidor muere, Docker lo reinicia solo y el juego vuelve a responder" || bad "la app no volvió tras morir"
 [ $fail -eq 0 ] && echo "TODO OK" || echo "HAY FALLOS"
 exit $fail

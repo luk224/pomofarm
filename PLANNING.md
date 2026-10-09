@@ -222,11 +222,11 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - **Hecho:** `docs/qa/tiempo.md` enlaza cada criterio de GDD §8 y cada regla de tiempo con su prueba (44 de Go + 4 scripts E2E); `make test-time` (o `E2E=1 make test-time`) comprueba que todas existen y las ejecuta. Nuevas: reinicio del servidor a mitad de un Pomodoro, pausa de 30 días, saltos del reloj del servidor, relojes extremos (1970–2262), zona horaria del servidor, formato de las marcas, "consultar a menudo = consultar una vez" sobre partidas aleatorias completas, y E2E `p5_03_time.py`. Dos mutaciones detectadas.
 - [x] **P5-04** Revisión de backups y restauración — agente: `devops` — dep: P0-05
   - **Hecho:** informe `docs/qa/backups.md`: copias verificadas antes de guardarse, copia automática verificada antes de migrar, `restore.sh` verifica primero y conserva la partida anterior (`--undo`), `pomofarm verify`, `deploy/fetch-backups.sh` (copia fuera de wyse), `deploy/status.sh`, `deploy/README.md`; 9 tests nuevos (3 mutaciones detectadas) y `qa_restore.sh` ampliado (21 comprobaciones en Docker limpio).
-- [ ] **P5-06** Notificaciones con el navegador cerrado (Web Push) — agente: `backend-go`, `frontend-3d` — dep: P1-07 — *valorar si hace falta*
-- [ ] **P5-05** Despliegue final en `wyse` y cierre — agente: `devops` — dep: P5-04
-  - [ ] P5-05a Despliegue estable con reinicio automático tras reiniciar `wyse`
-  - [ ] P5-05b Backups corriendo en `wyse` y restauración probada allí
-  - **Hecho:** la app responde desde otro dispositivo de la tailnet (iPhone incluido); README de despliegue.
+- [ ] **P5-06** Notificaciones con el navegador cerrado (Web Push) — agente: `backend-go`, `frontend-3d` — dep: P1-07 — *pendiente a propósito (decisión del usuario, 2026-10-09): exige HTTPS (tailscale cert) y los servidores de Apple/Google*
+- [x] **P5-05** Despliegue final en `wyse` y cierre — agente: `devops` — dep: P5-04
+  - [x] P5-05a Despliegue estable con reinicio automático tras reiniciar `wyse` (Docker habilitado en el arranque, `unless-stopped`, nginx que resuelve `app` en cada petición; el servidor se reinicia solo en 2 s; wyse no se reinició a propósito)
+  - [x] P5-05b Backups corriendo en `wyse` y restauración probada allí (`qa_restore_remote.sh`, stack aparte)
+  - **Hecho:** README de despliegue (`deploy/README.md`) y informe `docs/qa/fase-5.md`. La app responde desde la tailnet; **falta probarla en un iPhone real** (lo tienes tú).
 
 ---
 
