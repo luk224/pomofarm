@@ -46,5 +46,43 @@ curl -s 127.0.0.1:$PORT/api/state | python3 -c "import sys,json; p=json.load(sys
 # 5) y sobrevive a otro reinicio del contenedor
 docker compose -p $P restart app >/dev/null 2>&1; for _ in $(seq 1 40); do curl -fs 127.0.0.1:$PORT/api/health >/dev/null 2>&1 && break; sleep 0.5; done
 curl -s 127.0.0.1:$PORT/api/state | python3 -c "import sys,json; d=json.load(sys.stdin); sys.exit(0 if d['pomodoro'] and d['player']['focus_points']==42 else 1)" && ok "tras reiniciar el contenedor, el estado persiste" || bad "estado perdido tras reiniciar"
+
+# ---------- P5-04: la restauración es segura ----------
+state() { curl -s 127.0.0.1:$PORT/api/state | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['player']['name'], d['player']['focus_points'], 'pomodoro' if d['pomodoro'] else 'sin-pomodoro')"; }
+BEFORE=$(state)
+
+# 6) una copia estropeada se rechaza y no se toca nada (ni siquiera si es la «última»)
+docker run --rm -v ${P}_backups:/backups alpine:3.21 sh -c 'head -c 4000 /dev/urandom > /backups/pomofarm-29990101-000000.db'
+if COMPOSE_PROJECT_NAME=$P "$(pwd)/deploy/restore.sh" latest >/dev/null 2>&1; then bad "restore.sh aceptó una copia estropeada"; else ok "una copia estropeada (la más reciente) se rechaza"; fi
+[ "$(state)" = "$BEFORE" ] && ok "y la partida actual sigue igual y funcionando ($BEFORE)" || bad "la partida cambió tras rechazar la copia mala: $(state) vs $BEFORE"
+if COMPOSE_PROJECT_NAME=$P "$(pwd)/deploy/restore.sh" pomofarm-no-existe.db >/dev/null 2>&1; then bad "restore.sh aceptó una copia inexistente"; else ok "una copia que no existe se rechaza"; fi
+docker run --rm -v ${P}_backups:/backups alpine:3.21 rm -f /backups/pomofarm-29990101-000000.db
+
+# 7) la partida anterior se guarda y --undo la recupera
+COMPOSE_PROJECT_NAME=$P "$(pwd)/deploy/restore.sh" "$BK" >/dev/null 2>&1 && ok "se vuelve a restaurar la copia buena" || bad "segunda restauración falló"
+for _ in $(seq 1 40); do curl -fs 127.0.0.1:$PORT/api/health >/dev/null 2>&1 && break; sleep 0.5; done
+AFTER=$(state); [ "$AFTER" = "Restaurado 42 sin-pomodoro" ] && ok "tras restaurar, la partida es la de la copia ($AFTER)" || bad "estado tras restaurar: $AFTER"
+saved=$(docker run --rm -v ${P}_backups:/backups alpine:3.21 sh -c 'ls -d /backups/pre-restore/*/ | wc -l')
+[ "$saved" -ge 1 ] && ok "la partida anterior quedó guardada en /backups/pre-restore ($saved)" || bad "no se guardó la partida anterior"
+COMPOSE_PROJECT_NAME=$P "$(pwd)/deploy/restore.sh" --undo >/dev/null 2>&1 && ok "restore.sh --undo termina bien" || bad "--undo falló"
+for _ in $(seq 1 40); do curl -fs 127.0.0.1:$PORT/api/health >/dev/null 2>&1 && break; sleep 0.5; done
+[ "$(state)" = "$BEFORE" ] && ok "--undo devuelve exactamente la partida anterior ($BEFORE)" || bad "--undo no devolvió la partida anterior: $(state)"
+
+# 8) una copia de un esquema antiguo se actualiza, y antes de actualizar se guarda una copia de seguridad verificada
+OLD=$(ls -d "$HOME"/pomofarm-backups/wyse-before-phase4-*/ 2>/dev/null | sort | tail -1)
+if [ -n "$OLD" ] && [ -f "$OLD/pomofarm.db" ]; then
+  mkdir -p "$D/old" && cp "$OLD"/pomofarm.db* "$D/old/" && sqlite3 "$D/old/pomofarm.db" "VACUUM INTO '$D/old-v5.db'" \
+    && docker run --rm -v ${P}_backups:/backups -v "$D":/src alpine:3.21 cp /src/old-v5.db /backups/pomofarm-20260101-000000.db
+  COMPOSE_PROJECT_NAME=$P "$(pwd)/deploy/restore.sh" pomofarm-20260101-000000.db >/dev/null 2>&1 && ok "se restaura una copia con el esquema 5 (partida real de ayer)" || bad "restaurar la copia antigua falló"
+  for _ in $(seq 1 40); do curl -fs 127.0.0.1:$PORT/api/health >/dev/null 2>&1 && break; sleep 0.5; done
+  v=$(curl -s 127.0.0.1:$PORT/api/health | python3 -c "import sys,json; print(json.load(sys.stdin)['schema_version'])")
+  [ "$v" -ge 6 ] && ok "la app la actualiza al esquema $v y sigue funcionando" || bad "esquema tras restaurar: $v"
+  pm=$(docker run --rm -v ${P}_backups:/backups alpine:3.21 sh -c 'ls /backups/pre-migration/ 2>/dev/null')
+  echo "$pm" | grep -q "pomofarm-v5-" && ok "antes de actualizar se guardó una copia verificada ($(echo "$pm" | head -1))" || bad "no se guardó la copia previa a la migración: $pm"
+  docker compose -p $P exec -T app pomofarm verify "/backups/pre-migration/$(echo "$pm" | head -1)" >/dev/null 2>&1 && ok "y esa copia previa es válida" || bad "la copia previa no es válida"
+  curl -s 127.0.0.1:$PORT/api/state | python3 -c "import sys,json; d=json.load(sys.stdin); print('PASS la partida antigua se conserva:', d['player']['name'], d['player']['focus_points'], 'gotas')" 
+else
+  echo "SKIP no hay una copia con el esquema 5 en ~/pomofarm-backups"
+fi
 [ $fail -eq 0 ] && echo "TODO OK" || echo "HAY FALLOS"
 exit $fail

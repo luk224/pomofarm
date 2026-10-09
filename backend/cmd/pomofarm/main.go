@@ -27,10 +27,21 @@ func env(key, def string) string {
 func main() {
 	dbPath := env("POMOFARM_DB", "data/pomofarm.db")
 	backupDir := env("POMOFARM_BACKUPS", "backups")
+
+	// `pomofarm verify <file>` checks that a backup is a healthy PomoFarm database. It never touches the live database.
+	if len(os.Args) > 2 && os.Args[1] == "verify" {
+		if err := store.Verify(os.Args[2]); err != nil {
+			fmt.Fprintln(os.Stderr, "INVALID:", err)
+			os.Exit(1)
+		}
+		fmt.Println("OK", os.Args[2])
+		return
+	}
 	if err := os.MkdirAll(filepath.Dir(dbPath), 0o755); err != nil {
 		log.Fatal(err)
 	}
-	db, err := store.Open(dbPath)
+	// a verified safety copy is taken before any upgrade touches an existing game
+	db, err := store.OpenWithSafety(dbPath, backupDir, time.Now(), log.Printf)
 	if err != nil {
 		log.Fatal(err)
 	}

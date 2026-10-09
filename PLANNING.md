@@ -220,7 +220,8 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - **Hecho:** aviso calculado en el navegador (el servidor no empuja nada; con el navegador cerrado depende de P5-06): ≥ 3 plantas en 2 h, una vez por grupo, 6 h de calma, nunca durante un Pomodoro. Tests `attention.test.ts`, E2E `p5_02_attention.py`, GDD decisión 23.
 - [x] **P5-03** Suite de pruebas de tiempo completa — agente: `qa-tester` — dep: P2-01
   - **Hecho:** `docs/qa/tiempo.md` enlaza cada criterio de GDD §8 y cada regla de tiempo con su prueba (44 de Go + 4 scripts E2E); `make test-time` (o `E2E=1 make test-time`) comprueba que todas existen y las ejecuta. Nuevas: reinicio del servidor a mitad de un Pomodoro, pausa de 30 días, saltos del reloj del servidor, relojes extremos (1970–2262), zona horaria del servidor, formato de las marcas, "consultar a menudo = consultar una vez" sobre partidas aleatorias completas, y E2E `p5_03_time.py`. Dos mutaciones detectadas.
-- [ ] **P5-04** Revisión de backups y restauración — agente: `devops` — dep: P0-05
+- [x] **P5-04** Revisión de backups y restauración — agente: `devops` — dep: P0-05
+  - **Hecho:** informe `docs/qa/backups.md`: copias verificadas antes de guardarse, copia automática verificada antes de migrar, `restore.sh` verifica primero y conserva la partida anterior (`--undo`), `pomofarm verify`, `deploy/fetch-backups.sh` (copia fuera de wyse), `deploy/status.sh`, `deploy/README.md`; 9 tests nuevos (3 mutaciones detectadas) y `qa_restore.sh` ampliado (21 comprobaciones en Docker limpio).
 - [ ] **P5-06** Notificaciones con el navegador cerrado (Web Push) — agente: `backend-go`, `frontend-3d` — dep: P1-07 — *valorar si hace falta*
 - [ ] **P5-05** Despliegue final en `wyse` y cierre — agente: `devops` — dep: P5-04
   - [ ] P5-05a Despliegue estable con reinicio automático tras reiniciar `wyse`
