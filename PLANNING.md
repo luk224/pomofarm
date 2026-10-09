@@ -218,7 +218,8 @@ Fases = GDD §7. Referencias `GDD §n` apuntan a `gdd_pomofarm_3d_v2.md`.
   - **Hecho:** E2E `p5_01_focus.py` (FPS medidos, CPU 67 % frente a 101 % con render por software, pestaña oculta = 0 FPS), GDD decisión 22.
 - [x] **P5-02** Notificación "tu granja necesita atención" — agente: `backend-go`, `frontend-3d` — dep: P2-02
   - **Hecho:** aviso calculado en el navegador (el servidor no empuja nada; con el navegador cerrado depende de P5-06): ≥ 3 plantas en 2 h, una vez por grupo, 6 h de calma, nunca durante un Pomodoro. Tests `attention.test.ts`, E2E `p5_02_attention.py`, GDD decisión 23.
-- [ ] **P5-03** Suite de pruebas de tiempo completa — agente: `qa-tester` — dep: P2-01
+- [x] **P5-03** Suite de pruebas de tiempo completa — agente: `qa-tester` — dep: P2-01
+  - **Hecho:** `docs/qa/tiempo.md` enlaza cada criterio de GDD §8 y cada regla de tiempo con su prueba (44 de Go + 4 scripts E2E); `make test-time` (o `E2E=1 make test-time`) comprueba que todas existen y las ejecuta. Nuevas: reinicio del servidor a mitad de un Pomodoro, pausa de 30 días, saltos del reloj del servidor, relojes extremos (1970–2262), zona horaria del servidor, formato de las marcas, "consultar a menudo = consultar una vez" sobre partidas aleatorias completas, y E2E `p5_03_time.py`. Dos mutaciones detectadas.
 - [ ] **P5-04** Revisión de backups y restauración — agente: `devops` — dep: P0-05
 - [ ] **P5-06** Notificaciones con el navegador cerrado (Web Push) — agente: `backend-go`, `frontend-3d` — dep: P1-07 — *valorar si hace falta*
 - [ ] **P5-05** Despliegue final en `wyse` y cierre — agente: `devops` — dep: P5-04
