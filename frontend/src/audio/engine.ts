@@ -23,6 +23,7 @@ const unlockListeners = new Set<() => void>()
 export function unlockAudio(): AudioContext | null {
   try {
     if (!ctx) {
+      playbackSession()
       ctx = new AudioContext()
       master = ctx.createGain() // one switch for everything: "Sin audio" (GDD §2.4)
       master.gain.value = muted ? 0 : 1
@@ -36,9 +37,12 @@ export function unlockAudio(): AudioContext | null {
       if (import.meta.env.DEV) (window as unknown as { __audioEngine?: unknown }).__audioEngine = { ctx, buses, volumes, get master() { return master } }
     }
     const notify = () => unlockListeners.forEach((f) => f())
-    // resume() is asynchronous: listeners (e.g. starting the ambient sound) must run once it is really running
-    if (ctx.state === 'suspended') void ctx.resume().then(notify, () => undefined)
-    else notify()
+    if (ctx.state !== 'running') {
+      // "suspended" (not unlocked yet) or "interrupted" (iOS after a call or a trip to the background). resume() is asynchronous:
+      // listeners (e.g. starting the ambient sound) must run once it is really running.
+      void ctx.resume().then(notify, () => undefined)
+      kick(ctx)
+    } else notify()
   } catch {
     ctx = null // no Web Audio: everything stays visual
   }
@@ -49,6 +53,47 @@ export function unlockAudio(): AudioContext | null {
 export function setMasterMuted(on: boolean): void {
   muted = on
   if (master && ctx) master.gain.setTargetAtTime(on ? 0 : 1, ctx.currentTime, 0.02)
+}
+
+/**
+ * Phones are strict. Chrome on Android only counts a tap as permission to play sound when it ENDS (pointerdown does not count for
+ * touch), and Safari on iPhone wants audio to be started from a touchend/click handler, plays Web Audio through the ringer switch
+ * (silent mode = no sound) unless the page says its audio is "playback", and may "interrupt" the context later. So:
+ *  - the context is (re)started on every kind of tap or key press until it is running, not only on the first pointerdown;
+ *  - a one-sample silent buffer is played inside that gesture (the classic iOS unlock);
+ *  - the Audio Session API is set to "playback" where it exists, so the ringer switch does not mute the farm.
+ */
+export const UNLOCK_EVENTS = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'] as const
+
+function kick(c: AudioContext): void {
+  try {
+    const src = c.createBufferSource()
+    src.buffer = c.createBuffer(1, 1, 22050)
+    src.connect(c.destination)
+    src.start(0)
+  } catch {
+    /* harmless: the resume() above is the real unlock */
+  }
+}
+
+function playbackSession(): void {
+  const nav = navigator as Navigator & { audioSession?: { type: string } }
+  try {
+    if (nav.audioSession) nav.audioSession.type = 'playback'
+  } catch {
+    /* not supported */
+  }
+}
+
+/** Listens for taps and key presses and unlocks (or re-unlocks) the audio from inside them. Returns a function that stops. */
+export function watchAudioUnlock(): () => void {
+  const handler = () => {
+    if (!ctx || ctx.state !== 'running') unlockAudio()
+  }
+  for (const e of UNLOCK_EVENTS) window.addEventListener(e, handler, { capture: true, passive: true })
+  return () => {
+    for (const e of UNLOCK_EVENTS) window.removeEventListener(e, handler, true)
+  }
 }
 
 /** The context if audio is running (unlocked by a gesture), otherwise null. */

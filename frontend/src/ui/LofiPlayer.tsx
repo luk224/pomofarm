@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { chooseStation, setHost, setMusicVolume, stopMusic, togglePauseMusic } from '../audio/lofi'
 import { stationsOf, useMusic, type MusicStatus } from '../store/music'
 import { usePrefs } from '../store/prefs'
+import { isTouchOnly } from './device'
 import { SoundMixer } from './SoundMixer'
 
 const STATUS_TEXT: Record<MusicStatus, string> = {
@@ -42,6 +43,8 @@ export function LofiChip() {
 export function LofiPlayer() {
   const { open, status, failure, custom, selected, volume, setOpen, addCustom, removeCustom } = useMusic()
   const muted = usePrefs((s) => s.muted)
+  // Phones ignore the player's volume (the device's own buttons decide it), so the slider would do nothing there
+  const [touchOnly] = useState(() => isTouchOnly())
   const [link, setLink] = useState('')
   const [linkError, setLinkError] = useState(false)
   const stations = stationsOf(custom)
@@ -80,17 +83,21 @@ export function LofiPlayer() {
         </button>
       </div>
       <label className="restfield lofi__select">
-        <span>Emisión</span>
+        <span className="sr-only">Emisión</span>
         <select value={selected} data-testid="lofi-station" onChange={(e) => chooseStation(e.target.value)}>
           {stations.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
       </label>
+      {touchOnly ? (
+        <p className="hint" data-testid="lofi-volume-hint">Volumen de la música: botones del móvil.</p>
+      ) : (
       <label className="slider lofi__volume">
         <span>Volumen</span>
         <input type="range" min={0} max={100} value={Math.round(volume * 100)} data-testid="lofi-volume" aria-label="Volumen de la música"
           onChange={(e) => setMusicVolume(Number(e.target.value) / 100)} />
         <output>{Math.round(volume * 100)}</output>
       </label>
+      )}
       <div className="lofi__link">
         <input type="text" value={link} placeholder="Pega un enlace de YouTube" aria-label="Enlace de YouTube propio" data-testid="lofi-link"
           aria-invalid={linkError} onChange={(e) => { setLink(e.target.value); setLinkError(false) }}

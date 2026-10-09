@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { useEffect, useState } from 'react'
-import { unlockAudioOnFirstGesture } from './audio/bowl'
+import { watchAudioUnlock } from './audio/engine'
 import { startAudioSync } from './audio/sync'
 import { startA11ySync } from './ui/a11y'
 import { Farm } from './scene/Farm'
@@ -31,7 +31,7 @@ export default function App() {
   useShortcuts()
   useCompletionAlerts()
   useFarmAttention()
-  useEffect(() => unlockAudioOnFirstGesture(), [])
+  useEffect(() => watchAudioUnlock(), [])
   useEffect(() => startAudioSync(), [])
   useEffect(() => startA11ySync(), [])
   // Fit the 4×4 farm and the Silo on narrow screens: roughly 8.4 world units across (the 4×4 field plus the Silo).
